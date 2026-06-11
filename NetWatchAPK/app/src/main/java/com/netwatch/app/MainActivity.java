@@ -40,29 +40,25 @@ public class MainActivity extends Activity {
     private static final String DOMAIN_INTEL_URL  = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
     private static final String TRAFFIC_PROBE_URL = "https://superagent-cfb25b3e.base44.app/functions/trafficProbe";
 
-    // Tab views
     private View   tab1, tab2;
     private Button tabDomainBtn, tabTrafficBtn;
 
-    // Tab 1 – Domain Intel
+    // Tab 1
     private EditText     domainInput;
     private Button       lookupBtn;
     private LinearLayout resultsContainer;
     private TextView     statusText;
 
-    // Tab 2 – Traffic Monitor
+    // Tab 2
     private EditText     targetDomainInput;
     private Button       startVpnBtn, stopVpnBtn;
     private LinearLayout trafficLogContainer;
     private ScrollView   trafficScrollView;
     private TextView     vpnStatusText;
 
-    private final ExecutorService executor   = Executors.newCachedThreadPool();
+    private final ExecutorService executor    = Executors.newCachedThreadPool();
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
-
-    private BroadcastReceiver trafficReceiver;
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    private BroadcastReceiver     trafficReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +92,6 @@ public class MainActivity extends Activity {
         startVpnBtn.setOnClickListener(v -> startMonitoring());
         stopVpnBtn.setOnClickListener(v -> stopMonitoring());
 
-        // Register broadcast receiver – API 33 requires exported flag
         trafficReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -117,7 +112,6 @@ public class MainActivity extends Activity {
             registerReceiver(trafficReceiver, filter);
         }
 
-        // Request notification permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -127,8 +121,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ── Tab navigation ────────────────────────────────────────────────────────
-
     private void switchTab(int index) {
         tab1.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
@@ -136,15 +128,15 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setSelected(index == 1);
     }
 
-    // ── Domain Intelligence ───────────────────────────────────────────────────
+    // ── Domain Intel ──────────────────────────────────────────────────────────
 
     private void performLookup() {
         String raw = domainInput.getText().toString().trim();
-        if (raw.isEmpty()) { showToast("Please enter a domain"); return; }
-        String domain = raw.replaceAll("https?://", "").replaceAll("/.*", "").toLowerCase();
+        if (raw.isEmpty()) { showToast("Enter a domain"); return; }
+        String domain = raw.replaceAll("(?i)https?://", "").replaceAll("/.*", "").toLowerCase().trim();
 
         resultsContainer.removeAllViews();
-        statusText.setText("⏳ Scanning " + domain + " …");
+        statusText.setText("⏳  Scanning " + domain + " …");
         lookupBtn.setEnabled(false);
 
         executor.execute(() -> {
@@ -154,233 +146,207 @@ public class MainActivity extends Activity {
             mainHandler.post(() -> {
                 lookupBtn.setEnabled(true);
                 if (intelJson == null && probeJson == null) {
-                    statusText.setText("❌ Network error — check connection");
+                    statusText.setText("❌  Network error — check connection");
                     return;
                 }
-                statusText.setText("✅ Scan complete for " + domain);
-                buildResultCards(intelJson, probeJson);
+                statusText.setText("✅  Scan complete for " + domain);
+                buildReport(domain, intelJson, probeJson);
             });
         });
     }
 
     /**
-     * Parses the ACTUAL JSON structure returned by the deployed backend functions:
-     *
-     * domainIntel returns:
-     *   { dns: { A:[{data}], AAAA:[{data}], MX:[{data}], NS:[{data}], TXT:[{data}], CNAME:[{data}] },
-     *     subdomains: ["sub.domain.com", ...],
-     *     subdomainIps: [{subdomain, ips:[]}],
-     *     reverseIp: ["host1","host2"],
-     *     mainIp: "1.2.3.4" }
-     *
-     * trafficProbe returns:
-     *   { reachability: { http:{statusCode,latencyMs,finalUrl}, https:{...} },
-     *     ports: [{port, label, open}],
-     *     headers: { server, ... },
-     *     tlsInfo: { issuer, dnsNames:[] } }
+     * Builds a focused domain report showing:
+     *   1. Main domain + all IPs (v4 + v6) + CNAME
+     *   2. Subdomains with their IPs
+     *   3. Hidden / shared-host domains (PTR / reverse lookup)
+     *   4. TLS info (issuer, validity)
+     *   5. HTTP reachability
      */
-    private void buildResultCards(String intelJson, String probeJson) {
+    private void buildReport(String domain, String intelJson, String probeJson) {
         try {
-            // Check for API-level errors first
-            if (intelJson != null) {
-                JSONObject test = new JSONObject(intelJson);
-                if (test.has("error") && !test.has("dns")) {
-                    addCard("❌ API Error", test.optString("error"), "#EF9A9A");
-                    return;
-                }
-            }
-            if (intelJson == null && probeJson != null) {
-                JSONObject test = new JSONObject(probeJson);
-                if (test.has("error") && !test.has("reachability")) {
-                    addCard("❌ API Error", test.optString("error"), "#EF9A9A");
-                    return;
-                }
+            JSONObject intel = intelJson != null ? new JSONObject(intelJson) : null;
+            JSONObject probe = probeJson != null ? new JSONObject(probeJson) : null;
+
+            // ── Error guard ──────────────────────────────────────────────────
+            if (intel != null && intel.has("error") && !intel.has("ipv4")) {
+                addCard("❌ API Error", intel.optString("error"), "#EF9A9A");
+                return;
             }
 
-            // ── domainIntel results ──────────────────────────────────────────
-            if (intelJson != null) {
-                JSONObject intel = new JSONObject(intelJson);
-                JSONObject dns   = intel.optJSONObject("dns");
+            // ── 1. Main Domain Card ──────────────────────────────────────────
+            if (intel != null) {
+                StringBuilder sb = new StringBuilder();
 
-                if (dns != null) {
-                    // IPv4 (A records)
-                    JSONArray aRecs = dns.optJSONArray("A");
-                    if (aRecs != null && aRecs.length() > 0) {
-                        addCard("🌐 IPv4 Addresses (A Records)",
-                                extractDnsData(aRecs), "#A5D6A7");
-                    }
-
-                    // IPv6 (AAAA records)
-                    JSONArray aaaaRecs = dns.optJSONArray("AAAA");
-                    if (aaaaRecs != null && aaaaRecs.length() > 0) {
-                        addCard("🌐 IPv6 Addresses (AAAA Records)",
-                                extractDnsData(aaaaRecs), "#80DEEA");
-                    }
-
-                    // CNAME
-                    JSONArray cnameRecs = dns.optJSONArray("CNAME");
-                    if (cnameRecs != null && cnameRecs.length() > 0) {
-                        addCard("🔗 CNAME", extractDnsData(cnameRecs), "#90CAF9");
-                    }
-
-                    // Name Servers
-                    JSONArray nsRecs = dns.optJSONArray("NS");
-                    if (nsRecs != null && nsRecs.length() > 0) {
-                        addCard("🗄 Name Servers (NS)", extractDnsData(nsRecs), "#CE93D8");
-                    }
-
-                    // Mail Servers
-                    JSONArray mxRecs = dns.optJSONArray("MX");
-                    if (mxRecs != null && mxRecs.length() > 0) {
-                        addCard("📬 Mail Servers (MX)", extractDnsData(mxRecs), "#90CAF9");
-                    }
-
-                    // TXT Records
-                    JSONArray txtRecs = dns.optJSONArray("TXT");
-                    if (txtRecs != null && txtRecs.length() > 0) {
-                        addCard("📝 TXT Records", extractDnsData(txtRecs), "#DCEDC8");
-                    }
+                JSONArray ipv4 = intel.optJSONArray("ipv4");
+                if (ipv4 != null && ipv4.length() > 0) {
+                    sb.append("IPv4:\n");
+                    for (int i = 0; i < ipv4.length(); i++)
+                        sb.append("  ").append(ipv4.optString(i)).append("\n");
                 }
 
-                // Subdomains with their IPs
-                JSONArray subdomains   = intel.optJSONArray("subdomains");
-                JSONArray subdomainIps = intel.optJSONArray("subdomainIps");
-                if (subdomains != null && subdomains.length() > 0) {
-                    addSubdomainCard(subdomains, subdomainIps);
+                JSONArray ipv6 = intel.optJSONArray("ipv6");
+                if (ipv6 != null && ipv6.length() > 0) {
+                    sb.append("IPv6:\n");
+                    for (int i = 0; i < ipv6.length(); i++)
+                        sb.append("  ").append(ipv6.optString(i)).append("\n");
                 }
 
-                // Reverse IP
-                JSONArray reverseIp = intel.optJSONArray("reverseIp");
-                if (reverseIp != null && reverseIp.length() > 0) {
-                    addCard("🔄 Reverse IP — Shared Hosts (" + reverseIp.length() + ")",
-                            jsonArrayToLines(reverseIp), "#90A4AE");
+                String cname = intel.optString("cname", "");
+                if (!cname.isEmpty() && !cname.equals("null"))
+                    sb.append("CNAME:  ").append(cname).append("\n");
+
+                // Append TXT verification records if available from probe
+                if (sb.length() > 0)
+                    addCard("🌐  " + domain, sb.toString().trim(), "#A5D6A7");
+            }
+
+            // ── 2. Subdomains ────────────────────────────────────────────────
+            if (intel != null) {
+                JSONArray subs = intel.optJSONArray("subdomains");
+                if (subs != null && subs.length() > 0) {
+                    addSubdomainsCard(subs);
+                } else {
+                    addCard("🌿  Subdomains", "None discovered", "#546E7A");
                 }
             }
 
-            // ── trafficProbe results ─────────────────────────────────────────
-            if (probeJson != null) {
-                JSONObject probe = new JSONObject(probeJson);
-
-                // Reachability / HTTP info
-                JSONObject reach = probe.optJSONObject("reachability");
-                if (reach != null) {
+            // ── 3. Hidden / Shared-Host Domains ─────────────────────────────
+            if (intel != null) {
+                JSONArray shared = intel.optJSONArray("sharedHostDomains");
+                if (shared != null && shared.length() > 0) {
                     StringBuilder sb = new StringBuilder();
-                    JSONObject https = reach.optJSONObject("https");
-                    JSONObject http  = reach.optJSONObject("http");
-                    JSONObject active = https != null ? https : http;
-                    if (active != null) {
-                        sb.append("Status:      ").append(active.optInt("statusCode")).append("\n");
-                        sb.append("Latency:     ").append(active.optInt("latencyMs")).append(" ms\n");
-                        String finalUrl = active.optString("finalUrl", "");
-                        if (!finalUrl.isEmpty())
-                            sb.append("Resolved To: ").append(finalUrl);
-                    }
-                    if (sb.length() > 0)
-                        addCard("🌍 HTTP / HTTPS Reachability", sb.toString().trim(), "#BCAAA4");
+                    for (int i = 0; i < shared.length(); i++)
+                        sb.append("▸  ").append(shared.optString(i)).append("\n");
+                    addCard("🕵️  Hidden / Shared-Host Domains  (" + shared.length() + ")",
+                            sb.toString().trim(), "#FFCC80");
+                } else {
+                    addCard("🕵️  Hidden / Shared-Host Domains", "None found on this IP", "#546E7A");
                 }
+            }
 
-                // Response Headers
-                JSONObject headers = probe.optJSONObject("headers");
-                if (headers != null) {
-                    StringBuilder sb = new StringBuilder();
-                    String server    = headers.optString("server", "");
-                    String powered   = headers.optString("x-powered-by", "");
-                    String cdn       = headers.optString("cf-ray", "");       // Cloudflare
-                    String cacheCtrl = headers.optString("cache-control", "");
-                    String altSvc    = headers.optString("alt-svc", "");
-                    if (!server.isEmpty())    sb.append("Server:        ").append(server).append("\n");
-                    if (!powered.isEmpty())   sb.append("Powered By:    ").append(powered).append("\n");
-                    if (!cdn.isEmpty())       sb.append("CDN (CF-Ray):  ").append(cdn).append("\n");
-                    if (!cacheCtrl.isEmpty()) sb.append("Cache-Control: ").append(cacheCtrl).append("\n");
-                    if (!altSvc.isEmpty())    sb.append("Alt-Svc:       ").append(altSvc);
-                    if (sb.length() > 0)
-                        addCard("📡 Response Headers", sb.toString().trim(), "#FFCC80");
-                }
-
-                // TLS Certificate
+            // ── 4. TLS Certificate ───────────────────────────────────────────
+            if (probe != null) {
                 JSONObject tls = probe.optJSONObject("tlsInfo");
                 if (tls != null) {
                     StringBuilder sb = new StringBuilder();
                     String issuer = tls.optString("issuer", "");
-                    if (!issuer.isEmpty()) sb.append("Issuer:    ").append(issuer).append("\n");
+                    if (!issuer.isEmpty()) sb.append("Issuer:  ").append(issuer).append("\n");
+                    String notBefore = tls.optString("notBefore", "");
+                    String notAfter  = tls.optString("notAfter", "");
+                    if (!notBefore.isEmpty()) sb.append("Valid From:  ").append(notBefore).append("\n");
+                    if (!notAfter.isEmpty())  sb.append("Expires:     ").append(notAfter).append("\n");
                     JSONArray dnsNames = tls.optJSONArray("dnsNames");
                     if (dnsNames != null && dnsNames.length() > 0) {
-                        sb.append("SANs (").append(dnsNames.length()).append(" names):\n");
-                        int show = Math.min(dnsNames.length(), 8);
+                        sb.append("SANs (").append(dnsNames.length()).append(" entries):\n");
+                        int show = Math.min(dnsNames.length(), 6);
                         for (int i = 0; i < show; i++)
                             sb.append("  ").append(dnsNames.optString(i)).append("\n");
-                        if (dnsNames.length() > 8)
-                            sb.append("  … and ").append(dnsNames.length() - 8).append(" more");
+                        if (dnsNames.length() > 6)
+                            sb.append("  … +").append(dnsNames.length() - 6).append(" more");
                     }
                     if (sb.length() > 0)
-                        addCard("🔒 TLS Certificate", sb.toString().trim(), "#80CBC4");
+                        addCard("🔒  TLS Certificate", sb.toString().trim(), "#80CBC4");
                 }
+            }
 
-                // Port Scan
-                JSONArray ports = probe.optJSONArray("ports");
-                if (ports != null && ports.length() > 0) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < ports.length(); i++) {
-                        JSONObject p = ports.getJSONObject(i);
-                        boolean open  = p.optBoolean("open", false);
-                        String  label = p.optString("label", "?");
-                        int     port  = p.optInt("port");
-                        sb.append(open ? "🟢 " : "🔴 ")
-                          .append("Port ").append(port)
-                          .append(" (").append(label).append(") — ")
-                          .append(open ? "OPEN" : "closed").append("\n");
+            // ── 5. HTTP/HTTPS Reachability ───────────────────────────────────
+            if (probe != null) {
+                JSONObject reach = probe.optJSONObject("reachability");
+                if (reach != null) {
+                    JSONObject https = reach.optJSONObject("https");
+                    JSONObject http  = reach.optJSONObject("http");
+                    JSONObject active = https != null ? https : http;
+                    if (active != null && active.optBoolean("reachable", false)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Status:    HTTP ").append(active.optInt("statusCode")).append("\n");
+                        sb.append("Latency:   ").append(active.optInt("latencyMs")).append(" ms\n");
+                        String finalUrl = active.optString("finalUrl", "");
+                        if (!finalUrl.isEmpty())
+                            sb.append("Resolves → ").append(finalUrl);
+                        addCard("🌍  Reachability", sb.toString().trim(), "#90CAF9");
                     }
-                    addCard("🔌 Port Scan", sb.toString().trim(), "#90CAF9");
                 }
             }
 
         } catch (Exception e) {
-            statusText.setText("⚠ Parse error: " + e.getMessage());
+            addCard("⚠  Parse Error", e.getMessage(), "#EF9A9A");
         }
     }
 
-    /** Extract the "data" field from each DNS record object, one per line. */
-    private String extractDnsData(JSONArray records) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < records.length(); i++) {
-            if (i > 0) sb.append("\n");
-            JSONObject rec = records.optJSONObject(i);
-            if (rec != null) {
-                sb.append(rec.optString("data", ""));
-            } else {
-                sb.append(records.optString(i));
+    private void addSubdomainsCard(JSONArray subs) {
+        LinearLayout card = makeCardContainer();
+
+        TextView title = new TextView(this);
+        title.setText("🌿  SUBDOMAINS  (" + subs.length() + " FOUND)");
+        title.setTextSize(11);
+        title.setTextColor(Color.parseColor("#64B5F6"));
+        title.setTypeface(null, Typeface.BOLD);
+        title.setPadding(0, 0, 0, dp(6));
+        card.addView(title);
+
+        try {
+            for (int i = 0; i < subs.length(); i++) {
+                JSONObject sub = subs.getJSONObject(i);
+                String name = sub.optString("name", "");
+                JSONArray ips = sub.optJSONArray("ips");
+
+                // Subdomain name row
+                TextView nameView = new TextView(this);
+                nameView.setText("▸  " + name);
+                nameView.setTextSize(14);
+                nameView.setTextColor(Color.parseColor("#80DEEA"));
+                nameView.setTypeface(Typeface.MONOSPACE);
+                nameView.setPadding(0, dp(4), 0, 0);
+                card.addView(nameView);
+
+                // IPs row (filtered — only real IPs, skip CNAME chains)
+                if (ips != null && ips.length() > 0) {
+                    StringBuilder ipSb = new StringBuilder();
+                    for (int j = 0; j < ips.length(); j++) {
+                        String ip = ips.optString(j);
+                        // Only show entries that look like IPs (contain digits and dots, no spaces)
+                        if (ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) {
+                            if (ipSb.length() > 0) ipSb.append("  |  ");
+                            ipSb.append(ip);
+                        }
+                    }
+                    if (ipSb.length() > 0) {
+                        TextView ipView = new TextView(this);
+                        ipView.setText("   " + ipSb.toString());
+                        ipView.setTextSize(12);
+                        ipView.setTextColor(Color.parseColor("#90A4AE"));
+                        ipView.setTypeface(Typeface.MONOSPACE);
+                        card.addView(ipView);
+                    }
+                }
+
+                // Divider between entries
+                if (i < subs.length() - 1) {
+                    View div = new View(this);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, 1);
+                    lp.topMargin    = dp(4);
+                    lp.bottomMargin = dp(2);
+                    div.setLayoutParams(lp);
+                    div.setBackgroundColor(Color.parseColor("#1A3A5C"));
+                    card.addView(div);
+                }
             }
-        }
-        return sb.toString();
-    }
+        } catch (Exception ignored) {}
 
-    /** Turn a plain string JSON array into newline-separated lines. */
-    private String jsonArrayToLines(JSONArray arr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arr.length(); i++) {
-            if (i > 0) sb.append("\n");
-            sb.append(arr.optString(i));
-        }
-        return sb.toString();
+        resultsContainer.addView(card);
     }
 
     private void addCard(String title, String value, String valueColor) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundResource(R.drawable.card_background);
-        card.setPadding(dp(14), dp(12), dp(14), dp(12));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(10);
-        card.setLayoutParams(lp);
+        LinearLayout card = makeCardContainer();
 
         TextView titleView = new TextView(this);
-        titleView.setText(title);
+        titleView.setText(title.toUpperCase());
         titleView.setTextSize(11);
         titleView.setTextColor(Color.parseColor("#64B5F6"));
-        titleView.setAllCaps(true);
         titleView.setTypeface(null, Typeface.BOLD);
-        titleView.setPadding(0, 0, 0, dp(4));
+        titleView.setPadding(0, 0, 0, dp(5));
         card.addView(titleView);
 
         TextView valueView = new TextView(this);
@@ -394,7 +360,7 @@ public class MainActivity extends Activity {
         resultsContainer.addView(card);
     }
 
-    private void addSubdomainCard(JSONArray subdomains, JSONArray subdomainIps) {
+    private LinearLayout makeCardContainer() {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setBackgroundResource(R.drawable.card_background);
@@ -403,64 +369,7 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.bottomMargin = dp(10);
         card.setLayoutParams(lp);
-
-        TextView titleView = new TextView(this);
-        titleView.setText("🌿 Subdomains (" + subdomains.length() + " found)");
-        titleView.setTextSize(11);
-        titleView.setTextColor(Color.parseColor("#64B5F6"));
-        titleView.setAllCaps(true);
-        titleView.setTypeface(null, Typeface.BOLD);
-        titleView.setPadding(0, 0, 0, dp(4));
-        card.addView(titleView);
-
-        // Build a map of subdomain → IPs from subdomainIps array
-        // subdomainIps: [{subdomain: "foo.bar.com", ips: ["1.2.3.4"]}]
-        java.util.Map<String, String> ipMap = new java.util.HashMap<>();
-        if (subdomainIps != null) {
-            for (int i = 0; i < subdomainIps.length(); i++) {
-                JSONObject entry = subdomainIps.optJSONObject(i);
-                if (entry != null) {
-                    String sub = entry.optString("subdomain", "");
-                    JSONArray ips = entry.optJSONArray("ips");
-                    if (ips != null && ips.length() > 0) {
-                        StringBuilder ipSb = new StringBuilder();
-                        for (int j = 0; j < ips.length(); j++) {
-                            if (j > 0) ipSb.append(", ");
-                            ipSb.append(ips.optString(j));
-                        }
-                        ipMap.put(sub, ipSb.toString());
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < subdomains.length(); i++) {
-            String sub = subdomains.optString(i);
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.VERTICAL);
-            row.setPadding(0, dp(3), 0, dp(3));
-
-            TextView nameView = new TextView(this);
-            nameView.setText("▸ " + sub);
-            nameView.setTextSize(13);
-            nameView.setTextColor(Color.parseColor("#80DEEA"));
-            nameView.setTypeface(Typeface.MONOSPACE);
-            row.addView(nameView);
-
-            String ips = ipMap.get(sub);
-            if (ips != null && !ips.isEmpty()) {
-                TextView ipView = new TextView(this);
-                ipView.setText("  " + ips);
-                ipView.setTextSize(12);
-                ipView.setTextColor(Color.parseColor("#90A4AE"));
-                ipView.setTypeface(Typeface.MONOSPACE);
-                row.addView(ipView);
-            }
-
-            card.addView(row);
-        }
-
-        resultsContainer.addView(card);
+        return card;
     }
 
     // ── Traffic Monitor ───────────────────────────────────────────────────────
@@ -489,18 +398,18 @@ public class MainActivity extends Activity {
         trafficLogContainer.removeAllViews();
         startVpnBtn.setEnabled(false);
         stopVpnBtn.setEnabled(true);
-        vpnStatusText.setText("🟢 Monitoring active — watching: " + domain);
+        vpnStatusText.setText("🟢  Monitoring: " + domain);
         vpnStatusText.setTextColor(Color.parseColor("#66BB6A"));
 
-        Intent serviceIntent = new Intent(this, NetWatchVpnService.class);
-        serviceIntent.putExtra("target_domain", domain);
-        startForegroundService(serviceIntent);
+        Intent si = new Intent(this, NetWatchVpnService.class);
+        si.putExtra("target_domain", domain);
+        startForegroundService(si);
     }
 
     private void stopMonitoring() {
         startVpnBtn.setEnabled(true);
         stopVpnBtn.setEnabled(false);
-        vpnStatusText.setText("⚫ Monitoring stopped");
+        vpnStatusText.setText("⚫  Monitoring stopped");
         vpnStatusText.setTextColor(Color.parseColor("#78909C"));
 
         Intent si = new Intent(this, NetWatchVpnService.class);
@@ -562,7 +471,7 @@ public class MainActivity extends Activity {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
             conn.setConnectTimeout(15000);
-            conn.setReadTimeout(25000);
+            conn.setReadTimeout(30000);
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body.getBytes("UTF-8"));
             }
