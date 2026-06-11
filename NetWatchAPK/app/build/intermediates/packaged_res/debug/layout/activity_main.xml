@@ -172,6 +172,30 @@
                 android:paddingRight="8dp"
                 android:layout_marginBottom="10dp"/>
 
+
+            <!-- Alert toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="&#128276;  Alert on unknown hosts"
+                    android:textColor="#B0BEC5"
+                    android:textSize="13sp"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/alertSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"/>
+            </LinearLayout>
+
             <!-- Button Row -->
             <LinearLayout
                 android:layout_width="match_parent"
