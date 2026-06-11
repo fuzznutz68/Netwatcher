@@ -723,6 +723,8 @@ id edit_query
 id end
 id expand_activities_button
 id expanded_menu
+id exportDomainBtn
+id exportTrafficBtn
 id forever
 id fragment_container_view_tag
 id group_divider

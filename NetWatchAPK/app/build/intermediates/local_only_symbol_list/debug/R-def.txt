@@ -10,6 +10,8 @@ id appSpinner
 id clearMonBtn
 id connectionCountText
 id domainInput
+id exportDomainBtn
+id exportTrafficBtn
 id hostLogContainer
 id hostLogScroll
 id lookupBtn
