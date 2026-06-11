@@ -1,219 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F7FA">
+    android:background="#060F1E">
 
-    <!-- App Header -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1a237e"
-        android:padding="16dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="🔭 NetWatch"
-            android:textColor="#ffffff"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
+        android:orientation="vertical"
+        android:background="#0A1628"
+        android:padding="16dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Domain Monitor"
-            android:textColor="#90caf9"
-            android:textSize="13sp" />
+            android:text="🛡 NetWatch"
+            android:textSize="22sp"
+            android:textColor="#E3F2FD"
+            android:textStyle="bold"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Domain Intelligence &amp; Traffic Monitor"
+            android:textSize="12sp"
+            android:textColor="#90A4AE"/>
     </LinearLayout>
 
-    <!-- Tab Layout -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
+    <!-- Tab Bar -->
+    <LinearLayout
+        android:id="@+id/tabBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#283593"
-        app:tabTextColor="#90caf9"
-        app:tabSelectedTextColor="#ffffff"
-        app:tabIndicatorColor="#64b5f6"
-        app:tabIndicatorHeight="3dp" />
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#0A1628">
+
+        <Button
+            android:id="@+id/tabDomainBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="🔍 Domain Intel"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/tab_selector"
+            android:textSize="13sp"/>
+
+        <Button
+            android:id="@+id/tabTrafficBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="📡 Traffic Monitor"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/tab_selector"
+            android:textSize="13sp"/>
+    </LinearLayout>
 
     <!-- Tab 1: Domain Intel -->
-    <LinearLayout
-        android:id="@+id/tab1Content"
+    <ScrollView
+        android:id="@+id/tab1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:visibility="visible">
 
-        <!-- Search Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
-            android:padding="12dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:elevation="4dp">
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <EditText
-                android:id="@+id/domainInput"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:hint="Enter domain (e.g. google.com)"
-                android:inputType="textUri"
-                android:background="@drawable/input_background"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:textSize="15sp"
-                android:imeOptions="actionSearch"
-                android:singleLine="true" />
+            <!-- Input Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
 
-            <Button
-                android:id="@+id/lookupBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:text="Scan"
-                android:backgroundTint="#1a237e"
-                android:textColor="#ffffff"
-                android:textStyle="bold"
-                android:paddingStart="18dp"
-                android:paddingEnd="18dp" />
-        </LinearLayout>
+                <EditText
+                    android:id="@+id/domainInput"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="48dp"
+                    android:hint="Enter domain (e.g. google.com)"
+                    android:textColor="#E3F2FD"
+                    android:textColorHint="#546E7A"
+                    android:background="@drawable/input_background"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
+                    android:textSize="14sp"/>
 
-        <!-- Status -->
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:gravity="center"
-            android:textColor="#1565c0"
-            android:visibility="gone"
-            android:textSize="14sp" />
+                <Button
+                    android:id="@+id/lookupBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="SCAN"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/btn_primary"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"/>
+            </LinearLayout>
 
-        <!-- Results -->
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            <!-- Status -->
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Enter a domain and tap SCAN"
+                android:textColor="#78909C"
+                android:textSize="13sp"
+                android:layout_marginBottom="10dp"/>
 
+            <!-- Results container -->
             <LinearLayout
                 android:id="@+id/resultsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp" />
-        </ScrollView>
-    </LinearLayout>
+                android:orientation="vertical"/>
+
+        </LinearLayout>
+    </ScrollView>
 
     <!-- Tab 2: Traffic Monitor -->
     <LinearLayout
-        android:id="@+id/tab2Content"
+        android:id="@+id/tab2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:padding="12dp"
         android:visibility="gone">
 
-        <!-- Controls -->
+        <!-- Controls Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
-            android:padding="12dp"
             android:orientation="vertical"
-            android:elevation="4dp">
+            android:background="@drawable/card_background"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TARGET DOMAIN"
+                android:textSize="11sp"
+                android:textColor="#64B5F6"
+                android:textAllCaps="true"
+                android:layout_marginBottom="6dp"/>
 
             <EditText
                 android:id="@+id/targetDomainInput"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:hint="Domain to monitor (e.g. facebook.com)"
-                android:inputType="textUri"
+                android:hint="e.g. google.com or *.google.com"
+                android:textColor="#E3F2FD"
+                android:textColorHint="#546E7A"
                 android:background="@drawable/input_background"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:textSize="15sp"
-                android:singleLine="true" />
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textSize="14sp"
+                android:layout_marginBottom="10dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical">
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/startVpnBtn"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:text="▶ Start Monitoring"
-                    android:backgroundTint="#1b5e20"
-                    android:textColor="#ffffff"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="6dp" />
+                    android:layout_height="44dp"
+                    android:text="▶  START MONITORING"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/btn_primary"
+                    android:textSize="13sp"/>
 
                 <Button
                     android:id="@+id/stopVpnBtn"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:text="⏹ Stop"
-                    android:backgroundTint="#b71c1c"
-                    android:textColor="#ffffff"
-                    android:textStyle="bold"
-                    android:layout_marginStart="6dp" />
+                    android:layout_height="44dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="■  STOP"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/btn_danger"
+                    android:textSize="13sp"
+                    android:enabled="false"/>
             </LinearLayout>
-
-            <!-- VPN Status -->
-            <TextView
-                android:id="@+id/vpnStatusText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="🔴 Not monitoring"
-                android:textSize="14sp"
-                android:textColor="#757575"
-                android:gravity="center" />
         </LinearLayout>
 
-        <!-- Column Headers -->
-        <LinearLayout
+        <!-- VPN Status -->
+        <TextView
+            android:id="@+id/vpnStatusText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#e3f2fd"
-            android:padding="12dp"
-            android:orientation="horizontal">
+            android:text="● Monitoring inactive"
+            android:textColor="#78909C"
+            android:textSize="13sp"
+            android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="  DIR      PROTOCOL     HOST / IP : PORT                SIZE       TIME"
-                android:textSize="11sp"
-                android:textColor="#1565c0"
-                android:textStyle="bold"
-                android:fontFamily="monospace" />
-        </LinearLayout>
+        <!-- Traffic Log -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LIVE TRAFFIC LOG"
+            android:textSize="11sp"
+            android:textColor="#64B5F6"
+            android:textAllCaps="true"
+            android:layout_marginBottom="6dp"/>
 
-        <!-- Live Traffic Log -->
         <ScrollView
+            android:id="@+id/trafficScrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/card_background">
 
             <LinearLayout
                 android:id="@+id/trafficLogContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp" />
+                android:padding="10dp"/>
         </ScrollView>
+
     </LinearLayout>
 
 </LinearLayout>

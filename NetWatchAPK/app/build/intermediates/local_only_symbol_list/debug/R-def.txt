@@ -1,0 +1,37 @@
+R_DEF: Internal format may change without notice
+local
+drawable btn_danger
+drawable btn_primary
+drawable card_background
+drawable ic_launcher
+drawable input_background
+drawable tab_selector
+id domainInput
+id lookupBtn
+id resultsContainer
+id startVpnBtn
+id statusText
+id stopVpnBtn
+id tab1
+id tab2
+id tabBar
+id tabDomainBtn
+id tabTrafficBtn
+id targetDomainInput
+id trafficLogContainer
+id trafficScrollView
+id vpnStatusText
+layout activity_main
+string app_name
+string domain_hint
+string scan_btn
+string start_monitor
+string stop_monitor
+string vpn_active
+string vpn_permission_denied
+string vpn_stopped
+style AppTheme
+style CardStyle
+style SectionTitle
+style TabButton
+style ValueText
