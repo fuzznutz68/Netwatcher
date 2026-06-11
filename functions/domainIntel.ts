@@ -1,13 +1,11 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-
+// NetWatch - Domain Intelligence function (no auth required - public API)
 Deno.serve(async (req) => {
-  try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // Allow CORS for mobile clients
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
+  }
 
+  try {
     const body = await req.json().catch(() => ({}));
     const { domain } = body;
 
@@ -15,7 +13,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Domain is required' }, { status: 400 });
     }
 
-    // Normalize domain
     const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
 
     const results: any = {
@@ -23,8 +20,9 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString(),
       dns: {},
       subdomains: [],
-      whois: null,
+      subdomainIps: [],
       reverseIp: [],
+      mainIp: null,
       errors: []
     };
 
@@ -33,7 +31,8 @@ Deno.serve(async (req) => {
     for (const type of dnsTypes) {
       try {
         const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${cleanDomain}&type=${type}`, {
-          headers: { 'Accept': 'application/dns-json' }
+          headers: { 'Accept': 'application/dns-json' },
+          signal: AbortSignal.timeout(8000)
         });
         const data = await res.json();
         if (data.Answer && data.Answer.length > 0) {
@@ -46,7 +45,8 @@ Deno.serve(async (req) => {
           results.dns[type] = [];
         }
       } catch (e: any) {
-        results.errors.push(`DNS ${type} lookup failed: ${e.message}`);
+        results.dns[type] = [];
+        results.errors.push(`DNS ${type}: ${e.message}`);
       }
     }
 
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     try {
       const crtRes = await fetch(`https://crt.sh/?q=%25.${cleanDomain}&output=json`, {
         headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(12000)
       });
       if (crtRes.ok) {
         const crtData = await crtRes.json();
@@ -71,16 +71,16 @@ Deno.serve(async (req) => {
         results.subdomains = Array.from(subdomainSet).slice(0, 50);
       }
     } catch (e: any) {
-      results.errors.push(`Subdomain enumeration failed: ${e.message}`);
+      results.errors.push(`Subdomains: ${e.message}`);
     }
 
-    // --- Reverse IP lookup via HackerTarget ---
+    // --- Main IP + Reverse IP lookup ---
     const aRecords = results.dns['A'] || [];
     if (aRecords.length > 0) {
       const ip = aRecords[0].data;
       results.mainIp = ip;
       try {
-        const revRes = await fetch(`https://api.hacktarget.com/reverseiplookup/?q=${ip}`, {
+        const revRes = await fetch(`https://api.hackertarget.com/reverseiplookup/?q=${ip}`, {
           signal: AbortSignal.timeout(8000)
         });
         if (revRes.ok) {
@@ -90,14 +90,13 @@ Deno.serve(async (req) => {
           }
         }
       } catch (e: any) {
-        results.errors.push(`Reverse IP lookup failed: ${e.message}`);
+        results.errors.push(`Reverse IP: ${e.message}`);
       }
     }
 
-    // --- Subdomain IPs ---
-    const subdomainIps: any[] = [];
-    const toResolve = results.subdomains.slice(0, 10); // limit to avoid timeout
-    await Promise.allSettled(toResolve.map(async (sub: string) => {
+    // --- Resolve IPs for top subdomains ---
+    const toResolve = results.subdomains.slice(0, 10);
+    const subIpResults = await Promise.allSettled(toResolve.map(async (sub: string) => {
       try {
         const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${sub}&type=A`, {
           headers: { 'Accept': 'application/dns-json' },
@@ -105,16 +104,19 @@ Deno.serve(async (req) => {
         });
         const data = await res.json();
         if (data.Answer && data.Answer.length > 0) {
-          subdomainIps.push({
-            subdomain: sub,
-            ips: data.Answer.map((r: any) => r.data)
-          });
+          return { subdomain: sub, ips: data.Answer.map((r: any) => r.data) };
         }
       } catch (_) {}
+      return null;
     }));
-    results.subdomainIps = subdomainIps;
+    results.subdomainIps = subIpResults
+      .filter((r: any) => r.status === 'fulfilled' && r.value)
+      .map((r: any) => r.value);
 
-    return Response.json(results);
+    return Response.json(results, {
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
+    });
+
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 500 });
   }
