@@ -33,6 +33,15 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.SharedPreferences;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.widget.CompoundButton;
+import androidx.appcompat.widget.SwitchCompat;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -41,6 +50,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +97,13 @@ public class MainActivity extends Activity {
     private String lastProbeJsonForExport = "";
 
     private Button       exportDomainBtn, exportTrafficBtn;
+    private SwitchCompat alertSwitch;
+    private boolean      alertsEnabled  = true;
+    // Trusted domains for the current monitoring session (auto-seeded + user-approved)
+    private final Set<String> trustedDomains = Collections.synchronizedSet(new HashSet<>());
+    // Root domain of the currently monitored app (e.g. "paypal.com")
+    private String monitoredRootDomain = "";
+    private static final String PREFS_NAME = "netwatch_prefs";
     private BroadcastReceiver trafficReceiver;
     private final ExecutorService executor    = Executors.newCachedThreadPool();
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
@@ -129,8 +146,32 @@ public class MainActivity extends Activity {
 
         exportDomainBtn    = findViewById(R.id.exportDomainBtn);
         exportTrafficBtn   = findViewById(R.id.exportTrafficBtn);
+        alertSwitch        = findViewById(R.id.alertSwitch);
         exportDomainBtn.setOnClickListener(v -> exportDomainIntel());
         exportTrafficBtn.setOnClickListener(v -> exportTrafficLog());
+
+        // Restore alert toggle preference
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        alertsEnabled = prefs.getBoolean("alerts_enabled", true);
+        alertSwitch.setChecked(alertsEnabled);
+        alertSwitch.setOnCheckedChangeListener((btn, checked) -> {
+            alertsEnabled = checked;
+            prefs.edit().putBoolean("alerts_enabled", checked).apply();
+        });
+
+        // Seed global trusted CDN/cloud providers (never want to alert on these)
+        trustedDomains.addAll(Arrays.asList(
+            "google.com","googleapis.com","gstatic.com","googlevideo.com","googleusercontent.com",
+            "akamai.net","akamaized.net","akamaitechnologies.com","akamaiedge.net",
+            "cloudflare.com","cloudflare.net","cdn.cloudflare.net",
+            "fastly.net","fastly.com",
+            "amazon.com","amazonaws.com","awsstatic.com","cloudfront.net",
+            "microsoft.com","azure.com","msftconnecttest.com","msedge.net",
+            "apple.com","icloud.com","mzstatic.com",
+            "facebook.com","fbcdn.net","instagram.com",
+            "twitter.com","twimg.com",
+            "android.com","android.clients.google.com"
+        ));
         startMonBtn.setOnClickListener(v -> startMonitoring());
         stopMonBtn.setOnClickListener(v -> stopMonitoring());
         clearMonBtn.setOnClickListener(v -> clearLog());
@@ -149,12 +190,15 @@ public class MainActivity extends Activity {
                 if (selectedApp != null && !selectedApp.packageName.isEmpty()) {
                     // If already monitoring another app, stop it first
                     if (monitoring) stopMonitoring();
+                    // Seed trusted domains for the newly selected app
+                    seedTrustedDomains(selectedApp.packageName);
                     // Start monitoring first so we capture traffic from the moment the app opens
                     startMonitoring();
                     // Small delay so monitoring is running before the app comes to foreground
                     mainHandler.postDelayed(() -> launchApp(selectedApp.packageName), 400);
                 } else if (selectedApp != null && selectedApp.uid == -1) {
                     // "Whole Device" — just start monitoring, no app to launch
+                    trustedDomains.clear(); monitoredRootDomain = "";
                     if (!monitoring) startMonitoring();
                 }
             }
@@ -343,16 +387,21 @@ public class MainActivity extends Activity {
 
     private void addHostRow(String host, boolean active, String ts) {
         boolean isIp = host.matches("\\d+\\.\\d+\\.\\d+\\.\\d+.*") || host.contains(":");
+        boolean isUnknown = alertsEnabled && !isIp && !isTrustedHost(host);
+
+        // Fire alert for unknown hosts
+        if (isUnknown) fireAlert(host);
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(dp(6), dp(6), dp(6), dp(6));
+        if (isUnknown) row.setBackgroundColor(Color.parseColor("#1A2A1A")); // subtle red-green tint
 
         // Indicator dot
         TextView dot = new TextView(this);
         dot.setText(active ? "●  " : "○  ");
         dot.setTextSize(13);
-        dot.setTextColor(Color.parseColor(active ? "#66BB6A" : "#546E7A"));
+        dot.setTextColor(Color.parseColor(isUnknown ? "#FF5252" : (active ? "#66BB6A" : "#546E7A")));
         dot.setLayoutParams(new LinearLayout.LayoutParams(dp(26), LinearLayout.LayoutParams.WRAP_CONTENT));
         row.addView(dot);
 
@@ -360,7 +409,7 @@ public class MainActivity extends Activity {
         TextView hostView = new TextView(this);
         hostView.setText(host);
         hostView.setTextSize(isIp ? 12 : 14);
-        hostView.setTextColor(Color.parseColor(isIp ? "#90A4AE" : "#E3F2FD"));
+        hostView.setTextColor(Color.parseColor(isUnknown ? "#FF8A80" : (isIp ? "#90A4AE" : "#E3F2FD")));
         hostView.setTypeface(Typeface.MONOSPACE, isIp ? Typeface.NORMAL : Typeface.BOLD);
         hostView.setLayoutParams(new LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
@@ -368,13 +417,48 @@ public class MainActivity extends Activity {
         hostView.setSingleLine(true);
         row.addView(hostView);
 
+        // ⚠ badge for unknown hosts
+        if (isUnknown) {
+            TextView badge = new TextView(this);
+            badge.setText("⚠");
+            badge.setTextSize(13);
+            badge.setTextColor(Color.parseColor("#FF5252"));
+            badge.setPadding(dp(4), 0, dp(4), 0);
+            row.addView(badge);
+
+            // ✓ Trust button — tap to mark as trusted and recolor row
+            Button trustBtn = new Button(this);
+            trustBtn.setText("✓");
+            trustBtn.setTextSize(11);
+            trustBtn.setTextColor(Color.WHITE);
+            trustBtn.setPadding(dp(6), 0, dp(6), 0);
+            LinearLayout.LayoutParams tbp = new LinearLayout.LayoutParams(dp(36), dp(28));
+            tbp.setMargins(dp(2), 0, 0, 0);
+            trustBtn.setLayoutParams(tbp);
+            trustBtn.setBackgroundColor(Color.parseColor("#2E7D32"));
+            trustBtn.setOnClickListener(v -> {
+                // Add root of this host to trusted set
+                String root = extractRootDomain(host);
+                trustedDomains.add(root);
+                trustedDomains.add(host);
+                // Recolor this row to trusted
+                row.setBackgroundColor(Color.TRANSPARENT);
+                dot.setTextColor(Color.parseColor(active ? "#66BB6A" : "#546E7A"));
+                hostView.setTextColor(Color.parseColor("#E3F2FD"));
+                badge.setVisibility(android.view.View.GONE);
+                trustBtn.setVisibility(android.view.View.GONE);
+                showToast("✓ Trusted: " + root);
+            });
+            row.addView(trustBtn);
+        }
+
         // Timestamp
         TextView tsView = new TextView(this);
         tsView.setText(ts);
         tsView.setTextSize(10);
         tsView.setTextColor(Color.parseColor("#37474F"));
         tsView.setLayoutParams(new LinearLayout.LayoutParams(
-                dp(58), LinearLayout.LayoutParams.WRAP_CONTENT));
+                dp(46), LinearLayout.LayoutParams.WRAP_CONTENT));
         tsView.setGravity(android.view.Gravity.END);
         row.addView(tsView);
 
@@ -382,10 +466,101 @@ public class MainActivity extends Activity {
         View div = new View(this);
         div.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        div.setBackgroundColor(Color.parseColor("#0D2137"));
+        div.setBackgroundColor(Color.parseColor(isUnknown ? "#FF5252" : "#0D2137"));
 
         hostLogContainer.addView(row);
         hostLogContainer.addView(div);
+    }
+
+    /** True if host belongs to a trusted domain */
+    private boolean isTrustedHost(String host) {
+        if (host == null || host.isEmpty()) return true;
+        String h = host.toLowerCase();
+        // Strip geo prefix if present (e.g. "🇺🇸 Ashburn, US · Google LLC  api.google.com")
+        int lastSpace = h.lastIndexOf("  ");
+        if (lastSpace >= 0) h = h.substring(lastSpace + 2).trim();
+        for (String trusted : trustedDomains) {
+            if (h.equals(trusted) || h.endsWith("." + trusted)) return true;
+        }
+        return false;
+    }
+
+    /** Extract root domain from a hostname (last two labels) */
+    private static String extractRootDomain(String host) {
+        // Strip geo prefix
+        int lastSpace = host.lastIndexOf("  ");
+        String h = lastSpace >= 0 ? host.substring(lastSpace + 2).trim() : host;
+        String[] parts = h.split("\\.");
+        if (parts.length >= 2) return parts[parts.length - 2] + "." + parts[parts.length - 1];
+        return h;
+    }
+
+    /** Seed trusted domains when a new app is selected */
+    private void seedTrustedDomains(String packageName) {
+        // Keep global CDN list, clear app-specific ones
+        trustedDomains.removeIf(d -> !isGlobalCdn(d));
+        monitoredRootDomain = packageToRootDomain(packageName);
+        if (monitoredRootDomain != null) {
+            trustedDomains.add(monitoredRootDomain);
+            trustedDomains.add("www." + monitoredRootDomain);
+        }
+    }
+
+    private static boolean isGlobalCdn(String domain) {
+        String[] cdns = {"google.com","googleapis.com","gstatic.com","akamai.net","akamaized.net",
+            "cloudflare.com","cloudflare.net","fastly.net","amazonaws.com","cloudfront.net",
+            "msedge.net","microsoft.com","apple.com","icloud.com","fbcdn.net","twimg.com",
+            "akamaitechnologies.com","akamaiedge.net","awsstatic.com","mzstatic.com",
+            "googlevideo.com","googleusercontent.com","android.com","msftconnecttest.com"};
+        for (String cdn : cdns) if (domain.equals(cdn)) return true;
+        return false;
+    }
+
+    private static String packageToRootDomain(String pkg) {
+        if (pkg == null || pkg.isEmpty()) return null;
+        String[] parts = pkg.split("\\.");
+        if (parts.length < 2) return null;
+        String tld = parts[0]; String name = parts[1];
+        if ("com".equals(tld) || "org".equals(tld) || "io".equals(tld)) return name + ".com";
+        return name + "." + tld;
+    }
+
+    /** Vibrate + notification for an unexpected host */
+    private void fireAlert(String host) {
+        // Vibrate: short double-pulse
+        try {
+            Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+            if (v != null && v.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    v.vibrate(VibrationEffect.createWaveform(new long[]{0, 120, 80, 180}, -1));
+                } else {
+                    v.vibrate(new long[]{0, 120, 80, 180}, -1);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Status-bar notification
+        try {
+            String chanId = "netwatch_alerts";
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel ch = new NotificationChannel(chanId, "NetWatch Alerts", NotificationManager.IMPORTANCE_HIGH);
+            ch.enableVibration(false); // we already vibrated manually
+            nm.createNotificationChannel(ch);
+
+            // Strip geo prefix for clean display
+            String displayHost = host;
+            int sp = host.lastIndexOf("  ");
+            if (sp >= 0) displayHost = host.substring(sp + 2).trim();
+
+            android.app.Notification notif = new android.app.Notification.Builder(this, chanId)
+                    .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .setContentTitle("⚠ Unknown Connection Detected")
+                    .setContentText(displayHost)
+                    .setAutoCancel(true)
+                    .build();
+
+            nm.notify((int) System.currentTimeMillis(), notif);
+        } catch (Exception ignored) {}
     }
 
     // ── Domain Intel (Tab 1) ─────────────────────────────────────────────────

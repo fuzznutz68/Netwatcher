@@ -6,6 +6,7 @@ drawable card_background
 drawable ic_launcher
 drawable input_background
 drawable tab_selector
+id alertSwitch
 id appSpinner
 id clearMonBtn
 id connectionCountText
