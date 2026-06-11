@@ -17,100 +17,106 @@
 13    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 13-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:6:5-77
 13-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:6:22-74
-14    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-14-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:5-77
-14-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:22-74
-15
-16    <permission
-16-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
-17        android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-17-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
-18        android:protectionLevel="signature" />
-18-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
-19
-20    <uses-permission android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-20-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
-20-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
-21
-22    <application
-22-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:9:5-38:19
-23        android:allowBackup="true"
-23-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:10:9-35
-24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-24-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
-25        android:debuggable="true"
-26        android:extractNativeLibs="false"
-27        android:icon="@drawable/ic_launcher"
-27-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:11:9-45
-28        android:label="@string/app_name"
-28-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:12:9-41
-29        android:roundIcon="@drawable/ic_launcher"
-29-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:13:9-50
-30        android:supportsRtl="true"
-30-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:9-35
-31        android:theme="@style/AppTheme"
-31-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:15:9-40
-32        android:usesCleartextTraffic="true" >
-32-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:16:9-44
-33        <activity
-33-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:18:9-27:20
-34            android:name="com.netwatch.app.MainActivity"
-34-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:19:13-41
-35            android:exported="true"
-35-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:20:13-36
-36            android:label="@string/app_name"
-36-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:21:13-45
-37            android:screenOrientation="portrait" >
-37-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:22:13-49
-38            <intent-filter>
-38-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:23:13-26:29
-39                <action android:name="android.intent.action.MAIN" />
-39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:24:17-69
-39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:24:25-66
-40
-41                <category android:name="android.intent.category.LAUNCHER" />
-41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:25:17-77
-41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:25:27-74
-42            </intent-filter>
-43        </activity>
-44
-45        <service
-45-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:29:9-36:19
-46            android:name="com.netwatch.app.NetWatchVpnService"
-46-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-47
-47            android:exported="false"
-47-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:31:13-37
-48            android:permission="android.permission.BIND_VPN_SERVICE" >
-48-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:13-69
-49            <intent-filter>
-49-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:33:13-35:29
-50                <action android:name="android.net.VpnService" />
-50-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:17-65
-50-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:25-62
-51            </intent-filter>
-52        </service>
-53
-54        <provider
-54-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
-55            android:name="androidx.startup.InitializationProvider"
-55-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
-56            android:authorities="com.netwatch.app.androidx-startup"
-56-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
-57            android:exported="false" >
-57-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
-58            <meta-data
-58-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
-59                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-59-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
-60                android:value="androidx.startup" />
-60-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+14    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+14-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:5-87
+14-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:22-84
+15    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+15-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:8:5-77
+15-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:8:22-74
+16
+17    <permission
+17-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+18        android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:10:5-41:19
+24        android:allowBackup="true"
+24-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:11:9-35
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.9.0] /tmp/gradle_home/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:icon="@drawable/ic_launcher"
+28-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:12:9-45
+29        android:label="@string/app_name"
+29-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:13:9-41
+30        android:roundIcon="@drawable/ic_launcher"
+30-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:9-50
+31        android:supportsRtl="true"
+31-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:15:9-35
+32        android:theme="@style/AppTheme"
+32-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:16:9-40
+33        android:usesCleartextTraffic="true" >
+33-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:17:9-44
+34        <activity
+34-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:19:9-28:20
+35            android:name="com.netwatch.app.MainActivity"
+35-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:20:13-41
+36            android:exported="true"
+36-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:21:13-36
+37            android:label="@string/app_name"
+37-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:22:13-45
+38            android:screenOrientation="portrait" >
+38-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:23:13-49
+39            <intent-filter>
+39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:24:13-27:29
+40                <action android:name="android.intent.action.MAIN" />
+40-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:25:17-69
+40-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:25:25-66
+41
+42                <category android:name="android.intent.category.LAUNCHER" />
+42-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:26:17-77
+42-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:26:27-74
+43            </intent-filter>
+44        </activity>
+45
+46        <!-- foregroundServiceType required on API 34+ -->
+47        <service
+47-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:31:9-39:19
+48            android:name="com.netwatch.app.NetWatchVpnService"
+48-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:13-47
+49            android:exported="false"
+49-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:33:13-37
+50            android:foregroundServiceType="dataSync"
+50-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:13-53
+51            android:permission="android.permission.BIND_VPN_SERVICE" >
+51-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:35:13-69
+52            <intent-filter>
+52-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:36:13-38:29
+53                <action android:name="android.net.VpnService" />
+53-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:37:17-65
+53-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:37:25-62
+54            </intent-filter>
+55        </service>
+56
+57        <provider
+57-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+58            android:name="androidx.startup.InitializationProvider"
+58-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+59            android:authorities="com.netwatch.app.androidx-startup"
+59-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+60            android:exported="false" >
+60-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
 61            <meta-data
-61-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
-62                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-62-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+61-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+62                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+62-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
 63                android:value="androidx.startup" />
-63-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
-64        </provider>
-65    </application>
-66
-67</manifest>
+63-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle_home/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+64            <meta-data
+64-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+65                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+65-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+66                android:value="androidx.startup" />
+66-->[androidx.lifecycle:lifecycle-process:2.4.1] /tmp/gradle_home/caches/transforms-3/b7bd10e3360a468a9b79e7dca2ad5240/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+67        </provider>
+68    </application>
+69
+70</manifest>
