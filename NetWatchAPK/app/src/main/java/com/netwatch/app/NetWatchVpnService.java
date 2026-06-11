@@ -8,31 +8,45 @@ import android.content.pm.ServiceInfo;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NetWatchVpnService extends VpnService {
 
     public static final String TRAFFIC_ACTION = "com.netwatch.app.TRAFFIC";
-    public static final String ACTION_STOP     = "com.netwatch.app.STOP_VPN";
-    private static final String CHANNEL_ID     = "netwatch_vpn";
-    private static final int    NOTIF_ID       = 42;
+    public static final String ACTION_STOP    = "com.netwatch.app.STOP_VPN";
+    private static final String TAG           = "NetWatch";
+    private static final String CHANNEL_ID    = "netwatch_vpn";
+    private static final int    NOTIF_ID      = 42;
 
     private ParcelFileDescriptor vpnInterface;
     private volatile boolean     running = false;
     private String               targetDomain = "";
-    private final Set<String>    resolvedIPs  = new HashSet<>();
-    private ExecutorService      executor;
+
+    // Cache: IP → hostname (reverse DNS, non-blocking)
+    private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
+    // Deduplicate: only broadcast each unique dst IP+port once per second
+    private final LinkedHashMap<String, Long> recentKeys = new LinkedHashMap<String, Long>() {
+        protected boolean removeEldestEntry(Map.Entry<String, Long> e) {
+            return size() > 500;
+        }
+    };
+
+    private ExecutorService executor;
+    private ExecutorService dnsExecutor;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -40,129 +54,166 @@ public class NetWatchVpnService extends VpnService {
             stopSelf();
             return START_NOT_STICKY;
         }
-
         if (intent != null) {
             targetDomain = intent.getStringExtra("target_domain");
             if (targetDomain == null) targetDomain = "";
+            targetDomain = targetDomain.toLowerCase().trim();
         }
 
-        // Resolve target domain IPs on a background thread
-        if (!targetDomain.isEmpty()) {
-            final String domainToResolve = targetDomain;
-            new Thread(() -> resolveTargetDomain(domainToResolve)).start();
-        }
-
-        // Start foreground — API 34+ requires foreground service type
+        createNotificationChannel();
         Notification notif = buildNotification();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         } else {
             startForeground(NOTIF_ID, notif);
         }
 
-        executor = Executors.newSingleThreadExecutor();
+        dnsExecutor = Executors.newFixedThreadPool(4);
+        executor    = Executors.newSingleThreadExecutor();
         executor.execute(this::runVpnLoop);
         return START_STICKY;
     }
 
-    private void resolveTargetDomain(String domain) {
-        try {
-            String d = domain.startsWith("*.") ? domain.substring(2) : domain;
-            InetAddress[] addrs = InetAddress.getAllByName(d);
-            for (InetAddress a : addrs) resolvedIPs.add(a.getHostAddress());
-        } catch (Exception ignored) {}
-    }
-
     private void runVpnLoop() {
         try {
+            // Build VPN interface — route ALL traffic through us
             Builder builder = new Builder();
             builder.setMtu(1500);
-            builder.addAddress("10.0.0.2", 32);
-            builder.addRoute("0.0.0.0", 0);
+            builder.addAddress("10.99.0.1", 24);
+            builder.addRoute("0.0.0.0", 0);          // capture all IPv4
             builder.addDnsServer("8.8.8.8");
+            builder.addDnsServer("1.1.1.1");
             builder.setSession("NetWatch");
+            // Exclude ourselves so we don't loop our own network calls
             builder.addDisallowedApplication(getPackageName());
 
             vpnInterface = builder.establish();
-            if (vpnInterface == null) return;
+            if (vpnInterface == null) {
+                Log.e(TAG, "VPN establish() returned null — permission not granted?");
+                return;
+            }
+            Log.d(TAG, "VPN tunnel established, monitoring: " + targetDomain);
 
             running = true;
-            FileInputStream  in  = new FileInputStream(vpnInterface.getFileDescriptor());
+            FileInputStream in  = new FileInputStream(vpnInterface.getFileDescriptor());
             FileOutputStream out = new FileOutputStream(vpnInterface.getFileDescriptor());
-            ByteBuffer       pkt = ByteBuffer.allocate(32767);
+            byte[] buf = new byte[32767];
 
             while (running) {
-                pkt.clear();
-                int len = in.read(pkt.array());
-                if (len <= 0) { Thread.sleep(10); continue; }
-                pkt.limit(len);
-
-                byte versionIHL = pkt.get(0);
-                int  version    = (versionIHL >> 4) & 0xF;
-                if (version != 4) { out.write(pkt.array(), 0, len); continue; }
-
-                int  ihl      = (versionIHL & 0xF) * 4;
-                byte protocol = pkt.get(9);
-
-                int srcIp = ((pkt.get(12) & 0xFF) << 24) | ((pkt.get(13) & 0xFF) << 16)
-                          | ((pkt.get(14) & 0xFF) << 8)  |  (pkt.get(15) & 0xFF);
-                int dstIp = ((pkt.get(16) & 0xFF) << 24) | ((pkt.get(17) & 0xFF) << 16)
-                          | ((pkt.get(18) & 0xFF) << 8)  |  (pkt.get(19) & 0xFF);
-
-                String srcAddr = ipToString(srcIp);
-                String dstAddr = ipToString(dstIp);
-
-                int srcPort = 0, dstPort = 0;
-                if ((protocol == 6 || protocol == 17) && len > ihl + 3) {
-                    srcPort = ((pkt.get(ihl)     & 0xFF) << 8) | (pkt.get(ihl + 1) & 0xFF);
-                    dstPort = ((pkt.get(ihl + 2) & 0xFF) << 8) | (pkt.get(ihl + 3) & 0xFF);
+                int len = in.read(buf);
+                if (len <= 0) {
+                    Thread.sleep(5);
+                    continue;
                 }
-
-                String protoName  = protocol == 6 ? "TCP" : (protocol == 17 ? "UDP" : "IP");
-                boolean isOutbound = srcAddr.startsWith("10.0.0.");
-
-                String matchIp   = isOutbound ? dstAddr : srcAddr;
-                int    matchPort = isOutbound ? dstPort  : srcPort;
-
-                if (matchesTarget(matchIp, matchPort)) {
-                    String direction = isOutbound ? "⬆" : "⬇";
-                    String ipPort    = matchIp + ":" + matchPort;
-                    broadcastTraffic(direction, protoName, "", ipPort, len);
-                }
-
-                out.write(pkt.array(), 0, len);
+                // Forward packet back through VPN so real internet still works
+                out.write(buf, 0, len);
+                // Parse asynchronously so we don't slow down forwarding
+                final byte[] pkt = new byte[len];
+                System.arraycopy(buf, 0, pkt, 0, len);
+                parseAndReport(pkt, len);
             }
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
-            // VPN loop ended — expected on stop
+            Log.e(TAG, "VPN loop error: " + e.getMessage(), e);
         } finally {
             closeVpn();
         }
     }
 
-    private boolean matchesTarget(String ip, int port) {
-        if (targetDomain.isEmpty()) return true;
-        if (!resolvedIPs.isEmpty())  return resolvedIPs.contains(ip);
-        // Fallback when DNS hasn't resolved yet — show common web ports
-        return port == 80 || port == 443 || port == 8080 || port == 8443;
+    private void parseAndReport(byte[] pkt, int len) {
+        if (len < 20) return;
+
+        int versionIHL = pkt[0] & 0xFF;
+        int version    = (versionIHL >> 4) & 0xF;
+        if (version != 4) return;   // skip IPv6 for now
+
+        int ihl      = (versionIHL & 0xF) * 4;
+        int protocol = pkt[9] & 0xFF;
+
+        // Only care about TCP (6) and UDP (17)
+        if (protocol != 6 && protocol != 17) return;
+
+        String srcAddr = ipBytes(pkt, 12);
+        String dstAddr = ipBytes(pkt, 16);
+
+        if (len < ihl + 4) return;
+        int srcPort = ((pkt[ihl]     & 0xFF) << 8) | (pkt[ihl + 1] & 0xFF);
+        int dstPort = ((pkt[ihl + 2] & 0xFF) << 8) | (pkt[ihl + 3] & 0xFF);
+
+        // Outbound: source is our VPN address (10.99.x.x)
+        boolean isOutbound = srcAddr.startsWith("10.99.");
+        String remoteIp   = isOutbound ? dstAddr : srcAddr;
+        int    remotePort = isOutbound ? dstPort  : srcPort;
+        String direction  = isOutbound ? "⬆" : "⬇";
+        String protoName  = protocol == 6 ? "TCP" : "UDP";
+
+        // Skip uninteresting ports (local/broadcast/multicast)
+        if (remoteIp.startsWith("224.") || remoteIp.startsWith("239.")
+                || remoteIp.startsWith("255.") || remoteIp.equals("0.0.0.0")) return;
+        if (remotePort == 0) return;
+
+        // Dedup — don't spam the same connection every millisecond
+        String key = direction + remoteIp + ":" + remotePort;
+        long now = System.currentTimeMillis();
+        synchronized (recentKeys) {
+            Long last = recentKeys.get(key);
+            if (last != null && (now - last) < 2000) return;  // suppress same key within 2s
+            recentKeys.put(key, now);
+        }
+
+        // Resolve hostname (non-blocking — use cache, dispatch DNS in background)
+        String cachedHost = dnsCache.get(remoteIp);
+        if (cachedHost != null) {
+            emit(direction, protoName, cachedHost, remoteIp, remotePort, len);
+        } else {
+            // Emit immediately with raw IP, then update when DNS resolves
+            emit(direction, protoName, remoteIp, remoteIp, remotePort, len);
+            final String ipToResolve = remoteIp;
+            dnsExecutor.submit(() -> {
+                try {
+                    String host = InetAddress.getByName(ipToResolve).getHostName();
+                    if (!host.equals(ipToResolve)) {
+                        dnsCache.put(ipToResolve, host);
+                        // Re-emit with resolved name if it matches target
+                        if (targetDomain.isEmpty() || host.toLowerCase().contains(targetDomain)
+                                || ipToResolve.equals(dnsCache.get(targetDomain))) {
+                            emit(direction, protoName, host, ipToResolve, remotePort, len);
+                        }
+                    } else {
+                        dnsCache.put(ipToResolve, ipToResolve);
+                    }
+                } catch (Exception ignored) {
+                    dnsCache.put(ipToResolve, ipToResolve);
+                }
+            });
+        }
     }
 
-    private void broadcastTraffic(String direction, String protocol,
-                                   String host, String ipPort, int bytes) {
+    private void emit(String direction, String protocol, String host,
+                      String ip, int port, int bytes) {
+        // If a target domain is set, filter — show only matching entries
+        if (!targetDomain.isEmpty()) {
+            boolean matches = host.toLowerCase().contains(targetDomain)
+                    || ip.toLowerCase().contains(targetDomain);
+            if (!matches) return;
+        }
+
         String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
         Intent intent = new Intent(TRAFFIC_ACTION);
         intent.putExtra("direction", direction);
         intent.putExtra("protocol",  protocol);
-        intent.putExtra("host",      host);
-        intent.putExtra("ipPort",    ipPort);
+        intent.putExtra("host",      host.equals(ip) ? "" : host);
+        intent.putExtra("ipPort",    ip + ":" + port);
         intent.putExtra("bytes",     bytes);
         intent.putExtra("timestamp", ts);
         sendBroadcast(intent);
     }
 
-    private static String ipToString(int ip) {
-        return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "."
-             + ((ip >> 8)  & 0xFF) + "." + (ip & 0xFF);
+    private static String ipBytes(byte[] pkt, int offset) {
+        return (pkt[offset] & 0xFF) + "." + (pkt[offset+1] & 0xFF) + "."
+             + (pkt[offset+2] & 0xFF) + "." + (pkt[offset+3] & 0xFF);
     }
 
     private void closeVpn() {
@@ -174,20 +225,24 @@ public class NetWatchVpnService extends VpnService {
     @Override
     public void onDestroy() {
         running = false;
-        if (executor != null) executor.shutdownNow();
+        if (executor    != null) executor.shutdownNow();
+        if (dnsExecutor != null) dnsExecutor.shutdownNow();
         closeVpn();
         super.onDestroy();
     }
 
-    private Notification buildNotification() {
+    private void createNotificationChannel() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationChannel ch = new NotificationChannel(
                 CHANNEL_ID, "NetWatch VPN", NotificationManager.IMPORTANCE_LOW);
         nm.createNotificationChannel(ch);
+    }
 
+    private Notification buildNotification() {
+        String text = targetDomain.isEmpty() ? "Monitoring all traffic" : "Filtering: " + targetDomain;
         return new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("NetWatch Active")
-                .setContentText("Monitoring: " + targetDomain)
+                .setContentTitle("🔍 NetWatch Active")
+                .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
                 .build();
     }

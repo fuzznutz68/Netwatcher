@@ -706,7 +706,9 @@ id center_vertical
 id checkbox
 id checked
 id chronometer
+id clearLogBtn
 id collapseActionView
+id connectionCountText
 id content
 id contentPanel
 id custom

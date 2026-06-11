@@ -6,6 +6,8 @@ drawable card_background
 drawable ic_launcher
 drawable input_background
 drawable tab_selector
+id clearLogBtn
+id connectionCountText
 id domainInput
 id lookupBtn
 id resultsContainer
