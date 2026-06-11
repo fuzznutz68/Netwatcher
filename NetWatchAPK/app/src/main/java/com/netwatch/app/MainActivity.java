@@ -151,8 +151,10 @@ public class MainActivity extends Activity {
             }
         };
         IntentFilter f = new IntentFilter(TrafficMonitorService.EVENT_ACTION);
+        // Must use RECEIVER_EXPORTED (or no flag pre-T) because the broadcast
+        // has setPackage() applied — Android still routes it correctly.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(trafficReceiver, f, Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(trafficReceiver, f, Context.RECEIVER_EXPORTED);
         } else {
             registerReceiver(trafficReceiver, f);
         }
@@ -251,6 +253,7 @@ public class MainActivity extends Activity {
 
         Intent si = new Intent(this, TrafficMonitorService.class);
         si.putExtra("target_uid",  selectedApp.uid);
+        si.putExtra("target_pkg",  selectedApp.packageName);
         si.putExtra("target_name", selectedApp.label);
         startForegroundService(si);
     }
