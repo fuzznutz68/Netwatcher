@@ -120,9 +120,20 @@ public class MainActivity extends Activity {
         stopMonBtn.setOnClickListener(v -> stopMonitoring());
         clearMonBtn.setOnClickListener(v -> clearLog());
 
+        // Track whether the spinner is being set up for the first time (don't launch on init)
+        appSpinner.setTag("init");
         appSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 selectedApp = appList.isEmpty() ? null : appList.get(pos);
+                // Don't auto-launch on initial population of the spinner
+                if ("init".equals(appSpinner.getTag())) {
+                    appSpinner.setTag(null);
+                    return;
+                }
+                // Launch the selected app (skip "Whole Device")
+                if (selectedApp != null && !selectedApp.packageName.isEmpty()) {
+                    launchApp(selectedApp.packageName);
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
@@ -158,6 +169,23 @@ public class MainActivity extends Activity {
 
         // Load app list in background
         loadAppList();
+    }
+
+    // ── Launch App ──────────────────────────────────────────────────────────
+
+    private void launchApp(String packageName) {
+        try {
+            PackageManager pm = getPackageManager();
+            Intent launch = pm.getLaunchIntentForPackage(packageName);
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(launch);
+            } else {
+                showToast("Can't launch — app may be a background service");
+            }
+        } catch (Exception e) {
+            showToast("Could not open app: " + e.getMessage());
+        }
     }
 
     // ── App List ─────────────────────────────────────────────────────────────
