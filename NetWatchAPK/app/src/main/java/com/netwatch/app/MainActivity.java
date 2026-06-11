@@ -130,9 +130,17 @@ public class MainActivity extends Activity {
                     appSpinner.setTag(null);
                     return;
                 }
-                // Launch the selected app (skip "Whole Device")
+                // Launch the selected app (skip "Whole Device") and auto-start monitoring
                 if (selectedApp != null && !selectedApp.packageName.isEmpty()) {
-                    launchApp(selectedApp.packageName);
+                    // If already monitoring another app, stop it first
+                    if (monitoring) stopMonitoring();
+                    // Start monitoring first so we capture traffic from the moment the app opens
+                    startMonitoring();
+                    // Small delay so monitoring is running before the app comes to foreground
+                    mainHandler.postDelayed(() -> launchApp(selectedApp.packageName), 400);
+                } else if (selectedApp != null && selectedApp.uid == -1) {
+                    // "Whole Device" — just start monitoring, no app to launch
+                    if (!monitoring) startMonitoring();
                 }
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
