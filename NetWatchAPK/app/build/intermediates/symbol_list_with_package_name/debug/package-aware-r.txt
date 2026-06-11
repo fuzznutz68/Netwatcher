@@ -697,6 +697,7 @@ id activity_chooser_view_content
 id add
 id alertTitle
 id always
+id appSpinner
 id async
 id beginning
 id blocking
@@ -706,7 +707,7 @@ id center_vertical
 id checkbox
 id checked
 id chronometer
-id clearLogBtn
+id clearMonBtn
 id collapseActionView
 id connectionCountText
 id content
@@ -727,6 +728,8 @@ id fragment_container_view_tag
 id group_divider
 id home
 id homeAsUp
+id hostLogContainer
+id hostLogScroll
 id icon
 id icon_group
 id ifRoom
@@ -740,6 +743,7 @@ id list_item
 id lookupBtn
 id message
 id middle
+id monStatusText
 id multiply
 id never
 id none
@@ -756,6 +760,8 @@ id radio
 id resultsContainer
 id right_icon
 id right_side
+id rxRateText
+id rxTotalText
 id screen
 id scrollIndicatorDown
 id scrollIndicatorUp
@@ -781,9 +787,9 @@ id split_action_bar
 id src_atop
 id src_in
 id src_over
-id startVpnBtn
+id startMonBtn
 id statusText
-id stopVpnBtn
+id stopMonBtn
 id submenuarrow
 id submit_area
 id tab1
@@ -805,7 +811,6 @@ id tag_transition_group
 id tag_unhandled_key_event_manager
 id tag_unhandled_key_listeners
 id tag_window_insets_animation_callback
-id targetDomainInput
 id text
 id text2
 id textSpacerNoButtons
@@ -816,8 +821,8 @@ id titleDividerNoCustom
 id title_template
 id top
 id topPanel
-id trafficLogContainer
-id trafficScrollView
+id txRateText
+id txTotalText
 id unchecked
 id uniform
 id up
@@ -827,7 +832,6 @@ id view_tree_on_back_pressed_dispatcher_owner
 id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible_removing_fragment_view_tag
-id vpnStatusText
 id withText
 id wrap_content
 integer abc_config_activityDefaultDur

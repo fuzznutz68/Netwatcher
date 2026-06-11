@@ -35,7 +35,6 @@
         android:layout_height="48dp"
         android:orientation="horizontal"
         android:background="#0A1628">
-
         <Button
             android:id="@+id/tabDomainBtn"
             android:layout_width="0dp"
@@ -45,7 +44,6 @@
             android:textColor="#FFFFFF"
             android:background="@drawable/tab_selector"
             android:textSize="13sp"/>
-
         <Button
             android:id="@+id/tabTrafficBtn"
             android:layout_width="0dp"
@@ -57,15 +55,14 @@
             android:textSize="13sp"/>
     </LinearLayout>
 
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- Tab 1: Domain Intel                                     -->
-    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 1 — Domain Intel                          -->
+    <!-- ══════════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/tab1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,7 +74,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="12dp">
-
                 <EditText
                     android:id="@+id/domainInput"
                     android:layout_width="0dp"
@@ -93,7 +89,6 @@
                     android:imeOptions="actionSearch"
                     android:singleLine="true"
                     android:textSize="14sp"/>
-
                 <Button
                     android:id="@+id/lookupBtn"
                     android:layout_width="wrap_content"
@@ -120,13 +115,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"/>
-
         </LinearLayout>
     </ScrollView>
 
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- Tab 2: Traffic Monitor                                  -->
-    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 2 — Traffic Monitor                       -->
+    <!-- ══════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/tab2"
         android:layout_width="match_parent"
@@ -135,47 +129,40 @@
         android:padding="12dp"
         android:visibility="gone">
 
-        <!-- Controls Card -->
+        <!-- App Picker Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="14dp"
+            android:padding="12dp"
             android:layout_marginBottom="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FILTER BY DOMAIN  (leave blank = show all)"
+                android:text="SELECT APP TO MONITOR"
                 android:textSize="11sp"
                 android:textColor="#64B5F6"
                 android:textAllCaps="true"
                 android:layout_marginBottom="6dp"/>
 
-            <EditText
-                android:id="@+id/targetDomainInput"
+            <Spinner
+                android:id="@+id/appSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:hint="e.g. paypal.com"
-                android:textColor="#E3F2FD"
-                android:textColorHint="#546E7A"
                 android:background="@drawable/input_background"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:inputType="text"
-                android:singleLine="true"
-                android:textSize="14sp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:layout_marginBottom="10dp"/>
 
-            <!-- Start / Stop row -->
+            <!-- Button Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-
                 <Button
-                    android:id="@+id/startVpnBtn"
+                    android:id="@+id/startMonBtn"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="44dp"
@@ -183,9 +170,8 @@
                     android:textColor="#FFFFFF"
                     android:background="@drawable/btn_primary"
                     android:textSize="13sp"/>
-
                 <Button
-                    android:id="@+id/stopVpnBtn"
+                    android:id="@+id/stopMonBtn"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="44dp"
@@ -195,18 +181,15 @@
                     android:background="@drawable/btn_danger"
                     android:textSize="13sp"
                     android:enabled="false"/>
-
                 <Button
-                    android:id="@+id/clearLogBtn"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/clearMonBtn"
+                    android:layout_width="48dp"
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
                     android:text="🗑"
                     android:textColor="#FFFFFF"
                     android:background="@drawable/btn_danger"
-                    android:textSize="16sp"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"/>
+                    android:textSize="16sp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -216,16 +199,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="8dp">
-
             <TextView
-                android:id="@+id/vpnStatusText"
+                android:id="@+id/monStatusText"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="⚫  Monitoring inactive"
                 android:textColor="#78909C"
                 android:textSize="13sp"/>
-
             <TextView
                 android:id="@+id/connectionCountText"
                 android:layout_width="wrap_content"
@@ -235,60 +216,99 @@
                 android:textSize="12sp"/>
         </LinearLayout>
 
-        <!-- Column headers -->
+        <!-- Traffic Stats Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="4dp">
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="10dp">
 
-            <TextView
-                android:layout_width="30dp"
+            <!-- TX column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="DIR"
-                android:textSize="10sp"
-                android:textColor="#546E7A"
-                android:textAllCaps="true"/>
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/txTotalText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TX  —"
+                    android:textSize="15sp"
+                    android:textColor="#EF9A9A"
+                    android:textStyle="bold"
+                    android:typeface="monospace"/>
+                <TextView
+                    android:id="@+id/txRateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑ 0 B/s"
+                    android:textSize="12sp"
+                    android:textColor="#546E7A"
+                    android:typeface="monospace"/>
+            </LinearLayout>
 
+            <!-- Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#1A3A5C"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"/>
+
+            <!-- RX column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/rxTotalText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RX  —"
+                    android:textSize="15sp"
+                    android:textColor="#A5D6A7"
+                    android:textStyle="bold"
+                    android:typeface="monospace"/>
+                <TextView
+                    android:id="@+id/rxRateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↓ 0 B/s"
+                    android:textSize="12sp"
+                    android:textColor="#546E7A"
+                    android:typeface="monospace"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Host Log -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="HOST / IP"
-                android:textSize="10sp"
-                android:textColor="#546E7A"
+                android:text="LIVE CONNECTION HOSTS"
+                android:textSize="11sp"
+                android:textColor="#64B5F6"
                 android:textAllCaps="true"/>
-
-            <TextView
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:text="PORT"
-                android:textSize="10sp"
-                android:textColor="#546E7A"
-                android:textAllCaps="true"
-                android:gravity="end"/>
-
-            <TextView
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:text="TIME"
-                android:textSize="10sp"
-                android:textColor="#546E7A"
-                android:textAllCaps="true"
-                android:gravity="end"/>
         </LinearLayout>
 
-        <!-- Live log -->
         <ScrollView
-            android:id="@+id/trafficScrollView"
+            android:id="@+id/hostLogScroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/card_background">
-
             <LinearLayout
-                android:id="@+id/trafficLogContainer"
+                android:id="@+id/hostLogContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
