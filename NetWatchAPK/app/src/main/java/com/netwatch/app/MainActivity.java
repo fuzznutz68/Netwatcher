@@ -28,6 +28,11 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -75,7 +80,14 @@ public class MainActivity extends Activity {
     private boolean              monitoring   = false;
     private int                  hostCount    = 0;
     private final Set<String>    seenHosts    = new HashSet<>();
+    // Raw log data for export: host line → timestamp string
+    private final LinkedHashMap<String, String> trafficLogForExport = new LinkedHashMap<>();
+    // Domain Intel last result for export
+    private String lastDomainForExport = "";
+    private String lastIntelJsonForExport = "";
+    private String lastProbeJsonForExport = "";
 
+    private Button       exportDomainBtn, exportTrafficBtn;
     private BroadcastReceiver trafficReceiver;
     private final ExecutorService executor    = Executors.newCachedThreadPool();
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
@@ -116,6 +128,10 @@ public class MainActivity extends Activity {
         hostLogScroll      = findViewById(R.id.hostLogScroll);
         connectionCountText= findViewById(R.id.connectionCountText);
 
+        exportDomainBtn    = findViewById(R.id.exportDomainBtn);
+        exportTrafficBtn   = findViewById(R.id.exportTrafficBtn);
+        exportDomainBtn.setOnClickListener(v -> exportDomainIntel());
+        exportTrafficBtn.setOnClickListener(v -> exportTrafficLog());
         startMonBtn.setOnClickListener(v -> startMonitoring());
         stopMonBtn.setOnClickListener(v -> stopMonitoring());
         clearMonBtn.setOnClickListener(v -> clearLog());
@@ -284,6 +300,7 @@ public class MainActivity extends Activity {
         hostLogContainer.removeAllViews();
         hostCount = 0;
         seenHosts.clear();
+        trafficLogForExport.clear();
         connectionCountText.setText("");
         txTotalText.setText("TX  —");
         rxTotalText.setText("RX  —");
@@ -316,6 +333,7 @@ public class MainActivity extends Activity {
                 if (seenHosts.contains(host)) continue;  // deduplicate
                 seenHosts.add(host);
                 addHostRow(host, txRate > 0 || rxRate > 0, ts);
+                trafficLogForExport.put(host, ts);
                 hostCount++;
             }
             if (hostCount > 0)
@@ -392,6 +410,9 @@ public class MainActivity extends Activity {
                     return;
                 }
                 statusText.setText("✅  Scan complete for " + domain);
+                lastDomainForExport    = domain;
+                lastIntelJsonForExport = intelJson != null ? intelJson : "";
+                lastProbeJsonForExport = probeJson != null ? probeJson : "";
                 buildReport(domain, intelJson, probeJson);
             });
         });
@@ -536,6 +557,107 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.bottomMargin = dp(10); card.setLayoutParams(lp);
         return card;
+    }
+
+    // ── Export ───────────────────────────────────────────────────────────────
+
+    private void exportDomainIntel() {
+        if (lastDomainForExport.isEmpty()) { showToast("Run a scan first"); return; }
+        StringBuilder sb = new StringBuilder();
+        String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
+        sb.append("NetWatch — Domain Intelligence Report\n");
+        sb.append("Generated: ").append(ts).append("\n");
+        sb.append("Domain: ").append(lastDomainForExport).append("\n");
+        sb.append("=".repeat(60)).append("\n\n");
+        try {
+            if (!lastIntelJsonForExport.isEmpty()) {
+                JSONObject intel = new JSONObject(lastIntelJsonForExport);
+                JSONArray ipv4 = intel.optJSONArray("ipv4");
+                if (ipv4 != null && ipv4.length() > 0) {
+                    sb.append("IPv4 Addresses:\n");
+                    for (int i = 0; i < ipv4.length(); i++) sb.append("  ").append(ipv4.optString(i)).append("\n");
+                    sb.append("\n");
+                }
+                JSONArray ipv6 = intel.optJSONArray("ipv6");
+                if (ipv6 != null && ipv6.length() > 0) {
+                    sb.append("IPv6 Addresses:\n");
+                    for (int i = 0; i < ipv6.length(); i++) sb.append("  ").append(ipv6.optString(i)).append("\n");
+                    sb.append("\n");
+                }
+                String cname = intel.optString("cname","");
+                if (!cname.isEmpty() && !cname.equals("null")) sb.append("CNAME: ").append(cname).append("\n\n");
+                JSONArray subs = intel.optJSONArray("subdomains");
+                if (subs != null && subs.length() > 0) {
+                    sb.append("Subdomains (").append(subs.length()).append("):\n");
+                    for (int i = 0; i < subs.length(); i++) {
+                        JSONObject sub = subs.getJSONObject(i);
+                        sb.append("  ").append(sub.optString("name",""));
+                        JSONArray ips = sub.optJSONArray("ips");
+                        if (ips != null && ips.length() > 0) sb.append("  →  ").append(ips.optString(0));
+                        sb.append("\n");
+                    }
+                    sb.append("\n");
+                }
+                JSONArray shared = intel.optJSONArray("sharedHostDomains");
+                if (shared != null && shared.length() > 0) {
+                    sb.append("Shared-Host Domains:\n");
+                    for (int i = 0; i < shared.length(); i++) sb.append("  ").append(shared.optString(i)).append("\n");
+                    sb.append("\n");
+                }
+            }
+            if (!lastProbeJsonForExport.isEmpty()) {
+                JSONObject probe = new JSONObject(lastProbeJsonForExport);
+                JSONObject tls = probe.optJSONObject("tlsInfo");
+                if (tls != null) {
+                    sb.append("TLS Certificate:\n");
+                    sb.append("  Issuer:  ").append(tls.optString("issuer","")).append("\n");
+                    sb.append("  Valid:   ").append(tls.optString("notBefore","")).append("\n");
+                    sb.append("  Expires: ").append(tls.optString("notAfter","")).append("\n");
+                    sb.append("\n");
+                }
+                JSONObject reach = probe.optJSONObject("reachability");
+                if (reach != null) {
+                    JSONObject https = reach.optJSONObject("https");
+                    if (https != null && https.optBoolean("reachable",false)) {
+                        sb.append("Reachability:\n");
+                        sb.append("  HTTP Status: ").append(https.optInt("statusCode")).append("\n");
+                        sb.append("  Latency:     ").append(https.optInt("latencyMs")).append(" ms\n");
+                        sb.append("\n");
+                    }
+                }
+            }
+        } catch (Exception e) { sb.append("(parse error: ").append(e.getMessage()).append(")\n"); }
+        shareText("NetWatch_" + lastDomainForExport + "_" + ts.replace(" ","_").replace(":","") + ".txt", sb.toString());
+    }
+
+    private void exportTrafficLog() {
+        if (trafficLogForExport.isEmpty()) { showToast("No traffic data to export"); return; }
+        String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
+        String appLabel = selectedApp != null ? selectedApp.label : "Device";
+        StringBuilder sb = new StringBuilder();
+        sb.append("NetWatch — Traffic Monitor Log\n");
+        sb.append("Generated: ").append(ts).append("\n");
+        sb.append("App: ").append(appLabel).append("\n");
+        sb.append("Hosts captured: ").append(trafficLogForExport.size()).append("\n");
+        sb.append("=".repeat(60)).append("\n\n");
+        sb.append(String.format("%-12s  %s\n", "TIME", "HOST / IP"));
+        sb.append("-".repeat(60)).append("\n");
+        for (Map.Entry<String, String> entry : trafficLogForExport.entrySet()) {
+            sb.append(String.format("%-12s  %s\n", entry.getValue(), entry.getKey()));
+        }
+        shareText("NetWatch_Traffic_" + appLabel.replaceAll("[^a-zA-Z0-9]","_") + "_" + ts.replace(" ","_").replace(":","") + ".txt", sb.toString());
+    }
+
+    private void shareText(String filename, String text) {
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        android.content.ClipData clip = android.content.ClipData.newPlainText(filename, text);
+        clipboard.setPrimaryClip(clip);
+
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_SUBJECT, filename);
+        share.putExtra(Intent.EXTRA_TEXT, text);
+        startActivity(Intent.createChooser(share, "Export via…"));
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────

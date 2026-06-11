@@ -44,14 +44,14 @@ public class TrafficMonitorService extends Service {
     public static final String EXTRA_RX_BYTES  = "rx_bytes";
     public static final String EXTRA_TX_RATE   = "tx_rate";
     public static final String EXTRA_RX_RATE   = "rx_rate";
-    public static final String EXTRA_HOSTS     = "hosts";
+    public static final String EXTRA_HOSTS     = "hosts";       // newline-separated "flag host (city, country) [org]"
     public static final String EXTRA_TIMESTAMP = "timestamp";
 
-    private static final String CHANNEL_ID  = "netwatch_monitor";
-    private static final int    NOTIF_ID    = 43;
-    private static final long   POLL_MS     = 1000L;
-
+    private static final String CHANNEL_ID      = "netwatch_monitor";
+    private static final int    NOTIF_ID        = 43;
+    private static final long   POLL_MS         = 1000L;
     private static final String DOMAIN_INTEL_URL = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
+    private static final String GEO_IP_URL       = "https://superagent-cfb25b3e.base44.app/functions/geoIp";
 
     private int     targetUid  = -1;
     private String  targetPkg  = "";
@@ -61,17 +61,19 @@ public class TrafficMonitorService extends Service {
     private long lastTx = TrafficStats.UNSUPPORTED;
     private long lastRx = TrafficStats.UNSUPPORTED;
 
-    private final Handler         handler  = new Handler(Looper.getMainLooper());
-    private final ExecutorService ioExec   = Executors.newFixedThreadPool(6);
+    private final Handler         handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService ioExec  = Executors.newFixedThreadPool(6);
 
-    // IP → hostname cache (populated by reverse DNS lookups)
-    private final ConcurrentHashMap<String, String> dnsCache  = new ConcurrentHashMap<>();
-    // IPs we've already submitted for reverse-DNS (avoid duplicate jobs)
-    private final Set<String> submittedIps = Collections.synchronizedSet(new HashSet<>());
-    // Hosts we've already broadcast so we only send new ones
-    private final Set<String> broadcastHosts = Collections.synchronizedSet(new HashSet<>());
-    // Known domains seeded from the backend intel for this app's package name
-    private final List<String> seededDomains = new ArrayList<>();
+    // ip → hostname
+    private final ConcurrentHashMap<String, String>  dnsCache    = new ConcurrentHashMap<>();
+    // ip → GeoInfo string e.g. "🇺🇸 Ashburn, US · Google LLC"
+    private final ConcurrentHashMap<String, String>  geoCache    = new ConcurrentHashMap<>();
+    // IPs already submitted for PTR lookup
+    private final Set<String> submittedIps    = Collections.synchronizedSet(new HashSet<>());
+    // IPs already submitted for Geo lookup (batch pending)
+    private final Set<String> geoSubmitted    = Collections.synchronizedSet(new HashSet<>());
+    // Full host lines already broadcast to avoid duplicates
+    private final Set<String> broadcastHosts  = Collections.synchronizedSet(new HashSet<>());
 
     private final Runnable pollRunnable = new Runnable() {
         @Override public void run() {
@@ -102,58 +104,38 @@ public class TrafficMonitorService extends Service {
             startForeground(NOTIF_ID, n);
         }
 
-        dnsCache.clear();
-        submittedIps.clear();
-        broadcastHosts.clear();
-        seededDomains.clear();
+        dnsCache.clear(); geoCache.clear();
+        submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear();
         lastTx = TrafficStats.UNSUPPORTED;
         lastRx = TrafficStats.UNSUPPORTED;
         running = true;
 
-        // Seed known domains from backend in background
-        if (!targetPkg.isEmpty()) {
-            seedDomainsFromBackend(targetPkg);
-        }
-
+        if (!targetPkg.isEmpty()) seedDomainsFromBackend(targetPkg);
         handler.post(pollRunnable);
         return START_STICKY;
     }
 
-    // ── Seed domains from domainIntel backend ────────────────────────────────
-    // Derives a likely root domain from the package name (e.g. com.paypal.android → paypal.com)
-    // then fetches subdomains to pre-populate the display before connections are even seen.
+    // ── Domain seeding ────────────────────────────────────────────────────────
 
     private void seedDomainsFromBackend(String pkg) {
         ioExec.submit(() -> {
             String rootDomain = packageToRootDomain(pkg);
             if (rootDomain == null) return;
-            Log.d(TAG, "Seeding domains for " + rootDomain);
             try {
                 String json = postJson(DOMAIN_INTEL_URL, "{\"domain\":\"" + rootDomain + "\"}");
                 if (json == null) return;
                 JSONObject obj = new JSONObject(json);
-
                 List<String> domains = new ArrayList<>();
                 domains.add(rootDomain);
-
-                // Add subdomains
                 JSONArray subs = obj.optJSONArray("subdomains");
                 if (subs != null) {
                     for (int i = 0; i < subs.length(); i++) {
                         JSONObject sub = subs.optJSONObject(i);
-                        if (sub != null) {
-                            String name = sub.optString("name", "");
-                            if (!name.isEmpty()) domains.add(name);
-                        }
+                        if (sub != null) { String name = sub.optString("name",""); if (!name.isEmpty()) domains.add(name); }
                     }
                 }
-
-                synchronized (seededDomains) { seededDomains.addAll(domains); }
-
-                // Broadcast these as "known domains" immediately
-                broadcastNewHosts(domains, true);
-
-                // Kick off forward DNS on each seeded domain so we have IP→host mappings ready
+                // Forward-DNS each seeded domain to populate ip→host map
+                List<String> seedIps = new ArrayList<>();
                 for (String d : domains) {
                     final String dom = d;
                     ioExec.submit(() -> {
@@ -163,127 +145,145 @@ public class TrafficMonitorService extends Service {
                                 String ip = addr.getHostAddress();
                                 dnsCache.put(ip, dom);
                                 submittedIps.add(ip);
+                                synchronized (seedIps) { seedIps.add(ip); }
                             }
                         } catch (Exception ignored) {}
                     });
                 }
-
-            } catch (Exception e) {
-                Log.w(TAG, "seedDomains failed: " + e.getMessage());
-            }
+                // Broadcast seeded domain names immediately (without geo yet)
+                broadcastNewHosts(domains);
+            } catch (Exception e) { Log.w(TAG, "seedDomains: " + e.getMessage()); }
         });
     }
 
-    /** Converts a package name to a likely root domain.
-     *  com.paypal.android    → paypal.com
-     *  com.google.android.gm → google.com
-     *  net.netflix.mediaclient → netflix.net  (tries .com first)
-     */
     private static String packageToRootDomain(String pkg) {
         if (pkg == null || pkg.isEmpty()) return null;
         String[] parts = pkg.split("\\.");
         if (parts.length < 2) return null;
-        // Strip common prefixes
-        String tld  = parts[0]; // com / net / org / io / de / …
-        String name = parts[1]; // company name
-        // Always try .com first as it's most common
-        if ("com".equals(tld) || "org".equals(tld) || "io".equals(tld)) {
-            return name + ".com";
-        }
+        String tld = parts[0]; String name = parts[1];
+        if ("com".equals(tld) || "org".equals(tld) || "io".equals(tld)) return name + ".com";
         return name + "." + tld;
     }
 
-    // ── Main poll loop ────────────────────────────────────────────────────────
+    // ── Poll loop ─────────────────────────────────────────────────────────────
 
     private void poll() {
-        // 1. TrafficStats byte counters
+        // TrafficStats
         long tx, rx;
-        if (targetUid == -1) {
-            tx = TrafficStats.getTotalTxBytes();
-            rx = TrafficStats.getTotalRxBytes();
-        } else {
-            tx = TrafficStats.getUidTxBytes(targetUid);
-            rx = TrafficStats.getUidRxBytes(targetUid);
-        }
+        if (targetUid == -1) { tx = TrafficStats.getTotalTxBytes(); rx = TrafficStats.getTotalRxBytes(); }
+        else { tx = TrafficStats.getUidTxBytes(targetUid); rx = TrafficStats.getUidRxBytes(targetUid); }
 
         long txRate = 0, rxRate = 0;
-        if (lastTx != TrafficStats.UNSUPPORTED && tx != TrafficStats.UNSUPPORTED
-                && lastTx >= 0 && tx >= 0) {
-            txRate = Math.max(0, tx - lastTx);
-            rxRate = Math.max(0, rx - lastRx);
+        if (lastTx != TrafficStats.UNSUPPORTED && tx != TrafficStats.UNSUPPORTED && lastTx >= 0 && tx >= 0) {
+            txRate = Math.max(0, tx - lastTx); rxRate = Math.max(0, rx - lastRx);
         }
-        lastTx = tx;
-        lastRx = rx;
+        lastTx = tx; lastRx = rx;
 
-        // 2. Read /proc/net/tcp for ALL established connections (no UID filter —
-        //    modern Android restricts per-UID reads but usually allows reading all rows)
+        // Active IPs from /proc/net/tcp
         List<String> activeIps = readAllEstablishedIps();
-        Log.d(TAG, "poll: activeIps=" + activeIps.size() + " txRate=" + txRate + " rxRate=" + rxRate);
 
-        // 3. Submit reverse-DNS jobs for any new IPs
+        // Collect IPs needing geo lookup
+        List<String> needGeo = new ArrayList<>();
+        for (String ip : activeIps) {
+            if (!geoSubmitted.contains(ip)) { needGeo.add(ip); geoSubmitted.add(ip); }
+        }
+        if (!needGeo.isEmpty()) fetchGeoInBackground(new ArrayList<>(needGeo));
+
+        // PTR reverse DNS for new IPs
         for (String ip : activeIps) {
             if (!submittedIps.contains(ip)) {
                 submittedIps.add(ip);
                 final String toResolve = ip;
                 ioExec.submit(() -> {
                     try {
-                        // getHostName() does a PTR lookup
                         String host = InetAddress.getByName(toResolve).getHostName();
                         String resolved = host.equals(toResolve) ? toResolve : host;
                         dnsCache.put(toResolve, resolved);
-                        Log.d(TAG, "PTR " + toResolve + " → " + resolved);
-                        // Broadcast this host immediately once resolved
-                        List<String> single = new ArrayList<>();
-                        single.add(resolved);
-                        broadcastNewHosts(single, false);
+                        broadcastIpAsHost(toResolve);
                     } catch (Exception e) {
                         dnsCache.put(toResolve, toResolve);
+                        broadcastIpAsHost(toResolve);
                     }
                 });
             }
         }
 
-        // 4. Also broadcast any IPs already in cache that haven't been sent yet
-        List<String> resolved = new ArrayList<>();
+        // Broadcast any cached IPs not yet sent
         for (String ip : activeIps) {
-            String host = dnsCache.get(ip);
-            if (host != null) resolved.add(host);
-            else              resolved.add(ip);  // send raw IP while waiting for PTR
+            if (dnsCache.containsKey(ip)) broadcastIpAsHost(ip);
         }
-        broadcastNewHosts(resolved, false);
 
-        // 5. Always send a stats-only broadcast (even if no new hosts) so the byte counters update
-        sendStatsBroadcast(tx, rx, txRate, rxRate, null);
+        // Stats-only broadcast so byte counters always update
+        sendStatsBroadcast(tx, rx, txRate, rxRate, "");
     }
 
-    /** Send ONLY the byte-counter stats (no host data) */
-    private void sendStatsBroadcast(long tx, long rx, long txRate, long rxRate, String hosts) {
-        Intent ev = new Intent(EVENT_ACTION);
-        ev.setPackage(getPackageName());   // explicit package → RECEIVER_NOT_EXPORTED works
-        ev.putExtra(EXTRA_TX_BYTES,  tx == TrafficStats.UNSUPPORTED ? -1L : tx);
-        ev.putExtra(EXTRA_RX_BYTES,  rx == TrafficStats.UNSUPPORTED ? -1L : rx);
-        ev.putExtra(EXTRA_TX_RATE,   txRate);
-        ev.putExtra(EXTRA_RX_RATE,   rxRate);
-        ev.putExtra(EXTRA_HOSTS,     hosts != null ? hosts : "");
-        ev.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
-        sendBroadcast(ev);
+    /** Broadcast a single IP using the best available info (host + geo) */
+    private void broadcastIpAsHost(String ip) {
+        String host = dnsCache.getOrDefault(ip, ip);
+        String geo  = geoCache.get(ip);  // may be null if not yet resolved
+        String line = buildHostLine(host, geo);
+        List<String> single = new ArrayList<>();
+        single.add(line);
+        broadcastNewHosts(single);
     }
 
-    /** Broadcast only hosts that haven't been sent before */
-    private void broadcastNewHosts(List<String> hosts, boolean isSeeded) {
+    /** Assembles the display line: "🇺🇸 api.paypal.com · Ashburn, US · PayPal Inc" */
+    private static String buildHostLine(String host, String geo) {
+        if (geo == null || geo.isEmpty()) return host;
+        return geo + "  " + host;
+    }
+
+    private void fetchGeoInBackground(final List<String> ips) {
+        ioExec.submit(() -> {
+            try {
+                StringBuilder sb = new StringBuilder("{\"ips\":[");
+                for (int i = 0; i < ips.size(); i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append("\"").append(ips.get(i)).append("\"");
+                }
+                sb.append("]}");
+                String resp = postJson(GEO_IP_URL, sb.toString());
+                if (resp == null) return;
+                JSONObject obj = new JSONObject(resp);
+                JSONObject results = obj.optJSONObject("results");
+                if (results == null) return;
+                for (String ip : ips) {
+                    JSONObject info = results.optJSONObject(ip);
+                    if (info == null) continue;
+                    String flag    = info.optString("flag", "🌐");
+                    String city    = info.optString("city", "");
+                    String country = info.optString("countryCode", "");
+                    String org     = info.optString("org", "");
+                    // Shorten org: strip leading "AS12345 " prefix if present
+                    org = org.replaceAll("^AS\\d+\\s+", "");
+                    // Build compact geo string: "🇺🇸 Ashburn US · Google LLC"
+                    StringBuilder geo = new StringBuilder(flag).append(" ");
+                    if (!city.isEmpty()) geo.append(city).append(", ");
+                    geo.append(country);
+                    if (!org.isEmpty()) geo.append(" · ").append(org);
+                    geoCache.put(ip, geo.toString());
+                    // Re-broadcast the updated line (with geo now filled in)
+                    broadcastIpAsHost(ip);
+                }
+            } catch (Exception e) { Log.w(TAG, "fetchGeo: " + e.getMessage()); }
+        });
+    }
+
+    /** Broadcast only host lines not yet sent */
+    private void broadcastNewHosts(List<String> lines) {
         List<String> newOnes = new ArrayList<>();
-        for (String h : hosts) {
+        for (String h : lines) {
             if (h == null || h.isEmpty()) continue;
-            if (!broadcastHosts.contains(h)) {
-                broadcastHosts.add(h);
-                newOnes.add(h);
+            // Use the host part (before any geo prefix) as dedup key
+            String key = h.trim();
+            if (!broadcastHosts.contains(key)) {
+                broadcastHosts.add(key);
+                newOnes.add(key);
             }
         }
         if (newOnes.isEmpty()) return;
-
         StringBuilder sb = new StringBuilder();
         for (String h : newOnes) sb.append(h).append("\n");
-
         Intent ev = new Intent(EVENT_ACTION);
         ev.setPackage(getPackageName());
         ev.putExtra(EXTRA_TX_BYTES,  lastTx == TrafficStats.UNSUPPORTED ? -1L : lastTx);
@@ -295,58 +295,49 @@ public class TrafficMonitorService extends Service {
         sendBroadcast(ev);
     }
 
-    // ── /proc/net/tcp reader ─────────────────────────────────────────────────
-    // Read ALL established connections without UID filtering.
-    // Android 10+ restricts per-UID cross-process reads, but reading all rows
-    // (then filtering by UID if possible) is still permitted on most devices.
+    private void sendStatsBroadcast(long tx, long rx, long txRate, long rxRate, String hosts) {
+        Intent ev = new Intent(EVENT_ACTION);
+        ev.setPackage(getPackageName());
+        ev.putExtra(EXTRA_TX_BYTES,  tx == TrafficStats.UNSUPPORTED ? -1L : tx);
+        ev.putExtra(EXTRA_RX_BYTES,  rx == TrafficStats.UNSUPPORTED ? -1L : rx);
+        ev.putExtra(EXTRA_TX_RATE,   txRate);
+        ev.putExtra(EXTRA_RX_RATE,   rxRate);
+        ev.putExtra(EXTRA_HOSTS,     hosts != null ? hosts : "");
+        ev.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
+        sendBroadcast(ev);
+    }
+
+    // ── /proc/net/tcp ─────────────────────────────────────────────────────────
 
     private List<String> readAllEstablishedIps() {
         List<String> ips = new ArrayList<>();
         parseProcNetFile("/proc/net/tcp",  false, ips);
         parseProcNetFile("/proc/net/tcp6", true,  ips);
-        // Remove duplicates while preserving order
         return new ArrayList<>(new LinkedHashSet<>(ips));
     }
 
     private void parseProcNetFile(String path, boolean isIpv6, List<String> out) {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            boolean first = true;
+            String line; boolean first = true;
             while ((line = br.readLine()) != null) {
-                if (first) { first = false; continue; } // skip header
+                if (first) { first = false; continue; }
                 String[] parts = line.trim().split("\\s+");
                 if (parts.length < 4) continue;
-
-                // State: 01 = ESTABLISHED, 06 = TIME_WAIT, 08 = CLOSE_WAIT
                 String state = parts[3];
                 if (!"01".equals(state) && !"06".equals(state) && !"08".equals(state)) continue;
-
-                // If we have UID info (col 7) and are filtering a specific app, apply it
                 if (targetUid != -1 && parts.length >= 8) {
-                    try {
-                        int uid = Integer.parseInt(parts[7]);
-                        if (uid != targetUid) continue;
-                    } catch (Exception ignored) {
-                        // UID column missing or unreadable — include the row anyway
-                    }
+                    try { int uid = Integer.parseInt(parts[7]); if (uid != targetUid) continue; }
+                    catch (Exception ignored) {}
                 }
-
-                // Remote address is column 2: hex_ip:hex_port
                 String remAddr = parts[2];
                 String ip = hexToIp(remAddr, isIpv6);
                 if (ip == null || ip.isEmpty()) continue;
-                // Filter loopback & link-local but KEEP RFC1918 (mobile networks use them)
                 if (ip.startsWith("0.0.0.0") || ip.startsWith("127.") || ip.equals("::1")) continue;
-                // Filter remote port 0 (means no connection)
                 String portHex = remAddr.contains(":") ? remAddr.substring(remAddr.indexOf(':') + 1) : "0";
-                int port = Integer.parseInt(portHex, 16);
-                if (port == 0) continue;
-
+                try { if (Integer.parseInt(portHex, 16) == 0) continue; } catch (Exception ignored) {}
                 out.add(ip);
             }
-        } catch (Exception e) {
-            Log.w(TAG, "parseProcNet " + path + ": " + e.getMessage());
-        }
+        } catch (Exception e) { Log.w(TAG, "parseProcNet " + path + ": " + e.getMessage()); }
     }
 
     private static String hexToIp(String hexAddr, boolean isIpv6) {
@@ -355,21 +346,15 @@ public class TrafficMonitorService extends Service {
             if (colon < 0) return null;
             String hexIp = hexAddr.substring(0, colon);
             if (!isIpv6) {
-                // IPv4 in /proc/net/tcp is little-endian 32-bit hex
                 long val = Long.parseLong(hexIp, 16);
-                return ((val      ) & 0xFF) + "." +
-                       ((val >>  8) & 0xFF) + "." +
-                       ((val >> 16) & 0xFF) + "." +
-                       ((val >> 24) & 0xFF);
+                return ((val)&0xFF)+"."+((val>>8)&0xFF)+"."+((val>>16)&0xFF)+"."+((val>>24)&0xFF);
             } else {
                 if (hexIp.length() < 32) return null;
                 byte[] b = new byte[16];
                 for (int w = 0; w < 4; w++) {
-                    long word = Long.parseLong(hexIp.substring(w * 8, w * 8 + 8), 16);
-                    b[w*4]   = (byte)( word        & 0xFF);
-                    b[w*4+1] = (byte)((word >>  8) & 0xFF);
-                    b[w*4+2] = (byte)((word >> 16) & 0xFF);
-                    b[w*4+3] = (byte)((word >> 24) & 0xFF);
+                    long word = Long.parseLong(hexIp.substring(w*8, w*8+8), 16);
+                    b[w*4]=(byte)(word&0xFF); b[w*4+1]=(byte)((word>>8)&0xFF);
+                    b[w*4+2]=(byte)((word>>16)&0xFF); b[w*4+3]=(byte)((word>>24)&0xFF);
                 }
                 return InetAddress.getByAddress(b).getHostAddress();
             }
@@ -384,47 +369,34 @@ public class TrafficMonitorService extends Service {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(20000);
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(body.getBytes("UTF-8"));
-            }
+            conn.setDoOutput(true); conn.setConnectTimeout(10000); conn.setReadTimeout(20000);
+            try (OutputStream os = conn.getOutputStream()) { os.write(body.getBytes("UTF-8")); }
             int code = conn.getResponseCode();
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()));
+                    code>=200&&code<300 ? conn.getInputStream() : conn.getErrorStream()));
             StringBuilder sb = new StringBuilder(); String line;
-            while ((line = br.readLine()) != null) sb.append(line);
-            br.close();
-            return sb.toString();
+            while ((line=br.readLine())!=null) sb.append(line);
+            br.close(); return sb.toString();
         } catch (Exception e) { return null; }
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-    @Override
-    public void onDestroy() {
-        running = false;
-        handler.removeCallbacks(pollRunnable);
-        ioExec.shutdownNow();
-        super.onDestroy();
+    @Override public void onDestroy() {
+        running = false; handler.removeCallbacks(pollRunnable); ioExec.shutdownNow(); super.onDestroy();
     }
-
     @Override public IBinder onBind(Intent intent) { return null; }
 
     private void createChannel() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        NotificationChannel ch = new NotificationChannel(
-                CHANNEL_ID, "NetWatch Monitor", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "NetWatch Monitor", NotificationManager.IMPORTANCE_LOW);
         nm.createNotificationChannel(ch);
     }
 
     private Notification buildNotification() {
         String text = targetName.isEmpty() ? "Monitoring device traffic" : "Monitoring: " + targetName;
         return new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("🔍 NetWatch Active")
-                .setContentText(text)
-                .setSmallIcon(android.R.drawable.ic_menu_compass)
-                .build();
+                .setContentTitle("🔍 NetWatch Active").setContentText(text)
+                .setSmallIcon(android.R.drawable.ic_menu_compass).build();
     }
 }
