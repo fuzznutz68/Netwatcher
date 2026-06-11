@@ -181,6 +181,22 @@ public class MainActivity extends Activity {
      */
     private void buildResultCards(String intelJson, String probeJson) {
         try {
+            // Check for API-level errors first
+            if (intelJson != null) {
+                JSONObject test = new JSONObject(intelJson);
+                if (test.has("error") && !test.has("dns")) {
+                    addCard("❌ API Error", test.optString("error"), "#EF9A9A");
+                    return;
+                }
+            }
+            if (intelJson == null && probeJson != null) {
+                JSONObject test = new JSONObject(probeJson);
+                if (test.has("error") && !test.has("reachability")) {
+                    addCard("❌ API Error", test.optString("error"), "#EF9A9A");
+                    return;
+                }
+            }
+
             // ── domainIntel results ──────────────────────────────────────────
             if (intelJson != null) {
                 JSONObject intel = new JSONObject(intelJson);
