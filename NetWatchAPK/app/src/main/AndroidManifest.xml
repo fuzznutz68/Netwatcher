@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.netwatch.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Network permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- VPN permission (no root required) -->
-    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +15,6 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
 
-        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -33,7 +26,6 @@
             </intent-filter>
         </activity>
 
-        <!-- VPN Service (no root needed — uses Android VPNService API) -->
         <service
             android:name=".NetWatchVpnService"
             android:exported="false"
@@ -42,12 +34,6 @@
                 <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
-
-        <!-- Foreground service for traffic monitoring -->
-        <service
-            android:name=".TrafficMonitorService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
 
     </application>
 </manifest>

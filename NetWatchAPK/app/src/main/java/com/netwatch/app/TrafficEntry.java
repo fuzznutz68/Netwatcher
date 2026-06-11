@@ -1,14 +1,30 @@
 package com.netwatch.app;
 
 /**
- * Represents a single captured network packet / traffic event.
+ * Represents a single captured traffic event from the VPN tunnel.
  */
 public class TrafficEntry {
-    public String direction;    // "IN" or "OUT"
-    public String protocol;     // "TCP", "UDP", etc.
-    public String remoteIp;     // Remote IP address
-    public String remoteHost;   // Resolved hostname (or IP if unresolvable)
-    public int remotePort;      // Destination/source port
-    public long bytes;          // Payload bytes
-    public String timestamp;    // Human-readable time
+    public final String direction;  // "⬆" outbound | "⬇" inbound
+    public final String protocol;   // TCP / UDP / IP
+    public final String host;       // resolved hostname (may be empty)
+    public final String ipPort;     // IP:port
+    public final int    bytes;      // packet size in bytes
+    public final String timestamp;  // HH:mm:ss
+
+    public TrafficEntry(String direction, String protocol, String host,
+                        String ipPort, int bytes, String timestamp) {
+        this.direction = direction;
+        this.protocol  = protocol;
+        this.host      = host;
+        this.ipPort    = ipPort;
+        this.bytes     = bytes;
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return timestamp + "  " + direction + "  " + protocol + "  " +
+               (host.isEmpty() ? ipPort : host + " (" + ipPort + ")")
+               + "  " + bytes + "B";
+    }
 }
