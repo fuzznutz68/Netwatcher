@@ -4,10 +4,9 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.net.VpnService;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileInputStream;
@@ -32,10 +31,8 @@ public class NetWatchVpnService extends VpnService {
     private ParcelFileDescriptor vpnInterface;
     private volatile boolean     running = false;
     private String               targetDomain = "";
-    private Set<String>          resolvedIPs  = new HashSet<>();
+    private final Set<String>    resolvedIPs  = new HashSet<>();
     private ExecutorService      executor;
-
-    private static final int[] SERVICE_PORTS = {80, 443, 8080, 8443};
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -49,13 +46,20 @@ public class NetWatchVpnService extends VpnService {
             if (targetDomain == null) targetDomain = "";
         }
 
-        // Resolve domain IPs up front
-        resolvedIPs.clear();
+        // Resolve target domain IPs on a background thread
         if (!targetDomain.isEmpty()) {
-            new Thread(() -> resolveTargetDomain(targetDomain)).start();
+            final String domainToResolve = targetDomain;
+            new Thread(() -> resolveTargetDomain(domainToResolve)).start();
         }
 
-        startForeground(NOTIF_ID, buildNotification());
+        // Start foreground — API 34+ requires foreground service type
+        Notification notif = buildNotification();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34
+            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        } else {
+            startForeground(NOTIF_ID, notif);
+        }
+
         executor = Executors.newSingleThreadExecutor();
         executor.execute(this::runVpnLoop);
         return START_STICKY;
@@ -63,7 +67,6 @@ public class NetWatchVpnService extends VpnService {
 
     private void resolveTargetDomain(String domain) {
         try {
-            // Strip wildcard
             String d = domain.startsWith("*.") ? domain.substring(2) : domain;
             InetAddress[] addrs = InetAddress.getAllByName(d);
             for (InetAddress a : addrs) resolvedIPs.add(a.getHostAddress());
@@ -75,11 +78,9 @@ public class NetWatchVpnService extends VpnService {
             Builder builder = new Builder();
             builder.setMtu(1500);
             builder.addAddress("10.0.0.2", 32);
-            builder.addRoute("0.0.0.0", 0);          // capture all IPv4
+            builder.addRoute("0.0.0.0", 0);
             builder.addDnsServer("8.8.8.8");
             builder.setSession("NetWatch");
-
-            // Bypass our own app so we can still reach the backend
             builder.addDisallowedApplication(getPackageName());
 
             vpnInterface = builder.establish();
@@ -88,77 +89,66 @@ public class NetWatchVpnService extends VpnService {
             running = true;
             FileInputStream  in  = new FileInputStream(vpnInterface.getFileDescriptor());
             FileOutputStream out = new FileOutputStream(vpnInterface.getFileDescriptor());
-
-            ByteBuffer packet = ByteBuffer.allocate(32767);
+            ByteBuffer       pkt = ByteBuffer.allocate(32767);
 
             while (running) {
-                packet.clear();
-                int len = in.read(packet.array());
+                pkt.clear();
+                int len = in.read(pkt.array());
                 if (len <= 0) { Thread.sleep(10); continue; }
-                packet.limit(len);
+                pkt.limit(len);
 
-                // Parse IP header
-                byte versionIHL = packet.get(0);
+                byte versionIHL = pkt.get(0);
                 int  version    = (versionIHL >> 4) & 0xF;
-                if (version != 4) { out.write(packet.array(), 0, len); continue; } // forward IPv6 as-is
+                if (version != 4) { out.write(pkt.array(), 0, len); continue; }
 
-                int  ihl        = (versionIHL & 0xF) * 4;
-                byte protocol   = packet.get(9);
-                // Source IP
-                int  srcIp = ((packet.get(12) & 0xFF) << 24) | ((packet.get(13) & 0xFF) << 16)
-                           | ((packet.get(14) & 0xFF) << 8)  |  (packet.get(15) & 0xFF);
-                // Dest IP
-                int  dstIp = ((packet.get(16) & 0xFF) << 24) | ((packet.get(17) & 0xFF) << 16)
-                           | ((packet.get(18) & 0xFF) << 8)  |  (packet.get(19) & 0xFF);
+                int  ihl      = (versionIHL & 0xF) * 4;
+                byte protocol = pkt.get(9);
 
-                String srcAddr = ipIntToString(srcIp);
-                String dstAddr = ipIntToString(dstIp);
+                int srcIp = ((pkt.get(12) & 0xFF) << 24) | ((pkt.get(13) & 0xFF) << 16)
+                          | ((pkt.get(14) & 0xFF) << 8)  |  (pkt.get(15) & 0xFF);
+                int dstIp = ((pkt.get(16) & 0xFF) << 24) | ((pkt.get(17) & 0xFF) << 16)
+                          | ((pkt.get(18) & 0xFF) << 8)  |  (pkt.get(19) & 0xFF);
 
-                int dstPort = 0;
-                int srcPort = 0;
+                String srcAddr = ipToString(srcIp);
+                String dstAddr = ipToString(dstIp);
+
+                int srcPort = 0, dstPort = 0;
                 if ((protocol == 6 || protocol == 17) && len > ihl + 3) {
-                    srcPort = ((packet.get(ihl)     & 0xFF) << 8) | (packet.get(ihl + 1) & 0xFF);
-                    dstPort = ((packet.get(ihl + 2) & 0xFF) << 8) | (packet.get(ihl + 3) & 0xFF);
+                    srcPort = ((pkt.get(ihl)     & 0xFF) << 8) | (pkt.get(ihl + 1) & 0xFF);
+                    dstPort = ((pkt.get(ihl + 2) & 0xFF) << 8) | (pkt.get(ihl + 3) & 0xFF);
                 }
 
-                String protoName = protocol == 6 ? "TCP" : (protocol == 17 ? "UDP" : "IP");
-                boolean isOutbound = srcAddr.equals("10.0.0.2");
+                String protoName  = protocol == 6 ? "TCP" : (protocol == 17 ? "UDP" : "IP");
+                boolean isOutbound = srcAddr.startsWith("10.0.0.");
 
-                // Match against target domain
-                boolean matches = matchesTarget(isOutbound ? dstAddr : srcAddr,
-                                               isOutbound ? dstPort  : srcPort);
+                String matchIp   = isOutbound ? dstAddr : srcAddr;
+                int    matchPort = isOutbound ? dstPort  : srcPort;
 
-                if (matches) {
+                if (matchesTarget(matchIp, matchPort)) {
                     String direction = isOutbound ? "⬆" : "⬇";
-                    String ipPort    = (isOutbound ? dstAddr : srcAddr) + ":" +
-                                       (isOutbound ? dstPort  : srcPort);
+                    String ipPort    = matchIp + ":" + matchPort;
                     broadcastTraffic(direction, protoName, "", ipPort, len);
                 }
 
-                // Forward packet transparently
-                out.write(packet.array(), 0, len);
+                out.write(pkt.array(), 0, len);
             }
 
         } catch (Exception e) {
-            // VPN loop ended
+            // VPN loop ended — expected on stop
         } finally {
             closeVpn();
         }
     }
 
     private boolean matchesTarget(String ip, int port) {
-        if (targetDomain.isEmpty()) return true; // monitor all
-        // Check by resolved IP
-        if (!resolvedIPs.isEmpty()) {
-            return resolvedIPs.contains(ip);
-        }
-        // Fallback: match by port
-        for (int p : SERVICE_PORTS) if (port == p) return true;
-        return false;
+        if (targetDomain.isEmpty()) return true;
+        if (!resolvedIPs.isEmpty())  return resolvedIPs.contains(ip);
+        // Fallback when DNS hasn't resolved yet — show common web ports
+        return port == 80 || port == 443 || port == 8080 || port == 8443;
     }
 
     private void broadcastTraffic(String direction, String protocol,
-                                  String host, String ipPort, int bytes) {
+                                   String host, String ipPort, int bytes) {
         String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
         Intent intent = new Intent(TRAFFIC_ACTION);
         intent.putExtra("direction", direction);
@@ -170,7 +160,7 @@ public class NetWatchVpnService extends VpnService {
         sendBroadcast(intent);
     }
 
-    private static String ipIntToString(int ip) {
+    private static String ipToString(int ip) {
         return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "."
              + ((ip >> 8)  & 0xFF) + "." + (ip & 0xFF);
     }
@@ -191,17 +181,14 @@ public class NetWatchVpnService extends VpnService {
 
     private Notification buildNotification() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel ch = new NotificationChannel(
-                    CHANNEL_ID, "NetWatch VPN", NotificationManager.IMPORTANCE_LOW);
-            nm.createNotificationChannel(ch);
-        }
-        Notification.Builder nb = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                ? new Notification.Builder(this, CHANNEL_ID)
-                : new Notification.Builder(this);
-        return nb.setContentTitle("NetWatch Active")
-                 .setContentText("Monitoring: " + targetDomain)
-                 .setSmallIcon(android.R.drawable.ic_menu_compass)
-                 .build();
+        NotificationChannel ch = new NotificationChannel(
+                CHANNEL_ID, "NetWatch VPN", NotificationManager.IMPORTANCE_LOW);
+        nm.createNotificationChannel(ch);
+
+        return new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("NetWatch Active")
+                .setContentText("Monitoring: " + targetDomain)
+                .setSmallIcon(android.R.drawable.ic_menu_compass)
+                .build();
     }
 }
