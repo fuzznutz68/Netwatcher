@@ -52,7 +52,6 @@ import java.util.concurrent.Executors;
 public class MainActivity extends Activity {
 
     private static final String DOMAIN_INTEL_URL  = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
-    private static final String TRAFFIC_PROBE_URL = "https://superagent-cfb25b3e.base44.app/functions/trafficProbe";
     private static final int    NOTIF_PERM_CODE   = 1002;
 
     // ── Tabs ────────────────────────────────────────────────────────────────
@@ -402,18 +401,17 @@ public class MainActivity extends Activity {
 
         executor.execute(() -> {
             String intelJson = postJson(DOMAIN_INTEL_URL,  "{\"domain\":\"" + domain + "\"}");
-            String probeJson = postJson(TRAFFIC_PROBE_URL, "{\"domain\":\"" + domain + "\"}");
             mainHandler.post(() -> {
                 lookupBtn.setEnabled(true);
-                if (intelJson == null && probeJson == null) {
+                if (intelJson == null) {
                     statusText.setText("❌  Network error");
                     return;
                 }
                 statusText.setText("✅  Scan complete for " + domain);
                 lastDomainForExport    = domain;
                 lastIntelJsonForExport = intelJson != null ? intelJson : "";
-                lastProbeJsonForExport = probeJson != null ? probeJson : "";
-                buildReport(domain, intelJson, probeJson);
+                lastProbeJsonForExport = "";
+                buildReport(domain, intelJson, null);
             });
         });
     }
@@ -453,39 +451,7 @@ public class MainActivity extends Activity {
                 } else addCard("🕵️  Shared-Host", "None found", "#546E7A");
             }
 
-            if (probe != null) {
-                JSONObject tls = probe.optJSONObject("tlsInfo");
-                if (tls != null) {
-                    StringBuilder sb = new StringBuilder();
-                    String issuer = tls.optString("issuer","");
-                    if (!issuer.isEmpty()) sb.append("Issuer:    ").append(issuer).append("\n");
-                    sb.append("Valid:     ").append(tls.optString("notBefore","")).append("\n");
-                    sb.append("Expires:   ").append(tls.optString("notAfter","")).append("\n");
-                    JSONArray dnsNames = tls.optJSONArray("dnsNames");
-                    if (dnsNames != null && dnsNames.length() > 0) {
-                        int show = Math.min(dnsNames.length(), 6);
-                        sb.append("SANs (").append(dnsNames.length()).append("):\n");
-                        for (int i=0;i<show;i++) sb.append("  ").append(dnsNames.optString(i)).append("\n");
-                        if (dnsNames.length()>6) sb.append("  … +").append(dnsNames.length()-6).append(" more");
-                    }
-                    if (sb.length() > 0) addCard("🔒  TLS Certificate", sb.toString().trim(), "#80CBC4");
-                }
-            }
 
-            if (probe != null) {
-                JSONObject reach = probe.optJSONObject("reachability");
-                if (reach != null) {
-                    JSONObject https = reach.optJSONObject("https");
-                    JSONObject http  = reach.optJSONObject("http");
-                    JSONObject active = https != null ? https : http;
-                    if (active != null && active.optBoolean("reachable",false)) {
-                        String sb = "Status:   HTTP " + active.optInt("statusCode") + "\n" +
-                                "Latency:  " + active.optInt("latencyMs") + " ms\n" +
-                                "Final URL: " + active.optString("finalUrl","");
-                        addCard("🌍  Reachability", sb.trim(), "#90CAF9");
-                    }
-                }
-            }
 
         } catch (Exception e) {
             addCard("⚠  Parse Error", e.getMessage(), "#EF9A9A");
@@ -605,27 +571,7 @@ public class MainActivity extends Activity {
                     sb.append("\n");
                 }
             }
-            if (!lastProbeJsonForExport.isEmpty()) {
-                JSONObject probe = new JSONObject(lastProbeJsonForExport);
-                JSONObject tls = probe.optJSONObject("tlsInfo");
-                if (tls != null) {
-                    sb.append("TLS Certificate:\n");
-                    sb.append("  Issuer:  ").append(tls.optString("issuer","")).append("\n");
-                    sb.append("  Valid:   ").append(tls.optString("notBefore","")).append("\n");
-                    sb.append("  Expires: ").append(tls.optString("notAfter","")).append("\n");
-                    sb.append("\n");
-                }
-                JSONObject reach = probe.optJSONObject("reachability");
-                if (reach != null) {
-                    JSONObject https = reach.optJSONObject("https");
-                    if (https != null && https.optBoolean("reachable",false)) {
-                        sb.append("Reachability:\n");
-                        sb.append("  HTTP Status: ").append(https.optInt("statusCode")).append("\n");
-                        sb.append("  Latency:     ").append(https.optInt("latencyMs")).append(" ms\n");
-                        sb.append("\n");
-                    }
-                }
-            }
+
         } catch (Exception e) { sb.append("(parse error: ").append(e.getMessage()).append(")\n"); }
         shareText("NetWatch_" + lastDomainForExport + "_" + ts.replace(" ","_").replace(":","") + ".txt", sb.toString());
     }
