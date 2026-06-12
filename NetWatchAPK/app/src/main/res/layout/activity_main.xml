@@ -49,10 +49,19 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="48dp"
-            android:text="📡 Traffic Monitor"
+            android:text="📡 Traffic"
             android:textColor="#FFFFFF"
             android:background="@drawable/tab_selector"
-            android:textSize="13sp"/>
+            android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabCheckerBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="✅ Checker"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
     </LinearLayout>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -364,6 +373,70 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="8dp"/>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 3 — Domain Checker                        -->
+    <!-- ══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tab3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="12dp">
+
+        <!-- Control row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+            <Button
+                android:id="@+id/checkAllBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="▶  Check All"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/stopCheckBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="■  Stop"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_danger"
+                android:textSize="13sp"
+                android:enabled="false"/>
+        </LinearLayout>
+
+        <!-- Progress / status -->
+        <TextView
+            android:id="@+id/checkStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tap ▶ Check All to test reachability"
+            android:textColor="#90A4AE"
+            android:textSize="12sp"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Results list -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/checkResultsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="4dp"/>
         </ScrollView>
 
     </LinearLayout>

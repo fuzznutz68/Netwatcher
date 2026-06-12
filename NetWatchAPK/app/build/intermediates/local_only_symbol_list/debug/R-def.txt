@@ -8,6 +8,9 @@ drawable input_background
 drawable tab_selector
 id alertSwitch
 id appSpinner
+id checkAllBtn
+id checkResultsContainer
+id checkStatusText
 id clearMonBtn
 id connectionCountText
 id domainInput
@@ -22,10 +25,13 @@ id rxRateText
 id rxTotalText
 id startMonBtn
 id statusText
+id stopCheckBtn
 id stopMonBtn
 id tab1
 id tab2
+id tab3
 id tabBar
+id tabCheckerBtn
 id tabDomainBtn
 id tabTrafficBtn
 id txRateText

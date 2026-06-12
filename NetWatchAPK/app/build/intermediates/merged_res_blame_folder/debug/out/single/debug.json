@@ -1,30 +1,34 @@
 [
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_btn_primary.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/btn_primary.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_input_background.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/input_background.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_tab_selector.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/tab_selector.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/layout_activity_main.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_tab_selector.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/tab_selector.xml"
     },
     {
         "merged": "com.netwatch.app-merged_res-4:/layout_activity_main.xml.flat",
         "source": "com.netwatch.app-main-6:/layout/activity_main.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_ic_launcher.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/ic_launcher.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_btn_danger.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/btn_danger.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_card_background.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/card_background.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_ic_launcher.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/ic_launcher.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_input_background.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/input_background.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_card_background.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/card_background.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_btn_danger.xml.flat",
-        "source": "com.netwatch.app-main-6:/drawable/btn_danger.xml"
+        "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-4:/drawable_btn_primary.xml.flat",
+        "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-main-6:/drawable/btn_primary.xml"
     }
 ]
