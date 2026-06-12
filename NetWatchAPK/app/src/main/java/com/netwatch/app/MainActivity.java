@@ -892,7 +892,7 @@ public class MainActivity extends Activity {
             if (ip != null) {
                 try {
                     // 2. Geo-IP enrichment via ip-api.com (free, no key needed)
-                    java.net.URL geoUrl = new java.net.URL("http://ip-api.com/json/" + ip + "?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,query");
+                    java.net.URL geoUrl = new java.net.URL("https://ip-api.com/json/" + ip + "?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,query");
                     java.net.HttpURLConnection gc = (java.net.HttpURLConnection) geoUrl.openConnection();
                     gc.setConnectTimeout(6000); gc.setReadTimeout(6000);
                     java.io.InputStream gis = gc.getInputStream();
