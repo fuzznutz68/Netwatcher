@@ -541,6 +541,7 @@ com.netwatch.app:style/Base.Animation.AppCompat.Tooltip = 0x7f0d000a
 com.netwatch.app:drawable/abc_list_divider_material = 0x7f070024
 com.netwatch.app:dimen/abc_edit_text_inset_bottom_material = 0x7f06002c
 com.netwatch.app:drawable/abc_textfield_search_activated_mtrl_alpha = 0x7f07004b
+com.netwatch.app:xml/file_provider_paths = 0x7f0f0000
 com.netwatch.app:color/abc_background_cache_hint_selector_material_dark = 0x7f050000
 com.netwatch.app:drawable/abc_ic_voice_search_api_material = 0x7f070021
 com.netwatch.app:drawable/btn_danger = 0x7f070053
