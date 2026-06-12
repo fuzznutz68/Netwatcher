@@ -137,6 +137,7 @@ public class MainActivity extends Activity {
         tabDomainBtn  = findViewById(R.id.tabDomainBtn);
         tabTrafficBtn = findViewById(R.id.tabTrafficBtn);
         tabCheckerBtn = findViewById(R.id.tabCheckerBtn);
+        tabMyInfoBtn  = findViewById(R.id.tabMyInfoBtn);
         tab1          = findViewById(R.id.tab1);
         tab2          = findViewById(R.id.tab2);
         tabDomainBtn.setSelected(true);
