@@ -72,6 +72,7 @@ public class TrafficMonitorService extends Service {
     private final Set<String> submittedIps    = Collections.synchronizedSet(new HashSet<>());
     // IPs already submitted for Geo lookup (batch pending)
     private final Set<String> geoSubmitted    = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> submittedDomains = Collections.synchronizedSet(new HashSet<>());
     // Full host lines already broadcast to avoid duplicates
     private final Set<String> broadcastHosts  = Collections.synchronizedSet(new HashSet<>());
 
@@ -105,7 +106,7 @@ public class TrafficMonitorService extends Service {
         }
 
         dnsCache.clear(); geoCache.clear();
-        submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear();
+        submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
         lastTx = TrafficStats.UNSUPPORTED;
         lastRx = TrafficStats.UNSUPPORTED;
         running = true;
@@ -163,6 +164,83 @@ public class TrafficMonitorService extends Service {
         String tld = parts[0]; String name = parts[1];
         if ("com".equals(tld) || "org".equals(tld) || "io".equals(tld)) return name + ".com";
         return name + "." + tld;
+    }
+
+    // ── Companion-domain map ──────────────────────────────────────────────────
+    // Maps package-name substrings → additional domains the app is known to use.
+    // Also used as an org-name → domain lookup when geo data comes back.
+    private static final java.util.LinkedHashMap<String, String[]> COMPANION_DOMAINS;
+    static {
+        COMPANION_DOMAINS = new java.util.LinkedHashMap<>();
+        // OpenAI / ChatGPT
+        COMPANION_DOMAINS.put("openai",         new String[]{"openai.com","oaiusercontent.com","oaidatastatic.com","chatgpt.com","cdn.openai.com","auth0.openai.com"});
+        // Google
+        COMPANION_DOMAINS.put("google",         new String[]{"google.com","googleapis.com","gstatic.com","googleusercontent.com","googlevideo.com","ggpht.com","googleadservices.com"});
+        // YouTube
+        COMPANION_DOMAINS.put("youtube",        new String[]{"youtube.com","youtu.be","ytimg.com","ggpht.com","googlevideo.com","googleapis.com"});
+        // Meta / Facebook / Instagram
+        COMPANION_DOMAINS.put("facebook",       new String[]{"facebook.com","fbcdn.net","instagram.com","whatsapp.com","cdninstagram.com","fb.com"});
+        COMPANION_DOMAINS.put("instagram",      new String[]{"instagram.com","cdninstagram.com","fbcdn.net","facebook.com"});
+        COMPANION_DOMAINS.put("whatsapp",       new String[]{"whatsapp.com","whatsapp.net","fbcdn.net"});
+        // Microsoft
+        COMPANION_DOMAINS.put("microsoft",      new String[]{"microsoft.com","live.com","office.com","office365.com","microsoftonline.com","azure.com","azureedge.net","bing.com","msn.com","msocdn.com","skype.com","teams.microsoft.com"});
+        COMPANION_DOMAINS.put("teams",          new String[]{"teams.microsoft.com","microsoft.com","live.com","skype.com","microsoftonline.com"});
+        // Twitter / X
+        COMPANION_DOMAINS.put("twitter",        new String[]{"twitter.com","x.com","t.co","twimg.com","abs.twimg.com"});
+        // TikTok / ByteDance
+        COMPANION_DOMAINS.put("tiktok",         new String[]{"tiktok.com","tiktokcdn.com","muscdn.com","musical.ly","byteoversea.com","bytecdn.com"});
+        // Snapchat
+        COMPANION_DOMAINS.put("snapchat",       new String[]{"snapchat.com","sc-cdn.net","snap.com","snapkit.com"});
+        // Telegram
+        COMPANION_DOMAINS.put("telegram",       new String[]{"telegram.org","t.me","telesco.pe"});
+        // Netflix
+        COMPANION_DOMAINS.put("netflix",        new String[]{"netflix.com","nflxvideo.net","nflximg.net","nflxext.com","netflixdns.net"});
+        // Spotify
+        COMPANION_DOMAINS.put("spotify",        new String[]{"spotify.com","scdn.co","spotifycdn.com","audio-sp.spotify.com"});
+        // Amazon
+        COMPANION_DOMAINS.put("amazon",         new String[]{"amazon.com","amazonaws.com","cloudfront.net","ssl-images-amazon.com","media-amazon.com","primevideo.com"});
+        // Apple
+        COMPANION_DOMAINS.put("apple",          new String[]{"apple.com","icloud.com","mzstatic.com","aaplimg.com","cdn-apple.com","appleid.apple.com"});
+        // Reddit
+        COMPANION_DOMAINS.put("reddit",         new String[]{"reddit.com","redd.it","redditmedia.com","redditstatic.com","reddituploads.com"});
+        // Discord
+        COMPANION_DOMAINS.put("discord",        new String[]{"discord.com","discordapp.com","discordcdn.com","discord.gg"});
+        // LinkedIn
+        COMPANION_DOMAINS.put("linkedin",       new String[]{"linkedin.com","licdn.com"});
+        // Twitch
+        COMPANION_DOMAINS.put("twitch",         new String[]{"twitch.tv","twitchapps.com","jtvnw.net","twitchsvc.net","amazonaws.com"});
+        // GitHub
+        COMPANION_DOMAINS.put("github",         new String[]{"github.com","githubusercontent.com","githubassets.com","github.io"});
+        // Cloudflare
+        COMPANION_DOMAINS.put("cloudflare",     new String[]{"cloudflare.com","cloudflare-dns.com","1.1.1.1","1.0.0.1"});
+    }
+
+    /** Return all companion domains for a given package name. */
+    private static List<String> companionDomainsForPackage(String pkg) {
+        List<String> result = new ArrayList<>();
+        if (pkg == null) return result;
+        String lc = pkg.toLowerCase(java.util.Locale.US);
+        for (java.util.Map.Entry<String, String[]> e : COMPANION_DOMAINS.entrySet()) {
+            if (lc.contains(e.getKey())) {
+                for (String d : e.getValue()) result.add(d);
+            }
+        }
+        return result;
+    }
+
+    /** Return companion domains that match the given org string (from Geo-IP). */
+    private List<String> companionDomainsForOrg(String org) {
+        List<String> result = new ArrayList<>();
+        if (org == null || org.isEmpty()) return result;
+        String lc = org.toLowerCase(java.util.Locale.US);
+        for (java.util.Map.Entry<String, String[]> e : COMPANION_DOMAINS.entrySet()) {
+            if (lc.contains(e.getKey())) {
+                for (String d : e.getValue()) {
+                    if (!submittedDomains.contains(d)) result.add(d);
+                }
+            }
+        }
+        return result;
     }
 
     // ── Poll loop ─────────────────────────────────────────────────────────────
@@ -278,6 +356,30 @@ public class TrafficMonitorService extends Service {
                     geoCache.put(ip, geo.toString());
                     // Re-broadcast the updated line (with geo now filled in)
                     broadcastIpAsHost(ip);
+
+                    // Org-based companion domain expansion:
+                    // If the org matches a known provider (e.g. "OpenAI"), seed their
+                    // companion domains so we catch CDN/asset hosts like oaiusercontent.com
+                    if (!org.isEmpty()) {
+                        List<String> orgCompanions = companionDomainsForOrg(org);
+                        if (!orgCompanions.isEmpty()) {
+                            for (String cd : orgCompanions) {
+                                submittedDomains.add(cd);
+                                final String dom = cd;
+                                ioExec.submit(() -> {
+                                    try {
+                                        InetAddress[] addrs = InetAddress.getAllByName(dom);
+                                        for (InetAddress addr : addrs) {
+                                            String cdIp = addr.getHostAddress();
+                                            dnsCache.put(cdIp, dom);
+                                            submittedIps.add(cdIp);
+                                        }
+                                    } catch (Exception ignored) {}
+                                });
+                            }
+                            broadcastNewHosts(orgCompanions);
+                        }
+                    }
                 }
             } catch (Exception e) { Log.w(TAG, "fetchGeo: " + e.getMessage()); }
         });
