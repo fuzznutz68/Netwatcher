@@ -959,6 +959,8 @@ public class MainActivity extends Activity {
             {"Telegram",          "telegram.org"},
             {"LinkedIn",          "linkedin.com"},
             {"TikTok",            "tiktok.com"},
+            {"Reddit",            "reddit.com"},
+            {"Disqus",            "disqus.com"},
         });
         CHECKER_DOMAINS.put("🔴 Streaming", new String[][]{
             {"Netflix",           "netflix.com"},
