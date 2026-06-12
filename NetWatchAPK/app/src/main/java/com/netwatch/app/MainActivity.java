@@ -449,7 +449,7 @@ public class MainActivity extends Activity {
         TextView hostView = new TextView(this);
         hostView.setText(host);
         hostView.setTextSize(isIp ? 12 : 14);
-        hostView.setTextColor(Color.parseColor(isUnknown ? "#FF8A80" : (isIp ? "#90A4AE" : "#E3F2FD")));
+        hostView.setTextColor(Color.parseColor(isUnknown ? "#FF8A80" : (isIp ? "#90A4AE" : "#C8D8E8")));
         hostView.setTypeface(Typeface.MONOSPACE, isIp ? Typeface.NORMAL : Typeface.BOLD);
         hostView.setLayoutParams(new LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
@@ -484,7 +484,7 @@ public class MainActivity extends Activity {
                 // Recolor this row to trusted
                 row.setBackgroundColor(Color.TRANSPARENT);
                 dot.setTextColor(Color.parseColor(active ? "#66BB6A" : "#546E7A"));
-                hostView.setTextColor(Color.parseColor("#E3F2FD"));
+                hostView.setTextColor(Color.parseColor("#C8D8E8"));
                 badge.setVisibility(android.view.View.GONE);
                 trustBtn.setVisibility(android.view.View.GONE);
                 showToast("✓ Trusted: " + root);
@@ -679,7 +679,7 @@ public class MainActivity extends Activity {
         LinearLayout card = makeCardContainer();
         TextView title = new TextView(this);
         title.setText("🌿  SUBDOMAINS  (" + subs.length() + ")");
-        title.setTextSize(11); title.setTextColor(Color.parseColor("#64B5F6"));
+        title.setTextSize(11); title.setTextColor(Color.parseColor("#00E5FF"));
         title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
         card.addView(title);
         try {
@@ -720,7 +720,7 @@ public class MainActivity extends Activity {
         LinearLayout card = makeCardContainer();
         TextView t = new TextView(this);
         t.setText(title.toUpperCase()); t.setTextSize(11);
-        t.setTextColor(Color.parseColor("#64B5F6")); t.setTypeface(null, Typeface.BOLD);
+        t.setTextColor(Color.parseColor("#00E5FF")); t.setTypeface(null, Typeface.BOLD);
         t.setPadding(0,0,0,dp(5)); card.addView(t);
         TextView v = new TextView(this);
         v.setText(value); v.setTextSize(14);
@@ -873,7 +873,7 @@ public class MainActivity extends Activity {
     private void lookupMyInfo() {
         myInfoContainer.removeAllViews();
         // Show a loading card
-        addMyInfoRow("⏳ Looking up your public IP…", "", "#1E2A3A");
+        addMyInfoRow("⏳ Looking up your public IP…", "", "#0D1117");
         myInfoRefreshBtn.setEnabled(false);
 
         new Thread(() -> {
@@ -940,10 +940,10 @@ public class MainActivity extends Activity {
                 myInfoRefreshBtn.setEnabled(true);
 
                 // ── Public IP card ──
-                addMyInfoCard("🔌  Public IP Address", fIp, "#1A237E", "#7986CB");
+                addMyInfoCard("🔌  Public IP Address", fIp, "#001020", "#00E5FF");
 
                 if (resolvedIp == null) {
-                    addMyInfoRow("Could not reach the internet. Check your connection.", "", "#1E2A3A");
+                    addMyInfoRow("Could not reach the internet. Check your connection.", "", "#0D1117");
                     return;
                 }
 
@@ -954,7 +954,7 @@ public class MainActivity extends Activity {
                     if (ispSb.length() > 0) ispSb.append("\n");
                     ispSb.append("Org:  ").append(fOrg);
                 }
-                if (ispSb.length() > 0) addMyInfoCard("🏢  Provider", ispSb.toString(), "#1B5E20", "#81C784");
+                if (ispSb.length() > 0) addMyInfoCard("🏢  Provider", ispSb.toString(), "#001A0E", "#00FF88");
 
                 // ── Location card ──
                 StringBuilder locSb = new StringBuilder();
@@ -966,10 +966,10 @@ public class MainActivity extends Activity {
                     if (locSb.length()>0) locSb.append("\n");
                     locSb.append("Coords:    ").append(fLat).append(", ").append(fLon);
                 }
-                if (locSb.length() > 0) addMyInfoCard("📍  Geolocation", locSb.toString(), "#4A148C", "#CE93D8");
+                if (locSb.length() > 0) addMyInfoCard("📍  Geolocation", locSb.toString(), "#0A0020", "#B060FF");
 
                 // ── Timezone card ──
-                if (!fTz.isEmpty()) addMyInfoCard("🕐  Timezone", fTz, "#1A3A2A", "#80CBC4");
+                if (!fTz.isEmpty()) addMyInfoCard("🕐  Timezone", fTz, "#0A1A12", "#00E5CC");
 
                 // ── Maps shortcut ──
                 if (!fLat.isEmpty() && !fLon.isEmpty() && !fLat.equals("0.0")) {
@@ -1180,7 +1180,7 @@ public class MainActivity extends Activity {
             // Category header
             TextView header = new TextView(this);
             header.setText(cat.getKey());
-            header.setTextColor(Color.parseColor("#64B5F6"));
+            header.setTextColor(Color.parseColor("#00E5FF"));
             header.setTextSize(12f);
             header.setTypeface(null, Typeface.BOLD);
             LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(
@@ -1217,7 +1217,7 @@ public class MainActivity extends Activity {
                 info.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
                 TextView labelView = new TextView(this);
                 labelView.setText(label);
-                labelView.setTextColor(Color.parseColor("#E3F2FD"));
+                labelView.setTextColor(Color.parseColor("#C8D8E8"));
                 labelView.setTextSize(13f);
                 TextView hostView = new TextView(this);
                 hostView.setText(host);
@@ -1248,7 +1248,7 @@ public class MainActivity extends Activity {
         checkRunning.set(true);
         checkAllBtn.setEnabled(false);
         stopCheckBtn.setEnabled(true);
-        checkStatusText.setTextColor(Color.parseColor("#64B5F6"));
+        checkStatusText.setTextColor(Color.parseColor("#00E5FF"));
 
         // Reset all to pending
         for (Map.Entry<String, TextView> e : checkerStatusViews.entrySet()) {
@@ -1391,7 +1391,7 @@ public class MainActivity extends Activity {
                 TextView header = new TextView(this);
                 header.setTag("custom_header");
                 header.setText("🔎  Custom Checks");
-                header.setTextColor(Color.parseColor("#64B5F6"));
+                header.setTextColor(Color.parseColor("#00E5FF"));
                 header.setTextSize(12f);
                 header.setTypeface(null, android.graphics.Typeface.BOLD);
                 header.setAllCaps(true);
@@ -1425,7 +1425,7 @@ public class MainActivity extends Activity {
             info.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
             TextView labelView = new TextView(this);
             labelView.setText(host);
-            labelView.setTextColor(Color.parseColor("#E3F2FD"));
+            labelView.setTextColor(Color.parseColor("#C8D8E8"));
             labelView.setTextSize(13f);
             TextView typeView = new TextView(this);
             typeView.setText(host.matches("\\d+\\.\\d+\\.\\d+\\.\\d+") ? "IP Address" : "Domain");
@@ -1451,7 +1451,7 @@ public class MainActivity extends Activity {
         final TextView fDot    = dotView;
 
         checkStatusText.setText("Checking " + host + "…");
-        checkStatusText.setTextColor(Color.parseColor("#64B5F6"));
+        checkStatusText.setTextColor(Color.parseColor("#00E5FF"));
 
         executor.execute(() -> {
             long[] result = probeHost(host);

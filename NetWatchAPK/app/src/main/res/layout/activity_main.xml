@@ -4,28 +4,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#060F1E">
+    android:background="#0A0E17">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#0A1628"
+        android:background="#0D1117"
         android:padding="16dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🛡 NetWatch"
-            android:textSize="22sp"
-            android:textColor="#E3F2FD"
-            android:textStyle="bold"/>
+            android:text="◈ NETWATCH"
+            android:textSize="20sp"
+            android:textColor="#00E5FF"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.15"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Domain Intelligence &amp; Traffic Monitor"
-            android:textSize="12sp"
-            android:textColor="#90A4AE"/>
+            android:text="// domain intelligence &amp; traffic monitor"
+            android:textSize="11sp"
+            android:textColor="#2A4A5A"
+            android:fontFamily="monospace"/>
     </LinearLayout>
 
     <!-- Tab Bar -->
@@ -34,14 +37,14 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:orientation="horizontal"
-        android:background="#0A1628">
+        android:background="#0D1117">
         <Button
             android:id="@+id/tabDomainBtn"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="48dp"
             android:text="🔍 Domain Intel"
-            android:textColor="#FFFFFF"
+            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
             android:textSize="13sp"/>
         <Button
@@ -50,7 +53,7 @@
             android:layout_weight="1"
             android:layout_height="48dp"
             android:text="📡 Traffic"
-            android:textColor="#FFFFFF"
+            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
             android:textSize="12sp"/>
         <Button
@@ -59,7 +62,7 @@
             android:layout_weight="1"
             android:layout_height="48dp"
             android:text="✅ Checker"
-            android:textColor="#FFFFFF"
+            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
             android:textSize="12sp"/>
         <Button
@@ -68,7 +71,7 @@
             android:layout_weight="1"
             android:layout_height="48dp"
             android:text="🌐 My Info"
-            android:textColor="#FFFFFF"
+            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
             android:textSize="12sp"/>
     </LinearLayout>
@@ -98,7 +101,7 @@
                     android:layout_weight="1"
                     android:layout_height="48dp"
                     android:hint="Enter domain (e.g. paypal.com)"
-                    android:textColor="#E3F2FD"
+                    android:textColor="#00E5FF"
                     android:textColorHint="#546E7A"
                     android:background="@drawable/input_background"
                     android:paddingLeft="12dp"
@@ -113,7 +116,7 @@
                     android:layout_height="48dp"
                     android:layout_marginLeft="8dp"
                     android:text="SCAN"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_primary"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"/>
@@ -137,7 +140,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:text="⬆ Export"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_primary"
                     android:textSize="12sp"
                     android:paddingLeft="14dp"
@@ -177,7 +180,7 @@
                 android:layout_height="wrap_content"
                 android:text="SELECT APP TO MONITOR"
                 android:textSize="11sp"
-                android:textColor="#64B5F6"
+                android:textColor="#00E5FF"
                 android:textAllCaps="true"
                 android:layout_marginBottom="6dp"/>
 
@@ -205,7 +208,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="&#128276;  Alert on unknown hosts"
-                    android:textColor="#B0BEC5"
+                    android:textColor="#6A7A8A"
                     android:textSize="13sp"/>
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/alertSwitch"
@@ -225,7 +228,7 @@
                     android:layout_weight="1"
                     android:layout_height="44dp"
                     android:text="▶  START"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_primary"
                     android:textSize="13sp"/>
                 <Button
@@ -235,7 +238,7 @@
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
                     android:text="■  STOP"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_danger"
                     android:textSize="13sp"
                     android:enabled="false"/>
@@ -245,7 +248,7 @@
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
                     android:text="🗑"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_danger"
                     android:textSize="16sp"/>
                 <Button
@@ -254,7 +257,7 @@
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
                     android:text="⬆ Export"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E0E8F0"
                     android:background="@drawable/btn_primary"
                     android:textSize="12sp"
                     android:paddingLeft="14dp"
@@ -281,7 +284,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textColor="#64B5F6"
+                android:textColor="#00E5FF"
                 android:textSize="12sp"/>
         </LinearLayout>
 
@@ -367,7 +370,7 @@
                 android:layout_height="wrap_content"
                 android:text="LIVE CONNECTION HOSTS"
                 android:textSize="11sp"
-                android:textColor="#64B5F6"
+                android:textColor="#00E5FF"
                 android:textAllCaps="true"/>
         </LinearLayout>
 
@@ -411,7 +414,7 @@
                 android:layout_height="42dp"
                 android:hint="Enter domain or IP…"
                 android:textColorHint="#546E7A"
-                android:textColor="#E3F2FD"
+                android:textColor="#00E5FF"
                 android:textSize="13sp"
                 android:background="@drawable/input_background"
                 android:paddingStart="10dp"
@@ -425,7 +428,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="42dp"
                 android:text="Check"
-                android:textColor="#FFFFFF"
+                android:textColor="#E0E8F0"
                 android:background="@drawable/btn_primary"
                 android:textSize="13sp"
                 android:paddingStart="16dp"
@@ -444,7 +447,7 @@
                 android:layout_weight="1"
                 android:layout_height="42dp"
                 android:text="▶  Check All"
-                android:textColor="#FFFFFF"
+                android:textColor="#E0E8F0"
                 android:background="@drawable/btn_primary"
                 android:textSize="13sp"
                 android:layout_marginEnd="6dp"/>
@@ -454,7 +457,7 @@
                 android:layout_weight="1"
                 android:layout_height="42dp"
                 android:text="■  Stop"
-                android:textColor="#FFFFFF"
+                android:textColor="#E0E8F0"
                 android:background="@drawable/btn_danger"
                 android:textSize="13sp"
                 android:enabled="false"/>
@@ -466,7 +469,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tap ▶ Check All to test reachability"
-            android:textColor="#90A4AE"
+            android:textColor="#4A5A6A"
             android:textSize="12sp"
             android:layout_marginBottom="10dp"/>
 
@@ -512,7 +515,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Your public IP address, ISP, and location as seen from the internet."
-                android:textColor="#90A4AE"
+                android:textColor="#4A5A6A"
                 android:textSize="12sp"
                 android:layout_marginBottom="16dp"/>
 
@@ -522,7 +525,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:text="▶  Lookup My Info"
-                android:textColor="#FFFFFF"
+                android:textColor="#E0E8F0"
                 android:background="@drawable/btn_primary"
                 android:layout_marginBottom="16dp"/>
 
