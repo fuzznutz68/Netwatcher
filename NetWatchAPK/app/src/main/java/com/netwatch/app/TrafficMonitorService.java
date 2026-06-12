@@ -168,14 +168,28 @@ public class TrafficMonitorService extends Service {
     // ── Poll loop ─────────────────────────────────────────────────────────────
 
     private void poll() {
-        // TrafficStats
+        // TrafficStats — prefer per-UID, fall back to device total for whole-device mode
         long tx, rx;
-        if (targetUid == -1) { tx = TrafficStats.getTotalTxBytes(); rx = TrafficStats.getTotalRxBytes(); }
-        else { tx = TrafficStats.getUidTxBytes(targetUid); rx = TrafficStats.getUidRxBytes(targetUid); }
+        if (targetUid == -1) {
+            tx = TrafficStats.getTotalTxBytes();
+            rx = TrafficStats.getTotalRxBytes();
+        } else {
+            tx = TrafficStats.getUidTxBytes(targetUid);
+            rx = TrafficStats.getUidRxBytes(targetUid);
+            // Some devices return UNSUPPORTED for UID stats — fall back gracefully
+            if (tx == TrafficStats.UNSUPPORTED || tx < 0) {
+                tx = TrafficStats.getTotalTxBytes();
+                rx = TrafficStats.getTotalRxBytes();
+            }
+        }
+        // Sanitize
+        if (tx < 0) tx = TrafficStats.UNSUPPORTED;
+        if (rx < 0) rx = TrafficStats.UNSUPPORTED;
 
         long txRate = 0, rxRate = 0;
         if (lastTx != TrafficStats.UNSUPPORTED && tx != TrafficStats.UNSUPPORTED && lastTx >= 0 && tx >= 0) {
-            txRate = Math.max(0, tx - lastTx); rxRate = Math.max(0, rx - lastRx);
+            txRate = Math.max(0, tx - lastTx);
+            rxRate = Math.max(0, rx - lastRx);
         }
         lastTx = tx; lastRx = rx;
 
