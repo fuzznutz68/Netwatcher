@@ -271,19 +271,10 @@ public class MainActivity extends Activity {
             entries.add(new AppEntry("📱  Whole Device", "", -1));
 
             for (ApplicationInfo ai : apps) {
-                // Skip system apps with no internet activity (keeps list manageable)
-                // Include: user apps + system apps that use INTERNET permission
-                try {
-                    String[] perms = pm.getPackageInfo(ai.packageName,
-                            PackageManager.GET_PERMISSIONS).requestedPermissions;
-                    boolean hasInternet = false;
-                    if (perms != null) {
-                        for (String p : perms) {
-                            if ("android.permission.INTERNET".equals(p)) { hasInternet = true; break; }
-                        }
-                    }
-                    if (!hasInternet) continue;
-                } catch (Exception ignored) { continue; }
+                // Only show apps that have a launcher icon (appear in the app drawer).
+                // This filters out background services, daemons, and Android internals.
+                Intent launchIntent = pm.getLaunchIntentForPackage(ai.packageName);
+                if (launchIntent == null) continue;
 
                 String label = pm.getApplicationLabel(ai).toString();
                 entries.add(new AppEntry(label, ai.packageName, ai.uid));
