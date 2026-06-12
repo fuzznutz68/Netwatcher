@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
 
     // ── Tabs ────────────────────────────────────────────────────────────────
     private View   tab1, tab2;
-    private Button tabDomainBtn, tabTrafficBtn, tabCheckerBtn;
+    private Button tabDomainBtn, tabTrafficBtn, tabCheckerBtn, tabMyInfoBtn;
 
     // ── Tab 1 – Domain Intel ────────────────────────────────────────────────
     private EditText     domainInput;
@@ -103,12 +103,14 @@ public class MainActivity extends Activity {
     private String lastIntelJsonForExport = "";
     private String lastProbeJsonForExport = "";
 
-    private Button       exportDomainBtn, exportTrafficBtn;
+    private Button       exportDomainBtn, exportTrafficBtn, myInfoRefreshBtn;
+    private LinearLayout myInfoContainer;
     private SwitchCompat alertSwitch;
     private boolean      alertsEnabled  = true;
 
     // --- Tab 3: Domain Checker ---
     private LinearLayout  tab3;
+    private View           tab4;
     private Button        checkAllBtn, stopCheckBtn;
     private TextView      checkStatusText;
     private LinearLayout  checkResultsContainer;
@@ -141,6 +143,7 @@ public class MainActivity extends Activity {
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
+        tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
 
         // Tab 1
         domainInput      = findViewById(R.id.domainInput);
@@ -165,6 +168,9 @@ public class MainActivity extends Activity {
 
         // Tab 3
         tab3                = findViewById(R.id.tab3);
+        tab4                = findViewById(R.id.tab4);
+        myInfoContainer     = findViewById(R.id.myInfoContainer);
+        myInfoRefreshBtn    = findViewById(R.id.myInfoRefreshBtn);
         checkAllBtn         = findViewById(R.id.checkAllBtn);
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
         checkStatusText     = findViewById(R.id.checkStatusText);
@@ -177,6 +183,7 @@ public class MainActivity extends Activity {
         exportTrafficBtn   = findViewById(R.id.exportTrafficBtn);
         alertSwitch        = findViewById(R.id.alertSwitch);
         exportDomainBtn.setOnClickListener(v -> exportDomainIntel());
+        myInfoRefreshBtn.setOnClickListener(v -> lookupMyInfo());
         exportTrafficBtn.setOnClickListener(v -> exportTrafficLog());
 
         // Restore alert toggle preference
@@ -860,12 +867,173 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Tab 4 – My Network Info ──────────────────────────────────────────────
+
+    private void lookupMyInfo() {
+        myInfoContainer.removeAllViews();
+        // Show a loading card
+        addMyInfoRow("⏳ Looking up your public IP…", "", "#1E2A3A");
+        myInfoRefreshBtn.setEnabled(false);
+
+        new Thread(() -> {
+            String ip = null; String isp = ""; String org = "";
+            String city = ""; String region = ""; String country = ""; String flag = "🌐";
+            String lat = ""; String lon = ""; String timezone = ""; String zip = "";
+            try {
+                // 1. Get public IP via ipify
+                java.net.URL ipUrl = new java.net.URL("https://api.ipify.org");
+                java.net.HttpURLConnection ipConn = (java.net.HttpURLConnection) ipUrl.openConnection();
+                ipConn.setConnectTimeout(5000); ipConn.setReadTimeout(5000);
+                java.io.InputStream ipIs = ipConn.getInputStream();
+                ip = new String(ipIs.readAllBytes(), "UTF-8").trim();
+                ipConn.disconnect();
+            } catch (Exception e) { ip = null; }
+
+            if (ip != null) {
+                try {
+                    // 2. Geo-IP enrichment via ip-api.com (free, no key needed)
+                    java.net.URL geoUrl = new java.net.URL("http://ip-api.com/json/" + ip + "?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,query");
+                    java.net.HttpURLConnection gc = (java.net.HttpURLConnection) geoUrl.openConnection();
+                    gc.setConnectTimeout(6000); gc.setReadTimeout(6000);
+                    java.io.InputStream gis = gc.getInputStream();
+                    String geoJson = new String(gis.readAllBytes(), "UTF-8").trim();
+                    gc.disconnect();
+                    org.json.JSONObject g = new org.json.JSONObject(geoJson);
+                    if ("success".equals(g.optString("status"))) {
+                        isp      = g.optString("isp", "");
+                        org      = g.optString("org", "");
+                        city     = g.optString("city", "");
+                        region   = g.optString("regionName", "");
+                        country  = g.optString("country", "");
+                        zip      = g.optString("zip", "");
+                        lat      = String.valueOf(g.optDouble("lat", 0));
+                        lon      = String.valueOf(g.optDouble("lon", 0));
+                        timezone = g.optString("timezone", "");
+                        String cc = g.optString("countryCode", "");
+                        // Convert country code to flag emoji
+                        if (cc.length() == 2) {
+                            int f1 = 0x1F1E6 + (cc.charAt(0) - 'A');
+                            int f2 = 0x1F1E6 + (cc.charAt(1) - 'A');
+                            flag = new String(Character.toChars(f1)) + new String(Character.toChars(f2));
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            final String resolvedIp = ip;
+            final String fIp = resolvedIp != null ? resolvedIp : "Unable to determine";
+            final String fIsp = isp; final String fOrg = org;
+            final String fCity = city; final String fRegion = region;
+            final String fCountry = country; final String fFlag = flag;
+            final String fLat = lat; final String fLon = lon;
+            final String fTz = timezone; final String fZip = zip;
+
+            runOnUiThread(() -> {
+                myInfoContainer.removeAllViews();
+                myInfoRefreshBtn.setEnabled(true);
+
+                // ── Public IP card ──
+                addMyInfoCard("🔌  Public IP Address", fIp, "#1A237E", "#7986CB");
+
+                if (resolvedIp == null) {
+                    addMyInfoRow("Could not reach the internet. Check your connection.", "", "#1E2A3A");
+                    return;
+                }
+
+                // ── ISP / Org card ──
+                StringBuilder ispSb = new StringBuilder();
+                if (!fIsp.isEmpty()) ispSb.append("ISP:  ").append(fIsp);
+                if (!fOrg.isEmpty() && !fOrg.equals(fIsp)) {
+                    if (ispSb.length() > 0) ispSb.append("\n");
+                    ispSb.append("Org:  ").append(fOrg);
+                }
+                if (ispSb.length() > 0) addMyInfoCard("🏢  Provider", ispSb.toString(), "#1B5E20", "#81C784");
+
+                // ── Location card ──
+                StringBuilder locSb = new StringBuilder();
+                if (!fCity.isEmpty()) locSb.append("City:      ").append(fCity);
+                if (!fZip.isEmpty()) { if (locSb.length()>0) locSb.append("\n"); locSb.append("ZIP:       ").append(fZip); }
+                if (!fRegion.isEmpty()) { if (locSb.length()>0) locSb.append("\n"); locSb.append("Region:    ").append(fRegion); }
+                if (!fCountry.isEmpty()) { if (locSb.length()>0) locSb.append("\n"); locSb.append("Country:   ").append(fFlag).append("  ").append(fCountry); }
+                if (!fLat.isEmpty() && !fLon.isEmpty() && !fLat.equals("0.0")) {
+                    if (locSb.length()>0) locSb.append("\n");
+                    locSb.append("Coords:    ").append(fLat).append(", ").append(fLon);
+                }
+                if (locSb.length() > 0) addMyInfoCard("📍  Geolocation", locSb.toString(), "#4A148C", "#CE93D8");
+
+                // ── Timezone card ──
+                if (!fTz.isEmpty()) addMyInfoCard("🕐  Timezone", fTz, "#1A3A2A", "#80CBC4");
+
+                // ── Maps shortcut ──
+                if (!fLat.isEmpty() && !fLon.isEmpty() && !fLat.equals("0.0")) {
+                    Button mapsBtn = new Button(MainActivity.this);
+                    mapsBtn.setText("📍  Open in Maps");
+                    mapsBtn.setTextColor(0xFFFFFFFF);
+                    mapsBtn.setBackground(getResources().getDrawable(R.drawable.btn_primary));
+                    android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+                    lp.setMargins(0, 12, 0, 0);
+                    mapsBtn.setLayoutParams(lp);
+                    final String mapsUri = "geo:" + fLat + "," + fLon + "?q=" + fLat + "," + fLon + "(" + fIp + ")";
+                    mapsBtn.setOnClickListener(v -> {
+                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(mapsUri));
+                        if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
+                        else showToast("No maps app found");
+                    });
+                    myInfoContainer.addView(mapsBtn);
+                }
+            });
+        }).start();
+    }
+
+    private void addMyInfoCard(String title, String body, String bgColor, String titleColor) {
+        android.widget.LinearLayout card = new android.widget.LinearLayout(this);
+        card.setOrientation(android.widget.LinearLayout.VERTICAL);
+        card.setBackgroundColor(android.graphics.Color.parseColor(bgColor));
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, 12);
+        card.setLayoutParams(lp);
+        card.setPadding(28, 20, 28, 20);
+
+        android.widget.TextView tv = new android.widget.TextView(this);
+        tv.setText(title);
+        tv.setTextColor(android.graphics.Color.parseColor(titleColor));
+        tv.setTextSize(13f);
+        tv.setTypeface(null, android.graphics.Typeface.BOLD);
+        tv.setPadding(0, 0, 0, 10);
+        card.addView(tv);
+
+        android.widget.TextView bv = new android.widget.TextView(this);
+        bv.setText(body);
+        bv.setTextColor(0xFFE0E0E0);
+        bv.setTextSize(14f);
+        bv.setTypeface(android.graphics.Typeface.MONOSPACE);
+        card.addView(bv);
+
+        myInfoContainer.addView(card);
+    }
+
+    private void addMyInfoRow(String text, String sub, String bgColor) {
+        android.widget.TextView tv = new android.widget.TextView(this);
+        tv.setText(text);
+        tv.setTextColor(0xFFB0BEC5);
+        tv.setTextSize(13f);
+        tv.setPadding(12, 8, 12, 8);
+        myInfoContainer.addView(tv);
+    }
+
+        // ── Helpers ──────────────────────────────────────────────────────────────
 
     private void switchTab(int index) {
         tab1.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         tab3.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        tab4.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        if (index == 3 && myInfoContainer.getChildCount() == 0) lookupMyInfo();
         tabDomainBtn.setSelected(index == 0);
         tabTrafficBtn.setSelected(index == 1);
         tabCheckerBtn.setSelected(index == 2);

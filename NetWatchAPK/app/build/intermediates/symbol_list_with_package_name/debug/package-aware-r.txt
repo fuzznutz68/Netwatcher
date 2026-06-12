@@ -753,6 +753,8 @@ id message
 id middle
 id monStatusText
 id multiply
+id myInfoContainer
+id myInfoRefreshBtn
 id never
 id none
 id normal
@@ -804,10 +806,12 @@ id submit_area
 id tab1
 id tab2
 id tab3
+id tab4
 id tabBar
 id tabCheckerBtn
 id tabDomainBtn
 id tabMode
+id tabMyInfoBtn
 id tabTrafficBtn
 id tag_accessibility_actions
 id tag_accessibility_clickable_spans

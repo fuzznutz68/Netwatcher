@@ -62,6 +62,15 @@
             android:textColor="#FFFFFF"
             android:background="@drawable/tab_selector"
             android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabMyInfoBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="🌐 My Info"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
     </LinearLayout>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -474,5 +483,57 @@
         </ScrollView>
 
     </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 4 — My Network Info                       -->
+    <!-- ══════════════════════════════════════════════ -->
+    <ScrollView
+        android:id="@+id/tab4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🌐 My Network Info"
+                android:textColor="#E0F7FA"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your public IP address, ISP, and location as seen from the internet."
+                android:textColor="#90A4AE"
+                android:textSize="12sp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Lookup button -->
+            <Button
+                android:id="@+id/myInfoRefreshBtn"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="▶  Lookup My Info"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_primary"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Results card container -->
+            <LinearLayout
+                android:id="@+id/myInfoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
