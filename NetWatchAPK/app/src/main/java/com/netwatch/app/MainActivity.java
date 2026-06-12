@@ -315,10 +315,27 @@ public class MainActivity extends Activity {
             entries.add(new AppEntry("📱  Whole Device", "", -1));
 
             for (ApplicationInfo ai : apps) {
-                // Only show apps that have a launcher icon (appear in the app drawer).
-                // This filters out background services, daemons, and Android internals.
+                // Must have a launcher intent (visible in app drawer)
                 Intent launchIntent = pm.getLaunchIntentForPackage(ai.packageName);
                 if (launchIntent == null) continue;
+
+                // Skip system apps — only show user-installed apps
+                // FLAG_SYSTEM = pre-installed on system partition
+                // If the app was updated by the user it has FLAG_UPDATED_SYSTEM_APP — include those
+                boolean isSystemApp = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                boolean isUpdatedSystemApp = (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+                if (isSystemApp && !isUpdatedSystemApp) continue;
+
+                // Extra guard: skip known Android framework packages
+                String pkg = ai.packageName;
+                if (pkg.startsWith("com.android.") ||
+                    pkg.startsWith("android.") ||
+                    pkg.equals("android") ||
+                    pkg.startsWith("com.google.android.") ||
+                    pkg.startsWith("com.samsung.android.") ||
+                    pkg.startsWith("com.sec.android.") ||
+                    pkg.startsWith("com.qualcomm.") ||
+                    pkg.startsWith("com.mediatek.")) continue;
 
                 String label = pm.getApplicationLabel(ai).toString();
                 entries.add(new AppEntry(label, ai.packageName, ai.uid));
