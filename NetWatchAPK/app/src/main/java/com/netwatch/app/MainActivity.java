@@ -877,7 +877,7 @@ public class MainActivity extends Activity {
         myInfoRefreshBtn.setEnabled(false);
 
         new Thread(() -> {
-            String ip = null; String isp = ""; String org = "";
+            String ip = null; String isp = ""; String org = ""; String org2 = "";
             String city = ""; String region = ""; String country = ""; String flag = "🌐";
             String lat = ""; String lon = ""; String timezone = ""; String zip = "";
             try {
@@ -892,38 +892,44 @@ public class MainActivity extends Activity {
 
             if (ip != null) {
                 try {
-                    // 2. Geo-IP enrichment via ip-api.com (free, no key needed)
-                    java.net.URL geoUrl = new java.net.URL("https://ip-api.com/json/" + ip + "?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,query");
+                    // 2. Geo-IP enrichment via ipinfo.io (HTTPS, no key needed)
+                    java.net.URL geoUrl = new java.net.URL("https://ipinfo.io/" + ip + "/json");
                     java.net.HttpURLConnection gc = (java.net.HttpURLConnection) geoUrl.openConnection();
+                    gc.setRequestProperty("Accept", "application/json");
                     gc.setConnectTimeout(6000); gc.setReadTimeout(6000);
                     java.io.InputStream gis = gc.getInputStream();
                     String geoJson = new String(gis.readAllBytes(), "UTF-8").trim();
                     gc.disconnect();
                     org.json.JSONObject g = new org.json.JSONObject(geoJson);
-                    if ("success".equals(g.optString("status"))) {
-                        isp      = g.optString("isp", "");
-                        org      = g.optString("org", "");
-                        city     = g.optString("city", "");
-                        region   = g.optString("regionName", "");
-                        country  = g.optString("country", "");
-                        zip      = g.optString("zip", "");
-                        lat      = String.valueOf(g.optDouble("lat", 0));
-                        lon      = String.valueOf(g.optDouble("lon", 0));
-                        timezone = g.optString("timezone", "");
-                        String cc = g.optString("countryCode", "");
-                        // Convert country code to flag emoji
-                        if (cc.length() == 2) {
-                            int f1 = 0x1F1E6 + (cc.charAt(0) - 'A');
-                            int f2 = 0x1F1E6 + (cc.charAt(1) - 'A');
-                            flag = new String(Character.toChars(f1)) + new String(Character.toChars(f2));
-                        }
+                    // ipinfo.io response: ip, city, region, country, loc, org, postal, timezone
+                    isp      = g.optString("org", "");      // e.g. "AS15169 Google LLC"
+                    city     = g.optString("city", "");
+                    region   = g.optString("region", "");
+                    country  = g.optString("country", "");  // 2-letter code
+                    zip      = g.optString("postal", "");
+                    timezone = g.optString("timezone", "");
+                    String loc = g.optString("loc", "");    // "lat,lon"
+                    if (loc.contains(",")) {
+                        lat = loc.split(",")[0].trim();
+                        lon = loc.split(",")[1].trim();
+                    }
+                    // Resolve country code to full name
+                    try {
+                        java.util.Locale locale = new java.util.Locale("", country);
+                        org2 = locale.getDisplayCountry();
+                    } catch (Exception e2) { org2 = country; }
+                    // Convert country code to flag emoji
+                    if (country.length() == 2) {
+                        int f1 = 0x1F1E6 + (country.charAt(0) - 'A');
+                        int f2 = 0x1F1E6 + (country.charAt(1) - 'A');
+                        flag = new String(Character.toChars(f1)) + new String(Character.toChars(f2));
                     }
                 } catch (Exception ignored) {}
             }
 
             final String resolvedIp = ip;
             final String fIp = resolvedIp != null ? resolvedIp : "Unable to determine";
-            final String fIsp = isp; final String fOrg = org;
+            final String fIsp = isp; final String fOrg = org; final String fOrg2 = org2;
             final String fCity = city; final String fRegion = region;
             final String fCountry = country; final String fFlag = flag;
             final String fLat = lat; final String fLon = lon;
