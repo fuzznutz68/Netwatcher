@@ -113,6 +113,8 @@ public class MainActivity extends Activity {
     private TextView      checkStatusText;
     private LinearLayout  checkResultsContainer;
     private final AtomicBoolean checkRunning = new AtomicBoolean(false);
+    private EditText      customDomainInput;
+    private Button        checkCustomBtn;
     // Last known stats — reapplied when tab2 becomes visible
     private long lastKnownTx = -1, lastKnownRx = -1, lastKnownTxRate = 0, lastKnownRxRate = 0;
     // Trusted domains for the current monitoring session (auto-seeded + user-approved)
@@ -167,6 +169,8 @@ public class MainActivity extends Activity {
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
         checkStatusText     = findViewById(R.id.checkStatusText);
         checkResultsContainer = findViewById(R.id.checkResultsContainer);
+        customDomainInput = findViewById(R.id.customDomainInput);
+        checkCustomBtn    = findViewById(R.id.checkCustomBtn);
         connectionCountText= findViewById(R.id.connectionCountText);
 
         exportDomainBtn    = findViewById(R.id.exportDomainBtn);
@@ -186,6 +190,11 @@ public class MainActivity extends Activity {
 
         checkAllBtn.setOnClickListener(v -> startDomainCheck());
         stopCheckBtn.setOnClickListener(v  -> stopDomainCheck());
+        checkCustomBtn.setOnClickListener(v -> checkCustomDomain());
+        customDomainInput.setOnEditorActionListener((tv, actionId, event) -> {
+            checkCustomDomain();
+            return true;
+        });
         buildCheckerRows();
 
         // Seed global trusted CDN/cloud providers (never want to alert on these)
@@ -1112,6 +1121,118 @@ public class MainActivity extends Activity {
             long ms = System.currentTimeMillis() - start;
             return new long[]{0, ms};
         }
+    }
+
+
+    // ─────────────────────────────────────────────────────────────
+    // Custom domain / IP check
+    // ─────────────────────────────────────────────────────────────
+    private void checkCustomDomain() {
+        String raw = customDomainInput.getText().toString().trim();
+        if (raw.isEmpty()) { showToast("Enter a domain or IP first"); return; }
+        // Strip protocol prefix if pasted in
+        raw = raw.replaceFirst("^https?://", "").replaceFirst("/.*$", "");
+        final String host = raw;
+
+        // Dismiss keyboard
+        android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(customDomainInput.getWindowToken(), 0);
+
+        // Add a result row at the top of the results container (or update existing)
+        LinearLayout existingRow = (LinearLayout) checkResultsContainer.findViewWithTag("custom_" + host);
+        TextView statusView;
+        TextView dotView;
+
+        if (existingRow != null) {
+            dotView    = (TextView) existingRow.getTag();
+            statusView = (TextView) existingRow.getChildAt(existingRow.getChildCount() - 1);
+            dotView.setTextColor(Color.parseColor("#FFC107"));
+            statusView.setText("…");
+            statusView.setTextColor(Color.parseColor("#90A4AE"));
+        } else {
+            // Section header (only once for custom entries)
+            if (checkResultsContainer.findViewWithTag("custom_header") == null) {
+                TextView header = new TextView(this);
+                header.setTag("custom_header");
+                header.setText("🔎  Custom Checks");
+                header.setTextColor(Color.parseColor("#64B5F6"));
+                header.setTextSize(12f);
+                header.setTypeface(null, android.graphics.Typeface.BOLD);
+                header.setAllCaps(true);
+                LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                hp.setMargins(0, dp(10), 0, dp(4));
+                header.setLayoutParams(hp);
+                checkResultsContainer.addView(header, 0);
+            }
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setBackground(getDrawable(R.drawable.card_background));
+            row.setTag("custom_" + host);
+            LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            rp.setMargins(0, dp(2), 0, dp(2));
+            row.setLayoutParams(rp);
+            row.setPadding(dp(10), dp(8), dp(10), dp(8));
+
+            dotView = new TextView(this);
+            dotView.setText("●");
+            dotView.setTextColor(Color.parseColor("#FFC107")); // amber = in progress
+            dotView.setTextSize(14f);
+            dotView.setPadding(0, 0, dp(10), 0);
+            row.setTag(dotView);
+            row.addView(dotView);
+
+            LinearLayout info = new LinearLayout(this);
+            info.setOrientation(LinearLayout.VERTICAL);
+            info.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            TextView labelView = new TextView(this);
+            labelView.setText(host);
+            labelView.setTextColor(Color.parseColor("#E3F2FD"));
+            labelView.setTextSize(13f);
+            TextView typeView = new TextView(this);
+            typeView.setText(host.matches("\\d+\\.\\d+\\.\\d+\\.\\d+") ? "IP Address" : "Domain");
+            typeView.setTextColor(Color.parseColor("#607D8B"));
+            typeView.setTextSize(11f);
+            info.addView(labelView);
+            info.addView(typeView);
+            row.addView(info);
+
+            statusView = new TextView(this);
+            statusView.setText("…");
+            statusView.setTextColor(Color.parseColor("#90A4AE"));
+            statusView.setTextSize(12f);
+            statusView.setGravity(android.view.Gravity.END | android.view.Gravity.CENTER_VERTICAL);
+            row.addView(statusView);
+
+            // Insert just after the custom_header
+            int insertIdx = 1;
+            checkResultsContainer.addView(row, insertIdx);
+        }
+
+        final TextView fStatus = statusView;
+        final TextView fDot    = dotView;
+
+        checkStatusText.setText("Checking " + host + "…");
+        checkStatusText.setTextColor(Color.parseColor("#64B5F6"));
+
+        executor.execute(() -> {
+            long[] result = probeHost(host);
+            boolean ok = result[0] == 1;
+            long ms     = result[1];
+            mainHandler.post(() -> {
+                fStatus.setText(ok ? ms + " ms" : "BLOCKED");
+                fStatus.setTextColor(ok ? Color.parseColor("#66BB6A") : Color.parseColor("#EF5350"));
+                fDot.setTextColor(ok ? Color.parseColor("#66BB6A") : Color.parseColor("#EF5350"));
+                checkStatusText.setText(host + (ok ? " ✅  reachable in " + ms + " ms" : " 🚫  appears BLOCKED"));
+                checkStatusText.setTextColor(ok ? Color.parseColor("#66BB6A") : Color.parseColor("#EF9A9A"));
+                // Scroll to top so user sees the result
+                ScrollView sv = (ScrollView) checkResultsContainer.getParent();
+                sv.smoothScrollTo(0, 0);
+            });
+        });
     }
 
 }

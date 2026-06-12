@@ -9,10 +9,12 @@ drawable tab_selector
 id alertSwitch
 id appSpinner
 id checkAllBtn
+id checkCustomBtn
 id checkResultsContainer
 id checkStatusText
 id clearMonBtn
 id connectionCountText
+id customDomainInput
 id domainInput
 id exportDomainBtn
 id exportTrafficBtn
