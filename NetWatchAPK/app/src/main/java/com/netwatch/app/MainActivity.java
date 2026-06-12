@@ -734,53 +734,82 @@ public class MainActivity extends Activity {
 
     // ── Export ───────────────────────────────────────────────────────────────
 
+    /** Wrap a value for safe CSV embedding (escapes quotes, wraps in quotes). */
+    private String csv(String v) {
+        if (v == null) return "\"\"";
+        return "\"" + v.replace("\"", "\"\"") + "\"";
+    }
+
     private void exportDomainIntel() {
         if (lastDomainForExport.isEmpty()) { showToast("Run a scan first"); return; }
-        StringBuilder sb = new StringBuilder();
         String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
-        sb.append("NetWatch — Domain Intelligence Report\n");
-        sb.append("Generated: ").append(ts).append("\n");
-        sb.append("Domain: ").append(lastDomainForExport).append("\n");
-        sb.append("=".repeat(60)).append("\n\n");
+        StringBuilder sb = new StringBuilder();
+
+        // ── Header metadata block ──
+        sb.append("field,value\n");
+        sb.append(csv("report_type")).append(",").append(csv("NetWatch Domain Intelligence")).append("\n");
+        sb.append(csv("generated")).append(",").append(csv(ts)).append("\n");
+        sb.append(csv("domain")).append(",").append(csv(lastDomainForExport)).append("\n");
+        sb.append("\n");
+
         try {
             if (!lastIntelJsonForExport.isEmpty()) {
                 JSONObject intel = new JSONObject(lastIntelJsonForExport);
+
+                // IPv4
                 JSONArray ipv4 = intel.optJSONArray("ipv4");
                 if (ipv4 != null && ipv4.length() > 0) {
-                    sb.append("IPv4 Addresses:\n");
-                    for (int i = 0; i < ipv4.length(); i++) sb.append("  ").append(ipv4.optString(i)).append("\n");
+                    sb.append("record_type,value\n");
+                    for (int i = 0; i < ipv4.length(); i++)
+                        sb.append(csv("ipv4")).append(",").append(csv(ipv4.optString(i))).append("\n");
                     sb.append("\n");
                 }
+
+                // IPv6
                 JSONArray ipv6 = intel.optJSONArray("ipv6");
                 if (ipv6 != null && ipv6.length() > 0) {
-                    sb.append("IPv6 Addresses:\n");
-                    for (int i = 0; i < ipv6.length(); i++) sb.append("  ").append(ipv6.optString(i)).append("\n");
+                    sb.append("record_type,value\n");
+                    for (int i = 0; i < ipv6.length(); i++)
+                        sb.append(csv("ipv6")).append(",").append(csv(ipv6.optString(i))).append("\n");
                     sb.append("\n");
                 }
-                String cname = intel.optString("cname","");
-                if (!cname.isEmpty() && !cname.equals("null")) sb.append("CNAME: ").append(cname).append("\n\n");
+
+                // CNAME
+                String cname = intel.optString("cname", "");
+                if (!cname.isEmpty() && !cname.equals("null")) {
+                    sb.append("record_type,value\n");
+                    sb.append(csv("cname")).append(",").append(csv(cname)).append("\n\n");
+                }
+
+                // Subdomains
                 JSONArray subs = intel.optJSONArray("subdomains");
                 if (subs != null && subs.length() > 0) {
-                    sb.append("Subdomains (").append(subs.length()).append("):\n");
+                    sb.append("subdomain,ip\n");
                     for (int i = 0; i < subs.length(); i++) {
                         JSONObject sub = subs.getJSONObject(i);
-                        sb.append("  ").append(sub.optString("name",""));
-                        JSONArray ips = sub.optJSONArray("ips");
-                        if (ips != null && ips.length() > 0) sb.append("  →  ").append(ips.optString(0));
-                        sb.append("\n");
+                        String subName = sub.optString("name", "");
+                        JSONArray ips  = sub.optJSONArray("ips");
+                        String ip = (ips != null && ips.length() > 0) ? ips.optString(0) : "";
+                        sb.append(csv(subName)).append(",").append(csv(ip)).append("\n");
                     }
                     sb.append("\n");
                 }
+
+                // Shared-host domains
                 JSONArray shared = intel.optJSONArray("sharedHostDomains");
                 if (shared != null && shared.length() > 0) {
-                    sb.append("Shared-Host Domains:\n");
-                    for (int i = 0; i < shared.length(); i++) sb.append("  ").append(shared.optString(i)).append("\n");
+                    sb.append("shared_host_domain\n");
+                    for (int i = 0; i < shared.length(); i++)
+                        sb.append(csv(shared.optString(i))).append("\n");
                     sb.append("\n");
                 }
             }
+        } catch (Exception e) {
+            sb.append(csv("error")).append(",").append(csv(e.getMessage())).append("\n");
+        }
 
-        } catch (Exception e) { sb.append("(parse error: ").append(e.getMessage()).append(")\n"); }
-        shareText("NetWatch_" + lastDomainForExport + "_" + ts.replace(" ","_").replace(":","") + ".txt", sb.toString());
+        String filename = "NetWatch_" + lastDomainForExport + "_" + ts.replace(" ", "_").replace(":", "") + ".csv";
+        shareCsv(filename, sb.toString());
     }
 
     private void exportTrafficLog() {
@@ -788,29 +817,47 @@ public class MainActivity extends Activity {
         String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
         String appLabel = selectedApp != null ? selectedApp.label : "Device";
         StringBuilder sb = new StringBuilder();
-        sb.append("NetWatch — Traffic Monitor Log\n");
-        sb.append("Generated: ").append(ts).append("\n");
-        sb.append("App: ").append(appLabel).append("\n");
-        sb.append("Hosts captured: ").append(trafficLogForExport.size()).append("\n");
-        sb.append("=".repeat(60)).append("\n\n");
-        sb.append(String.format("%-12s  %s\n", "TIME", "HOST / IP"));
-        sb.append("-".repeat(60)).append("\n");
+
+        // CSV header
+        sb.append("timestamp,host_or_ip\n");
         for (Map.Entry<String, String> entry : trafficLogForExport.entrySet()) {
-            sb.append(String.format("%-12s  %s\n", entry.getValue(), entry.getKey()));
+            sb.append(csv(entry.getValue())).append(",").append(csv(entry.getKey())).append("\n");
         }
-        shareText("NetWatch_Traffic_" + appLabel.replaceAll("[^a-zA-Z0-9]","_") + "_" + ts.replace(" ","_").replace(":","") + ".txt", sb.toString());
+
+        String filename = "NetWatch_Traffic_" + appLabel.replaceAll("[^a-zA-Z0-9]", "_") + "_" + ts.replace(" ", "_").replace(":", "") + ".csv";
+        shareCsv(filename, sb.toString());
     }
 
-    private void shareText(String filename, String text) {
+    private void shareCsv(String filename, String csvText) {
+        // Also copy to clipboard as plain text for convenience
         android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        android.content.ClipData clip = android.content.ClipData.newPlainText(filename, text);
+        android.content.ClipData clip = android.content.ClipData.newPlainText(filename, csvText);
         clipboard.setPrimaryClip(clip);
 
-        Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("text/plain");
-        share.putExtra(Intent.EXTRA_SUBJECT, filename);
-        share.putExtra(Intent.EXTRA_TEXT, text);
-        startActivity(Intent.createChooser(share, "Export via…"));
+        // Write to a cache file so apps like Files / Drive / Email can attach it properly
+        try {
+            java.io.File cacheDir = new java.io.File(getCacheDir(), "exports");
+            cacheDir.mkdirs();
+            java.io.File outFile = new java.io.File(cacheDir, filename);
+            try (java.io.FileWriter fw = new java.io.FileWriter(outFile)) { fw.write(csvText); }
+
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                this, getPackageName() + ".provider", outFile);
+
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/csv");
+            share.putExtra(Intent.EXTRA_SUBJECT, filename);
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(share, "Export CSV via…"));
+        } catch (Exception e) {
+            // Fallback: share as plain text
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/csv");
+            share.putExtra(Intent.EXTRA_SUBJECT, filename);
+            share.putExtra(Intent.EXTRA_TEXT, csvText);
+            startActivity(Intent.createChooser(share, "Export CSV via…"));
+        }
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
