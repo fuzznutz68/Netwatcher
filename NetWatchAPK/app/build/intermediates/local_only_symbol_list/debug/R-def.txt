@@ -22,6 +22,8 @@ id hostLogContainer
 id hostLogScroll
 id lookupBtn
 id monStatusText
+id myInfoContainer
+id myInfoRefreshBtn
 id resultsContainer
 id rxRateText
 id rxTotalText
@@ -32,9 +34,11 @@ id stopMonBtn
 id tab1
 id tab2
 id tab3
+id tab4
 id tabBar
 id tabCheckerBtn
 id tabDomainBtn
+id tabMyInfoBtn
 id tabTrafficBtn
 id txRateText
 id txTotalText
