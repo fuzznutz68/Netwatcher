@@ -27,6 +27,13 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import android.view.ViewParent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,7 +73,7 @@ public class MainActivity extends Activity {
 
     // ── Tabs ────────────────────────────────────────────────────────────────
     private View   tab1, tab2;
-    private Button tabDomainBtn, tabTrafficBtn;
+    private Button tabDomainBtn, tabTrafficBtn, tabCheckerBtn;
 
     // ── Tab 1 – Domain Intel ────────────────────────────────────────────────
     private EditText     domainInput;
@@ -99,6 +106,13 @@ public class MainActivity extends Activity {
     private Button       exportDomainBtn, exportTrafficBtn;
     private SwitchCompat alertSwitch;
     private boolean      alertsEnabled  = true;
+
+    // --- Tab 3: Domain Checker ---
+    private LinearLayout  tab3;
+    private Button        checkAllBtn, stopCheckBtn;
+    private TextView      checkStatusText;
+    private LinearLayout  checkResultsContainer;
+    private final AtomicBoolean checkRunning = new AtomicBoolean(false);
     // Last known stats — reapplied when tab2 becomes visible
     private long lastKnownTx = -1, lastKnownRx = -1, lastKnownTxRate = 0, lastKnownRxRate = 0;
     // Trusted domains for the current monitoring session (auto-seeded + user-approved)
@@ -118,11 +132,13 @@ public class MainActivity extends Activity {
         // Tabs
         tabDomainBtn  = findViewById(R.id.tabDomainBtn);
         tabTrafficBtn = findViewById(R.id.tabTrafficBtn);
+        tabCheckerBtn = findViewById(R.id.tabCheckerBtn);
         tab1          = findViewById(R.id.tab1);
         tab2          = findViewById(R.id.tab2);
         tabDomainBtn.setSelected(true);
-        tabDomainBtn.setOnClickListener(v -> switchTab(0));
+        tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
+        tabCheckerBtn.setOnClickListener(v -> switchTab(2));
 
         // Tab 1
         domainInput      = findViewById(R.id.domainInput);
@@ -144,6 +160,13 @@ public class MainActivity extends Activity {
         rxRateText         = findViewById(R.id.rxRateText);
         hostLogContainer   = findViewById(R.id.hostLogContainer);
         hostLogScroll      = findViewById(R.id.hostLogScroll);
+
+        // Tab 3
+        tab3                = findViewById(R.id.tab3);
+        checkAllBtn         = findViewById(R.id.checkAllBtn);
+        stopCheckBtn        = findViewById(R.id.stopCheckBtn);
+        checkStatusText     = findViewById(R.id.checkStatusText);
+        checkResultsContainer = findViewById(R.id.checkResultsContainer);
         connectionCountText= findViewById(R.id.connectionCountText);
 
         exportDomainBtn    = findViewById(R.id.exportDomainBtn);
@@ -160,6 +183,10 @@ public class MainActivity extends Activity {
             alertsEnabled = checked;
             prefs.edit().putBoolean("alerts_enabled", checked).apply();
         });
+
+        checkAllBtn.setOnClickListener(v -> startDomainCheck());
+        stopCheckBtn.setOnClickListener(v  -> stopDomainCheck());
+        buildCheckerRows();
 
         // Seed global trusted CDN/cloud providers (never want to alert on these)
         trustedDomains.addAll(Arrays.asList(
@@ -782,8 +809,10 @@ public class MainActivity extends Activity {
     private void switchTab(int index) {
         tab1.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        tab3.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         tabDomainBtn.setSelected(index == 0);
         tabTrafficBtn.setSelected(index == 1);
+        tabCheckerBtn.setSelected(index == 2);
         // Re-apply last known stats so TX/RX panels are never blank on tab entry
         if (index == 1 && lastKnownTx >= 0) {
             txTotalText.setText("TX  " + formatBytes(lastKnownTx));
@@ -834,4 +863,255 @@ public class MainActivity extends Activity {
         try { unregisterReceiver(trafficReceiver); } catch (Exception ignored) {}
         executor.shutdownNow();
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // TAB 3 — Domain Checker
+    // ─────────────────────────────────────────────────────────────
+
+    // Ordered map: category -> list of {label, host}
+    private static final LinkedHashMap<String, String[][]> CHECKER_DOMAINS = new LinkedHashMap<>();
+    static {
+        CHECKER_DOMAINS.put("🔵 Google", new String[][]{
+            {"Google Search",     "google.com"},
+            {"Google DNS",        "8.8.8.8"},
+            {"Gmail",             "mail.google.com"},
+            {"Google Drive",      "drive.google.com"},
+            {"YouTube",           "youtube.com"},
+            {"Google Play",       "play.google.com"},
+            {"Google APIs",       "googleapis.com"},
+        });
+        CHECKER_DOMAINS.put("🟠 Microsoft", new String[][]{
+            {"Bing",              "bing.com"},
+            {"Outlook / Exchange","outlook.office365.com"},
+            {"OneDrive",          "onedrive.live.com"},
+            {"Teams",             "teams.microsoft.com"},
+            {"Azure",             "azure.microsoft.com"},
+            {"GitHub",            "github.com"},
+            {"Microsoft CDN",     "msftconnecttest.com"},
+        });
+        CHECKER_DOMAINS.put("🟡 Cloudflare", new String[][]{
+            {"Cloudflare DNS 1",  "1.1.1.1"},
+            {"Cloudflare DNS 2",  "1.0.0.1"},
+            {"Cloudflare Web",    "cloudflare.com"},
+            {"WARP / DoH",        "cloudflare-dns.com"},
+        });
+        CHECKER_DOMAINS.put("🟣 Social & Messaging", new String[][]{
+            {"Facebook",          "facebook.com"},
+            {"Instagram",         "instagram.com"},
+            {"WhatsApp",          "web.whatsapp.com"},
+            {"Twitter / X",       "x.com"},
+            {"Telegram",          "telegram.org"},
+            {"LinkedIn",          "linkedin.com"},
+            {"TikTok",            "tiktok.com"},
+        });
+        CHECKER_DOMAINS.put("🔴 Streaming", new String[][]{
+            {"Netflix",           "netflix.com"},
+            {"Spotify",           "spotify.com"},
+            {"Twitch",            "twitch.tv"},
+            {"Apple iCloud",      "icloud.com"},
+        });
+        CHECKER_DOMAINS.put("🟢 CDN / Infrastructure", new String[][]{
+            {"Akamai",            "akamai.com"},
+            {"Fastly",            "fastly.com"},
+            {"Amazon AWS",        "aws.amazon.com"},
+            {"Quad9 DNS",         "9.9.9.9"},
+            {"OpenDNS",           "208.67.222.222"},
+        });
+        CHECKER_DOMAINS.put("🏦 Finance & Payments", new String[][]{
+            {"PayPal",            "paypal.com"},
+            {"Stripe",            "stripe.com"},
+            {"Visa",              "visa.com"},
+            {"Mastercard",        "mastercard.com"},
+        });
+    }
+
+    // Map host -> status TextView (populated by buildCheckerRows)
+    private final Map<String, TextView> checkerStatusViews = new LinkedHashMap<>();
+
+    private void buildCheckerRows() {
+        checkResultsContainer.removeAllViews();
+        checkerStatusViews.clear();
+
+        for (Map.Entry<String, String[][]> cat : CHECKER_DOMAINS.entrySet()) {
+            // Category header
+            TextView header = new TextView(this);
+            header.setText(cat.getKey());
+            header.setTextColor(Color.parseColor("#64B5F6"));
+            header.setTextSize(12f);
+            header.setTypeface(null, Typeface.BOLD);
+            LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            hp.setMargins(0, dp(10), 0, dp(4));
+            header.setLayoutParams(hp);
+            header.setAllCaps(true);
+            checkResultsContainer.addView(header);
+
+            for (String[] entry : cat.getValue()) {
+                String label = entry[0];
+                String host  = entry[1];
+
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setBackground(getDrawable(R.drawable.card_background));
+                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                rp.setMargins(0, dp(2), 0, dp(2));
+                row.setLayoutParams(rp);
+                row.setPadding(dp(10), dp(8), dp(10), dp(8));
+
+                // Status dot
+                TextView dot = new TextView(this);
+                dot.setText("●");
+                dot.setTextColor(Color.parseColor("#546E7A"));
+                dot.setTextSize(14f);
+                dot.setPadding(0, 0, dp(10), 0);
+                row.addView(dot);
+
+                // Label + host
+                LinearLayout info = new LinearLayout(this);
+                info.setOrientation(LinearLayout.VERTICAL);
+                info.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                TextView labelView = new TextView(this);
+                labelView.setText(label);
+                labelView.setTextColor(Color.parseColor("#E3F2FD"));
+                labelView.setTextSize(13f);
+                TextView hostView = new TextView(this);
+                hostView.setText(host);
+                hostView.setTextColor(Color.parseColor("#607D8B"));
+                hostView.setTextSize(11f);
+                info.addView(labelView);
+                info.addView(hostView);
+                row.addView(info);
+
+                // Latency / status text
+                TextView status = new TextView(this);
+                status.setText("—");
+                status.setTextColor(Color.parseColor("#546E7A"));
+                status.setTextSize(12f);
+                status.setGravity(android.view.Gravity.END | android.view.Gravity.CENTER_VERTICAL);
+                row.addView(status);
+
+                checkerStatusViews.put(host, status);
+                // Store dot view using tag so we can color it
+                row.setTag(dot);
+                checkResultsContainer.addView(row);
+            }
+        }
+    }
+
+    private void startDomainCheck() {
+        if (checkRunning.get()) return;
+        checkRunning.set(true);
+        checkAllBtn.setEnabled(false);
+        stopCheckBtn.setEnabled(true);
+        checkStatusText.setTextColor(Color.parseColor("#64B5F6"));
+
+        // Reset all to pending
+        for (Map.Entry<String, TextView> e : checkerStatusViews.entrySet()) {
+            e.getValue().setText("…");
+            e.getValue().setTextColor(Color.parseColor("#90A4AE"));
+            // Reset dot
+            ViewParent vp = e.getValue().getParent();
+            if (vp instanceof LinearLayout) {
+                Object tag = ((LinearLayout)vp).getTag();
+                if (tag instanceof TextView) ((TextView)tag).setTextColor(Color.parseColor("#546E7A"));
+            }
+        }
+
+        final List<String[]> allEntries = new ArrayList<>();
+        for (String[][] entries : CHECKER_DOMAINS.values())
+            for (String[] e : entries) allEntries.add(e);
+
+        executor.execute(() -> {
+            int done = 0, reachable = 0, blocked = 0;
+            for (String[] entry : allEntries) {
+                if (!checkRunning.get()) break;
+                String label = entry[0];
+                String host  = entry[1];
+                done++;
+                final int fdone = done;
+                mainHandler.post(() ->
+                    checkStatusText.setText("Checking " + fdone + "/" + allEntries.size() + " — " + host));
+
+                long[] result = probeHost(host);
+                // result[0] = 1 reachable / 0 blocked, result[1] = latency ms
+                boolean ok = result[0] == 1;
+                long ms     = result[1];
+                if (ok) reachable++; else blocked++;
+
+                mainHandler.post(() -> {
+                    TextView sv = checkerStatusViews.get(host);
+                    if (sv == null) return;
+                    sv.setText(ok ? ms + " ms" : "BLOCKED");
+                    sv.setTextColor(ok ? Color.parseColor("#66BB6A") : Color.parseColor("#EF5350"));
+                    ViewParent vp = sv.getParent();
+                    if (vp instanceof LinearLayout) {
+                        Object tag = ((LinearLayout)vp).getTag();
+                        if (tag instanceof TextView)
+                            ((TextView)tag).setTextColor(ok ? Color.parseColor("#66BB6A") : Color.parseColor("#EF5350"));
+                    }
+                });
+            }
+
+            final int fr = reachable, fb = blocked, fd = done;
+            mainHandler.post(() -> {
+                checkRunning.set(false);
+                checkAllBtn.setEnabled(true);
+                stopCheckBtn.setEnabled(false);
+                if (fd == allEntries.size()) {
+                    checkStatusText.setText("Done — ✅ " + fr + " reachable   🚫 " + fb + " blocked");
+                } else {
+                    checkStatusText.setText("Stopped — ✅ " + fr + "  🚫 " + fb + " (of " + fd + " checked)");
+                }
+                checkStatusText.setTextColor(fb > 0 ? Color.parseColor("#EF9A9A") : Color.parseColor("#66BB6A"));
+            });
+        });
+    }
+
+    private void stopDomainCheck() {
+        checkRunning.set(false);
+        stopCheckBtn.setEnabled(false);
+    }
+
+    /** Returns [reachable(1/0), latencyMs] */
+    private long[] probeHost(String host) {
+        long start = System.currentTimeMillis();
+        try {
+            // First try HTTP(S) for named hosts, ICMP-style connect for IPs
+            boolean isIp = host.matches("\\d+\\.\\d+\\.\\d+\\.\\d+");
+            if (isIp) {
+                InetAddress addr = InetAddress.getByName(host);
+                boolean reached = addr.isReachable(3000);
+                if (!reached) {
+                    // Fallback: TCP connect to port 53 (DNS) for IP addresses
+                    try (java.net.Socket sock = new java.net.Socket()) {
+                        sock.connect(new java.net.InetSocketAddress(host, 53), 3000);
+                        reached = true;
+                    } catch (Exception ignored2) {}
+                }
+                long ms = System.currentTimeMillis() - start;
+                return new long[]{reached ? 1 : 0, ms};
+            } else {
+                // DNS resolve first
+                InetAddress.getByName(host); // throws if blocked/unresolvable
+                // Then HTTP HEAD
+                URL url = new URL("https://" + host + "/");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("HEAD");
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                conn.setInstanceFollowRedirects(true);
+                conn.connect();
+                int code = conn.getResponseCode();
+                conn.disconnect();
+                long ms = System.currentTimeMillis() - start;
+                // Any HTTP response (including 4xx/5xx) means the host is reachable
+                return new long[]{(code > 0) ? 1 : 0, ms};
+            }
+        } catch (Exception e) {
+            long ms = System.currentTimeMillis() - start;
+            return new long[]{0, ms};
+        }
+    }
+
 }

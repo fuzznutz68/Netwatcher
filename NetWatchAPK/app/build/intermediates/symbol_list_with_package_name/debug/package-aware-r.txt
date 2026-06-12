@@ -705,6 +705,9 @@ id blocking
 id bottom
 id buttonPanel
 id center_vertical
+id checkAllBtn
+id checkResultsContainer
+id checkStatusText
 id checkbox
 id checked
 id chronometer
@@ -792,12 +795,15 @@ id src_in
 id src_over
 id startMonBtn
 id statusText
+id stopCheckBtn
 id stopMonBtn
 id submenuarrow
 id submit_area
 id tab1
 id tab2
+id tab3
 id tabBar
+id tabCheckerBtn
 id tabDomainBtn
 id tabMode
 id tabTrafficBtn
