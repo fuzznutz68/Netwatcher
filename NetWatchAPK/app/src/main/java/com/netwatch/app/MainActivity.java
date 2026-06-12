@@ -1172,6 +1172,9 @@ public class MainActivity extends Activity {
             {"Stripe",            "stripe.com"},
             {"Visa",              "visa.com"},
             {"Mastercard",        "mastercard.com"},
+            {"Wise",              "wise.com"},
+            {"Tangem",            "tangem.com"},
+            {"Bitcoin",           "bitcoin.org"},
         });
         CHECKER_DOMAINS.put("🎮 Gaming", new String[][]{
             {"Xbox Live",         "xbox.com"},
