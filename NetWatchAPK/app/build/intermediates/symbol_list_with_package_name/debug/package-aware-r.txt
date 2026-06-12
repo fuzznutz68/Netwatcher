@@ -706,6 +706,7 @@ id bottom
 id buttonPanel
 id center_vertical
 id checkAllBtn
+id checkCustomBtn
 id checkResultsContainer
 id checkStatusText
 id checkbox
@@ -717,6 +718,7 @@ id connectionCountText
 id content
 id contentPanel
 id custom
+id customDomainInput
 id customPanel
 id decor_content_parent
 id default_activity_button

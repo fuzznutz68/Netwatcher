@@ -389,6 +389,40 @@
         android:visibility="gone"
         android:padding="12dp">
 
+        <!-- Custom domain input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/customDomainInput"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:hint="Enter domain or IP…"
+                android:textColorHint="#546E7A"
+                android:textColor="#E3F2FD"
+                android:textSize="13sp"
+                android:background="@drawable/input_background"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:inputType="textUri"
+                android:imeOptions="actionSearch"
+                android:singleLine="true"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/checkCustomBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:text="Check"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"/>
+        </LinearLayout>
+
         <!-- Control row -->
         <LinearLayout
             android:layout_width="match_parent"
