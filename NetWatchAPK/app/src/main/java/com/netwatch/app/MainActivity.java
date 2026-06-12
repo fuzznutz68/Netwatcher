@@ -99,6 +99,8 @@ public class MainActivity extends Activity {
     private Button       exportDomainBtn, exportTrafficBtn;
     private SwitchCompat alertSwitch;
     private boolean      alertsEnabled  = true;
+    // Last known stats — reapplied when tab2 becomes visible
+    private long lastKnownTx = -1, lastKnownRx = -1, lastKnownTxRate = 0, lastKnownRxRate = 0;
     // Trusted domains for the current monitoring session (auto-seeded + user-approved)
     private final Set<String> trustedDomains = Collections.synchronizedSet(new HashSet<>());
     // Root domain of the currently monitored app (e.g. "paypal.com")
@@ -354,11 +356,14 @@ public class MainActivity extends Activity {
     // ── Stats Update (called from broadcast) ─────────────────────────────────
 
     private void updateStats(long txBytes, long rxBytes, long txRate, long rxRate, String hostsRaw) {
-        // Update totals
-        txTotalText.setText("TX  " + formatBytes(txBytes));
-        rxTotalText.setText("RX  " + formatBytes(rxBytes));
-        txRateText.setText("↑ " + formatBytes(txRate) + "/s");
-        rxRateText.setText("↓ " + formatBytes(rxRate) + "/s");
+        // Cache for tab re-entry
+        lastKnownTx = txBytes; lastKnownRx = rxBytes;
+        lastKnownTxRate = txRate; lastKnownRxRate = rxRate;
+        // Update totals — -1 means TrafficStats.UNSUPPORTED on this device
+        txTotalText.setText("TX  " + (txBytes < 0 ? "N/A" : formatBytes(txBytes)));
+        rxTotalText.setText("RX  " + (rxBytes < 0 ? "N/A" : formatBytes(rxBytes)));
+        txRateText.setText("↑ " + (txBytes < 0 ? "N/A" : formatBytes(txRate) + "/s"));
+        rxRateText.setText("↓ " + (rxBytes < 0 ? "N/A" : formatBytes(rxRate) + "/s"));
 
         // Color rate text based on activity
         int rateColor = (txRate > 0 || rxRate > 0)
@@ -788,6 +793,15 @@ public class MainActivity extends Activity {
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         tabDomainBtn.setSelected(index == 0);
         tabTrafficBtn.setSelected(index == 1);
+        // Re-apply last known stats so TX/RX panels are never blank on tab entry
+        if (index == 1 && lastKnownTx >= 0) {
+            txTotalText.setText("TX  " + formatBytes(lastKnownTx));
+            rxTotalText.setText("RX  " + formatBytes(lastKnownRx));
+            txRateText.setText("↑ " + formatBytes(lastKnownTxRate) + "/s");
+            rxRateText.setText("↓ " + formatBytes(lastKnownRxRate) + "/s");
+            txRateText.setTextColor(lastKnownTxRate > 0 ? Color.parseColor("#EF9A9A") : Color.parseColor("#546E7A"));
+            rxRateText.setTextColor(lastKnownRxRate > 0 ? Color.parseColor("#66BB6A") : Color.parseColor("#546E7A"));
+        }
     }
 
     private static String formatBytes(long bytes) {
