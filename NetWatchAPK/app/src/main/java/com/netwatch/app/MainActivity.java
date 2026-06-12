@@ -1149,6 +1149,17 @@ public class MainActivity extends Activity {
             {"Visa",              "visa.com"},
             {"Mastercard",        "mastercard.com"},
         });
+        CHECKER_DOMAINS.put("🎮 Gaming", new String[][]{
+            {"Xbox Live",         "xbox.com"},
+            {"Xbox Services",     "xboxlive.com"},
+            {"Xbox CDN",          "xboxlive-ce-retail.com"},
+            {"Microsoft Game",    "xgweb.com"},
+            {"PlayStation",       "playstation.com"},
+            {"PSN Network",       "psn.np.com"},
+            {"PS Store",          "store.playstation.com"},
+            {"PS CDN",            "dl.playstation.net"},
+            {"PS Auth",           "auth.api.sonyentertainmentnetwork.com"},
+        });
     }
 
     // Map host -> status TextView (populated by buildCheckerRows)
