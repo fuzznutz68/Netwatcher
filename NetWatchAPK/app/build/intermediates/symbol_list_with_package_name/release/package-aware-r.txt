@@ -3324,6 +3324,7 @@ id line3
 id linear
 id listMode
 id list_item
+id liveHostsLabel
 id lookupBtn
 id m3_side_sheet
 id marquee
@@ -3487,6 +3488,7 @@ id search_mag_icon
 id search_plate
 id search_src_text
 id search_voice_btn
+id selectAppLabel
 id select_dialog_listview
 id selected
 id selection_type

@@ -90,6 +90,7 @@ public class MainActivity extends Activity {
     private Button       startMonBtn, stopMonBtn, clearMonBtn;
     private TextView     monStatusText;
     private TextView     myInfoTitleText, myInfoDescText;
+    private TextView     selectAppLabel, liveHostsLabel;
     private TextView     txTotalText, rxTotalText, txRateText, rxRateText;
     private LinearLayout hostLogContainer;
     private ScrollView   hostLogScroll;
@@ -188,8 +189,12 @@ public class MainActivity extends Activity {
         myInfoContainer     = findViewById(R.id.myInfoContainer);
         myInfoRefreshBtn    = findViewById(R.id.myInfoRefreshBtn);
         myInfoTitleText    = findViewById(R.id.myInfoTitleText);
+        selectAppLabel     = findViewById(R.id.selectAppLabel);
+        liveHostsLabel     = findViewById(R.id.liveHostsLabel);
         myInfoDescText     = findViewById(R.id.myInfoDescText);
         myInfoTitleText    = findViewById(R.id.myInfoTitleText);
+        selectAppLabel     = findViewById(R.id.selectAppLabel);
+        liveHostsLabel     = findViewById(R.id.liveHostsLabel);
         myInfoDescText     = findViewById(R.id.myInfoDescText);
         checkAllBtn         = findViewById(R.id.checkAllBtn);
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
@@ -529,6 +534,8 @@ public class MainActivity extends Activity {
         myInfoRefreshBtn.setText(isRussian ? "▶  Получить данные" : "▶  Lookup My Info");
         myInfoTitleText.setText(isRussian ? "🌐 Моя сеть" : "🌐 My Network Info");
         myInfoDescText.setText(isRussian ? "Ваш публичный IP-адрес, провайдер и местоположение." : "Your public IP address, ISP, and location as seen from the internet.");
+        selectAppLabel.setText(isRussian ? "ВЫБРАТЬ ПРИЛОЖЕНИЕ" : "SELECT APP TO MONITOR");
+        liveHostsLabel.setText(isRussian ? "АКТИВНЫЕ СОЕДИНЕНИЯ" : "LIVE CONNECTION HOSTS");
     }
 
     // ── Info / Help Dialog ───────────────────────────────────────────────────
