@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.netwatch.app"
-    android:versionCode="32"
+    android:versionCode="33"
     android:versionName="1.4.4" >
 
     <uses-sdk
@@ -23,7 +23,6 @@
     <uses-permission android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
-        android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:extractNativeLibs="true"
