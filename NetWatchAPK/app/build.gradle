@@ -14,12 +14,23 @@ android {
         versionName "1.4.4"
     }
 
+    signingConfigs {
+        release {
+            storeFile     file("../netwatch-release.keystore")
+            storePassword "netwatch2024"
+            keyAlias      "netwatch"
+            keyPassword   "netwatch2024"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.release
         }
     }
 
