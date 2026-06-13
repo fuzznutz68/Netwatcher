@@ -30,7 +30,9 @@ id menu_instructions_traffic
 id menu_language
 id monStatusText
 id myInfoContainer
+id myInfoDescText
 id myInfoRefreshBtn
+id myInfoTitleText
 id resultsContainer
 id rxRateText
 id rxTotalText

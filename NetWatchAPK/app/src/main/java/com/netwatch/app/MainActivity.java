@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
     private Spinner      appSpinner;
     private Button       startMonBtn, stopMonBtn, clearMonBtn;
     private TextView     monStatusText;
+    private TextView     myInfoTitleText, myInfoDescText;
     private TextView     txTotalText, rxTotalText, txRateText, rxRateText;
     private LinearLayout hostLogContainer;
     private ScrollView   hostLogScroll;
@@ -186,6 +187,10 @@ public class MainActivity extends Activity {
         tab4                = findViewById(R.id.tab4);
         myInfoContainer     = findViewById(R.id.myInfoContainer);
         myInfoRefreshBtn    = findViewById(R.id.myInfoRefreshBtn);
+        myInfoTitleText    = findViewById(R.id.myInfoTitleText);
+        myInfoDescText     = findViewById(R.id.myInfoDescText);
+        myInfoTitleText    = findViewById(R.id.myInfoTitleText);
+        myInfoDescText     = findViewById(R.id.myInfoDescText);
         checkAllBtn         = findViewById(R.id.checkAllBtn);
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
         checkStatusText     = findViewById(R.id.checkStatusText);
@@ -522,6 +527,8 @@ public class MainActivity extends Activity {
         checkStatusText.setText(isRussian ? "Нажмите ▶ Проверить всё для теста" : "Tap ▶ Check All to test reachability");
         // My Info tab
         myInfoRefreshBtn.setText(isRussian ? "▶  Получить данные" : "▶  Lookup My Info");
+        myInfoTitleText.setText(isRussian ? "🌐 Моя сеть" : "🌐 My Network Info");
+        myInfoDescText.setText(isRussian ? "Ваш публичный IP-адрес, провайдер и местоположение." : "Your public IP address, ISP, and location as seen from the internet.");
     }
 
     // ── Info / Help Dialog ───────────────────────────────────────────────────
