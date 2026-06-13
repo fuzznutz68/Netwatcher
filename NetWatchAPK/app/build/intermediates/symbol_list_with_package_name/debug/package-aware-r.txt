@@ -755,6 +755,7 @@ id menu_instructions_checker
 id menu_instructions_domain
 id menu_instructions_myinfo
 id menu_instructions_traffic
+id menu_language
 id message
 id middle
 id monStatusText

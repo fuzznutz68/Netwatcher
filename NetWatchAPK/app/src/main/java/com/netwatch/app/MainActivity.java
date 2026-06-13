@@ -128,6 +128,8 @@ public class MainActivity extends Activity {
     // Root domain of the currently monitored app (e.g. "paypal.com")
     private String monitoredRootDomain = "";
     private static final String PREFS_NAME = "netwatch_prefs";
+    private static final String PREF_LANG   = "language";   // "en" or "ru"
+    private boolean isRussian = false;
     private BroadcastReceiver trafficReceiver;
     private final ExecutorService executor    = Executors.newCachedThreadPool();
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
@@ -136,6 +138,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Language preference
+        SharedPreferences prefs0 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        isRussian = "ru".equals(prefs0.getString(PREF_LANG, "en"));
 
         // Tabs
         tabDomainBtn  = findViewById(R.id.tabDomainBtn);
@@ -152,78 +158,8 @@ public class MainActivity extends Activity {
 
         // ── Top-right menu button ────────────────────────────────────────────
         TextView menuBtn = findViewById(R.id.menuBtn);
-        menuBtn.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.getMenuInflater().inflate(R.menu.main_menu, popup.getMenu());
-            popup.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.menu_instructions_domain) {
-                    showInfoDialog("🔍 Domain Intel — Help",
-                        "Enter any domain name and tap Lookup.\n\n" +
-                        "Results include:\n" +
-                        "  • IP Addresses (A records)\n" +
-                        "  • Subdomains detected\n" +
-                        "  • WHOIS registration info\n" +
-                        "  • Geo-IP location of the server\n\n" +
-                        "Tap Export to save results as a CSV file.");
-                    return true;
-                } else if (id == R.id.menu_instructions_traffic) {
-                    showInfoDialog("📡 Traffic Monitor — Help",
-                        "Monitor live network connections for any installed app or the whole device.\n\n" +
-                        "How to use:\n" +
-                        "  1. Select an app from the dropdown (or 'Whole Device')\n" +
-                        "  2. Tap Start — the selected app launches automatically\n" +
-                        "  3. NetWatch captures all outbound connections in real-time\n\n" +
-                        "Features:\n" +
-                        "  • Geo-IP lookup for every connection\n" +
-                        "  • Companion domain detection (CDNs, subdomains)\n" +
-                        "  • Vibration alert for unknown/unlisted domains\n" +
-                        "  • Export connection log as RFC 4180 CSV");
-                    return true;
-                } else if (id == R.id.menu_instructions_checker) {
-                    showInfoDialog("✅ Domain Checker — Help",
-                        "Quickly verify connectivity to well-known service domains.\n\n" +
-                        "Categories include:\n" +
-                        "  • Microsoft, Google, Apple, Cloudflare\n" +
-                        "  • Social & Messaging\n" +
-                        "  • Finance & Payments\n" +
-                        "  • Gaming (Xbox, PlayStation)\n\n" +
-                        "Each domain shows a live status:\n" +
-                        "  🟢 Reachable  |  🔴 Blocked / Unreachable\n\n" +
-                        "Tap Check All to run all tests at once.\n" +
-                        "Use the custom input at the top to test any domain manually.");
-                    return true;
-                } else if (id == R.id.menu_instructions_myinfo) {
-                    showInfoDialog("🌐 My Info — Help",
-                        "Displays live information about your current network connection.\n\n" +
-                        "Shown details:\n" +
-                        "  • Public IP Address\n" +
-                        "  • ISP / Network Provider\n" +
-                        "  • City, Region, Country\n" +
-                        "  • GPS Coordinates (tap for Google Maps)\n" +
-                        "  • Timezone\n\n" +
-                        "Data is fetched from ipinfo.io.\n" +
-                        "Tap Refresh to update at any time.");
-                    return true;
-                } else if (id == R.id.menu_about) {
-                    showInfoDialog("ℹ️ About NetWatch",
-                        "◈ NETWATCH\n" +
-                        "Version 1.4.2\n\n" +
-                        "A professional-grade network intelligence tool for Android.\n\n" +
-                        "Features:\n" +
-                        "  • Domain Intelligence & WHOIS lookup\n" +
-                        "  • Real-time per-app traffic monitoring\n" +
-                        "  • Domain reachability checker\n" +
-                        "  • Live network & geo-IP info\n\n" +
-                        "Built with ❤️ using Base44 Superagent.");
-                    return true;
-                }
-                return false;
-            });
-            popup.show();
-        });
+        menuBtn.setOnClickListener(v -> showMainMenu(v));
 
-        // Tab 1
         domainInput      = findViewById(R.id.domainInput);
         lookupBtn        = findViewById(R.id.lookupBtn);
         resultsContainer = findViewById(R.id.resultsContainer);
@@ -382,12 +318,181 @@ public class MainActivity extends Activity {
 
     // ── App List ─────────────────────────────────────────────────────────────
 
+    // ── Main popup menu ──────────────────────────────────────────────────────
+    private void showMainMenu(android.view.View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenuInflater().inflate(R.menu.main_menu, popup.getMenu());
+
+        // Update menu label to show current language
+        popup.getMenu().findItem(R.id.menu_language)
+             .setTitle(isRussian ? "🌍 Language: Русский" : "🌍 Language: English");
+
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.menu_instructions_domain) {
+                if (isRussian) {
+                    showInfoDialog("🔍 Domain Intel — Справка",
+                        "Введите доменное имя и нажмите Поиск.\n\n" +
+                        "Результаты включают:\n" +
+                        "  • IP-адреса (A-записи)\n" +
+                        "  • Обнаруженные поддомены\n" +
+                        "  • Информация WHOIS\n" +
+                        "  • Geo-IP локация сервера\n\n" +
+                        "Нажмите Экспорт для сохранения результатов в CSV.");
+                } else {
+                    showInfoDialog("🔍 Domain Intel — Help",
+                        "Enter any domain name and tap Lookup.\n\n" +
+                        "Results include:\n" +
+                        "  • IP Addresses (A records)\n" +
+                        "  • Subdomains detected\n" +
+                        "  • WHOIS registration info\n" +
+                        "  • Geo-IP location of the server\n\n" +
+                        "Tap Export to save results as a CSV file.");
+                }
+                return true;
+            } else if (id == R.id.menu_instructions_traffic) {
+                if (isRussian) {
+                    showInfoDialog("📡 Монитор трафика — Справка",
+                        "Мониторинг сетевых соединений для любого приложения или всего устройства.\n\n" +
+                        "Как использовать:\n" +
+                        "  1. Выберите приложение из списка (или «Всё устройство»)\n" +
+                        "  2. Нажмите Старт — выбранное приложение запустится автоматически\n" +
+                        "  3. NetWatch фиксирует все исходящие соединения в реальном времени\n\n" +
+                        "Возможности:\n" +
+                        "  • Geo-IP поиск для каждого соединения\n" +
+                        "  • Обнаружение смежных доменов (CDN, поддомены)\n" +
+                        "  • Вибрация при соединении с неизвестным доменом\n" +
+                        "  • Экспорт лога соединений в формате RFC 4180 CSV");
+                } else {
+                    showInfoDialog("📡 Traffic Monitor — Help",
+                        "Monitor live network connections for any installed app or the whole device.\n\n" +
+                        "How to use:\n" +
+                        "  1. Select an app from the dropdown (or \'Whole Device\')\n" +
+                        "  2. Tap Start — the selected app launches automatically\n" +
+                        "  3. NetWatch captures all outbound connections in real-time\n\n" +
+                        "Features:\n" +
+                        "  • Geo-IP lookup for every connection\n" +
+                        "  • Companion domain detection (CDNs, subdomains)\n" +
+                        "  • Vibration alert for unknown/unlisted domains\n" +
+                        "  • Export connection log as RFC 4180 CSV");
+                }
+                return true;
+            } else if (id == R.id.menu_instructions_checker) {
+                if (isRussian) {
+                    showInfoDialog("✅ Проверка доменов — Справка",
+                        "Быстрая проверка доступности известных сервисных доменов.\n\n" +
+                        "Категории:\n" +
+                        "  • Microsoft, Google, Apple, Cloudflare\n" +
+                        "  • Социальные сети и мессенджеры\n" +
+                        "  • Финансы и платежи\n" +
+                        "  • Игры (Xbox, PlayStation)\n\n" +
+                        "Статус каждого домена:\n" +
+                        "  🟢 Доступен  |  🔴 Заблокирован / Недоступен\n\n" +
+                        "Нажмите «Проверить всё» для запуска всех тестов.\n" +
+                        "Используйте поле ввода вверху для проверки любого домена вручную.");
+                } else {
+                    showInfoDialog("✅ Domain Checker — Help",
+                        "Quickly verify connectivity to well-known service domains.\n\n" +
+                        "Categories include:\n" +
+                        "  • Microsoft, Google, Apple, Cloudflare\n" +
+                        "  • Social & Messaging\n" +
+                        "  • Finance & Payments\n" +
+                        "  • Gaming (Xbox, PlayStation)\n\n" +
+                        "Each domain shows a live status:\n" +
+                        "  🟢 Reachable  |  🔴 Blocked / Unreachable\n\n" +
+                        "Tap Check All to run all tests at once.\n" +
+                        "Use the custom input at the top to test any domain manually.");
+                }
+                return true;
+            } else if (id == R.id.menu_instructions_myinfo) {
+                if (isRussian) {
+                    showInfoDialog("🌐 Мои данные — Справка",
+                        "Отображает актуальную информацию о вашем сетевом подключении.\n\n" +
+                        "Показываемые данные:\n" +
+                        "  • Публичный IP-адрес\n" +
+                        "  • Провайдер / Сеть\n" +
+                        "  • Город, регион, страна\n" +
+                        "  • GPS-координаты (нажмите для открытия в Google Maps)\n" +
+                        "  • Часовой пояс\n\n" +
+                        "Данные получены от ipinfo.io.\n" +
+                        "Нажмите Обновить для актуализации информации.");
+                } else {
+                    showInfoDialog("🌐 My Info — Help",
+                        "Displays live information about your current network connection.\n\n" +
+                        "Shown details:\n" +
+                        "  • Public IP Address\n" +
+                        "  • ISP / Network Provider\n" +
+                        "  • City, Region, Country\n" +
+                        "  • GPS Coordinates (tap for Google Maps)\n" +
+                        "  • Timezone\n\n" +
+                        "Data is fetched from ipinfo.io.\n" +
+                        "Tap Refresh to update at any time.");
+                }
+                return true;
+            } else if (id == R.id.menu_language) {
+                showLanguageDialog();
+                return true;
+            } else if (id == R.id.menu_about) {
+                if (isRussian) {
+                    showInfoDialog("ℹ️ О программе NetWatch",
+                        "◈ NETWATCH\n" +
+                        "Версия 1.4.3\n\n" +
+                        "Профессиональный инструмент сетевой разведки для Android.\n\n" +
+                        "Возможности:\n" +
+                        "  • Анализ доменов и WHOIS-запросы\n" +
+                        "  • Мониторинг трафика приложений в реальном времени\n" +
+                        "  • Проверка доступности доменов\n" +
+                        "  • Актуальная информация о сети и Geo-IP\n\n" +
+                        "Создано с ❤️ с помощью Base44 Superagent.");
+                } else {
+                    showInfoDialog("ℹ️ About NetWatch",
+                        "◈ NETWATCH\n" +
+                        "Version 1.4.3\n\n" +
+                        "A professional-grade network intelligence tool for Android.\n\n" +
+                        "Features:\n" +
+                        "  • Domain Intelligence & WHOIS lookup\n" +
+                        "  • Real-time per-app traffic monitoring\n" +
+                        "  • Domain reachability checker\n" +
+                        "  • Live network & geo-IP info\n\n" +
+                        "Built with ❤️ using Base44 Superagent.");
+                }
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+
+    // ── Language picker dialog ────────────────────────────────────────────────
+    private void showLanguageDialog() {
+        String[] options = {"🇬🇧  English", "🇷🇺  Русский"};
+        int current = isRussian ? 1 : 0;
+        new AlertDialog.Builder(this)
+            .setTitle(isRussian ? "🌍 Выберите язык" : "🌍 Select Language")
+            .setSingleChoiceItems(options, current, (dialog, which) -> {
+                boolean selectRu = (which == 1);
+                if (selectRu != isRussian) {
+                    isRussian = selectRu;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .edit()
+                        .putString(PREF_LANG, isRussian ? "ru" : "en")
+                        .apply();
+                }
+                dialog.dismiss();
+                android.widget.Toast.makeText(this,
+                    isRussian ? "Язык изменён на Русский" : "Language set to English",
+                    android.widget.Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(isRussian ? "Отмена" : "Cancel", null)
+            .show();
+    }
+
     // ── Info / Help Dialog ───────────────────────────────────────────────────
     private void showInfoDialog(String title, String message) {
         new AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Got it", null)
+            .setPositiveButton(isRussian ? "Понятно" : "Got it", null)
             .show();
     }
 
