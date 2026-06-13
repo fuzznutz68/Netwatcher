@@ -12,12 +12,12 @@
         "source": "com.netwatch.app-main-5:/layout/activity_main.xml"
     },
     {
-        "merged": "com.netwatch.app-merged_res-4:/drawable_ic_launcher.xml.flat",
-        "source": "com.netwatch.app-main-5:/drawable/ic_launcher.xml"
-    },
-    {
         "merged": "com.netwatch.app-merged_res-4:/drawable_card_background.xml.flat",
         "source": "com.netwatch.app-main-5:/drawable/card_background.xml"
+    },
+    {
+        "merged": "com.netwatch.app-merged_res-4:/drawable_ic_launcher.xml.flat",
+        "source": "com.netwatch.app-main-5:/drawable/ic_launcher.xml"
     },
     {
         "merged": "com.netwatch.app-merged_res-4:/drawable_input_background.xml.flat",
