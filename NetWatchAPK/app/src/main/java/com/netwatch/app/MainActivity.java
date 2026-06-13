@@ -151,6 +151,7 @@ public class MainActivity extends Activity {
         tab1          = findViewById(R.id.tab1);
         tab2          = findViewById(R.id.tab2);
         tabDomainBtn.setSelected(true);
+        refreshTabLabels();
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
@@ -477,6 +478,7 @@ public class MainActivity extends Activity {
                         .edit()
                         .putString(PREF_LANG, isRussian ? "ru" : "en")
                         .apply();
+                    refreshTabLabels();
                 }
                 dialog.dismiss();
                 android.widget.Toast.makeText(this,
@@ -485,6 +487,14 @@ public class MainActivity extends Activity {
             })
             .setNegativeButton(isRussian ? "Отмена" : "Cancel", null)
             .show();
+    }
+
+    // ── Refresh Tab Labels ───────────────────────────────────────────────────
+    private void refreshTabLabels() {
+        tabDomainBtn.setText(isRussian ? "🔍 Домены"   : "🔍 Domain Intel");
+        tabTrafficBtn.setText(isRussian ? "📡 Трафик"   : "📡 Traffic");
+        tabCheckerBtn.setText(isRussian ? "✅ Проверка" : "✅ Checker");
+        tabMyInfoBtn.setText(isRussian  ? "🌐 Мой IP"  : "🌐 My Info");
     }
 
     // ── Info / Help Dialog ───────────────────────────────────────────────────
