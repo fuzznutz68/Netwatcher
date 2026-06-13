@@ -447,10 +447,14 @@ public class MainActivity extends Activity {
                 showLanguageDialog();
                 return true;
             } else if (id == R.id.menu_about) {
+                String versionName = "1.4.5";
+                try {
+                    versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                } catch (Exception ignored) {}
                 if (isRussian) {
                     showInfoDialog("ℹ️ О программе NetWatch",
                         "◈ NETWATCH\n" +
-                        "Версия 1.4.3\n\n" +
+                        "Версия " + versionName + "\n\n" +
                         "Профессиональный инструмент сетевой разведки для Android.\n\n" +
                         "Возможности:\n" +
                         "  • Анализ доменов и WHOIS-запросы\n" +
@@ -461,7 +465,7 @@ public class MainActivity extends Activity {
                 } else {
                     showInfoDialog("ℹ️ About NetWatch",
                         "◈ NETWATCH\n" +
-                        "Version 1.4.3\n\n" +
+                        "Version " + versionName + "\n\n" +
                         "A professional-grade network intelligence tool for Android.\n\n" +
                         "Features:\n" +
                         "  • Domain Intelligence & WHOIS lookup\n" +
