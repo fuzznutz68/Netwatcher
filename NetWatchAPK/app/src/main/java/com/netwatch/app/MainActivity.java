@@ -152,7 +152,6 @@ public class MainActivity extends Activity {
         tab2          = findViewById(R.id.tab2);
         tabDomainBtn.setSelected(true);
         refreshTabLabels();
-        refreshUiStrings();
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
@@ -210,6 +209,9 @@ public class MainActivity extends Activity {
             alertsEnabled = checked;
             prefs.edit().putBoolean("alerts_enabled", checked).apply();
         });
+
+        // Apply localized strings now that all views are initialized
+        refreshUiStrings();
 
         checkAllBtn.setOnClickListener(v -> startDomainCheck());
         stopCheckBtn.setOnClickListener(v  -> stopDomainCheck());
