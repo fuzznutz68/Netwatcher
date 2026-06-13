@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="alert_label">🔔  Alert on unknown hosts</string>
     <string name="app_name">NetWatch</string>
-    <string name="domain_hint">Enter domain (e.g. google.com)</string>
-    <string name="scan_btn">Scan</string>
-    <string name="start_monitor">Start Monitoring</string>
-    <string name="stop_monitor">Stop</string>
+    <string name="check_all_btn">▶  Check All</string>
+    <string name="check_btn">Check</string>
+    <string name="checker_hint">Enter domain or IP…</string>
+    <string name="checker_idle_label">Tap ▶ Check All to test reachability</string>
+    <string name="domain_hint">Enter domain (e.g. paypal.com)</string>
+    <string name="domain_hint_label">Enter a domain and tap SCAN</string>
+    <string name="export_btn">⬆ Export</string>
+    <string name="live_hosts_label">LIVE CONNECTION HOSTS</string>
+    <string name="lookup_btn">▶  Lookup My Info</string>
+    <string name="mon_inactive">⚫  Monitoring inactive</string>
+    <string name="my_info_desc">Your public IP address, ISP, and location as seen from the internet.</string>
+    <string name="my_info_title">🌐 My Network Info</string>
+    <string name="scan_btn">SCAN</string>
+    <string name="select_app_label">SELECT APP TO MONITOR</string>
+    <string name="start_btn">▶  START</string>
+    <string name="stop_btn">■  STOP</string>
+    <string name="stop_check_btn">■  Stop</string>
     <string name="vpn_active">Monitoring active</string>
-    <string name="vpn_permission_denied">VPN permission denied. Traffic monitoring requires VPN access.</string>
+    <string name="vpn_permission_denied">VPN permission denied.</string>
     <string name="vpn_stopped">Monitoring stopped</string>
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">#00E5FF</item>

@@ -152,6 +152,7 @@ public class MainActivity extends Activity {
         tab2          = findViewById(R.id.tab2);
         tabDomainBtn.setSelected(true);
         refreshTabLabels();
+        refreshUiStrings();
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
@@ -310,7 +311,7 @@ public class MainActivity extends Activity {
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(launch);
             } else {
-                showToast("Can't launch — app may be a background service");
+                showToast(isRussian ? "Невозможно запустить — фоновый сервис" : "Can't launch — app may be a background service");
             }
         } catch (Exception e) {
             showToast("Could not open app: " + e.getMessage());
@@ -479,6 +480,7 @@ public class MainActivity extends Activity {
                         .putString(PREF_LANG, isRussian ? "ru" : "en")
                         .apply();
                     refreshTabLabels();
+                    refreshUiStrings();
                 }
                 dialog.dismiss();
                 android.widget.Toast.makeText(this,
@@ -495,6 +497,29 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setText(isRussian ? "📡 Трафик"   : "📡 Traffic");
         tabCheckerBtn.setText(isRussian ? "✅ Проверка" : "✅ Checker");
         tabMyInfoBtn.setText(isRussian  ? "🌐 Мой IP"  : "🌐 My Info");
+    }
+
+    // ── Refresh All UI Strings on Language Change ────────────────────────────
+    private void refreshUiStrings() {
+        // Domain Intel tab
+        domainInput.setHint(isRussian ? "Введите домен (напр. paypal.com)" : "Enter domain (e.g. paypal.com)");
+        lookupBtn.setText(isRussian ? "СКАН" : "SCAN");
+        statusText.setText(isRussian ? "Введите домен и нажмите СКАН" : "Enter a domain and tap SCAN");
+        exportDomainBtn.setText(isRussian ? "⬆ Экспорт" : "⬆ Export");
+        // Traffic Monitor tab
+        startMonBtn.setText(isRussian ? "▶  СТАРТ" : "▶  START");
+        stopMonBtn.setText(isRussian ? "■  СТОП" : "■  STOP");
+        exportTrafficBtn.setText(isRussian ? "⬆ Экспорт" : "⬆ Export");
+        alertSwitch.setText(isRussian ? "🔔  Оповещение о неизвестных хостах" : "🔔  Alert on unknown hosts");
+        monStatusText.setText(isRussian ? "⚫  Мониторинг неактивен" : "⚫  Monitoring inactive");
+        // Domain Checker tab
+        customDomainInput.setHint(isRussian ? "Введите домен или IP…" : "Enter domain or IP…");
+        checkCustomBtn.setText(isRussian ? "Проверить" : "Check");
+        checkAllBtn.setText(isRussian ? "▶  Проверить всё" : "▶  Check All");
+        stopCheckBtn.setText(isRussian ? "■  Стоп" : "■  Stop");
+        checkStatusText.setText(isRussian ? "Нажмите ▶ Проверить всё для теста" : "Tap ▶ Check All to test reachability");
+        // My Info tab
+        myInfoRefreshBtn.setText(isRussian ? "▶  Получить данные" : "▶  Lookup My Info");
     }
 
     // ── Info / Help Dialog ───────────────────────────────────────────────────
@@ -562,7 +587,7 @@ public class MainActivity extends Activity {
     // ── Monitoring Control ───────────────────────────────────────────────────
 
     private void startMonitoring() {
-        if (selectedApp == null) { showToast("Select an app first"); return; }
+        if (selectedApp == null) { showToast(isRussian ? "Сначала выберите приложение" : "Select an app first"); return; }
 
         clearLog();
         monitoring = true;
@@ -570,7 +595,7 @@ public class MainActivity extends Activity {
         stopMonBtn.setEnabled(true);
         appSpinner.setEnabled(false);
 
-        monStatusText.setText("🟢  Monitoring: " + selectedApp.label);
+        monStatusText.setText((isRussian ? "🟢  Мониторинг: " : "🟢  Monitoring: ") + selectedApp.label);
         monStatusText.setTextColor(Color.parseColor("#66BB6A"));
 
         Intent si = new Intent(this, TrafficMonitorService.class);
@@ -586,7 +611,7 @@ public class MainActivity extends Activity {
         stopMonBtn.setEnabled(false);
         appSpinner.setEnabled(true);
 
-        monStatusText.setText("⚫  Monitoring stopped");
+        monStatusText.setText(isRussian ? "⚫  Мониторинг остановлен" : "⚫  Monitoring stopped");
         monStatusText.setTextColor(Color.parseColor("#78909C"));
 
         Intent si = new Intent(this, TrafficMonitorService.class);
@@ -638,7 +663,7 @@ public class MainActivity extends Activity {
                 hostCount++;
             }
             if (hostCount > 0)
-                connectionCountText.setText(hostCount + " unique hosts");
+                connectionCountText.setText(hostCount + (isRussian ? " уникальных хостов" : " unique hosts"));
             hostLogScroll.post(() -> hostLogScroll.fullScroll(ScrollView.FOCUS_DOWN));
         }
     }
@@ -705,7 +730,7 @@ public class MainActivity extends Activity {
                 hostView.setTextColor(Color.parseColor("#C8D8E8"));
                 badge.setVisibility(android.view.View.GONE);
                 trustBtn.setVisibility(android.view.View.GONE);
-                showToast("✓ Trusted: " + root);
+                showToast(isRussian ? "✓ Доверенный: " + root : "✓ Trusted: " + root);
             });
             row.addView(trustBtn);
         }
@@ -825,11 +850,11 @@ public class MainActivity extends Activity {
 
     private void performLookup() {
         String raw = domainInput.getText().toString().trim();
-        if (raw.isEmpty()) { showToast("Enter a domain"); return; }
+        if (raw.isEmpty()) { showToast(isRussian ? "Введите домен" : "Enter a domain"); return; }
         String domain = raw.replaceAll("(?i)https?://", "").replaceAll("/.*", "").toLowerCase().trim();
 
         resultsContainer.removeAllViews();
-        statusText.setText("⏳  Scanning " + domain + " …");
+        statusText.setText(isRussian ? "⏳  Сканирование " + domain + " …" : "⏳  Scanning " + domain + " …");
         lookupBtn.setEnabled(false);
 
         executor.execute(() -> {
@@ -837,10 +862,10 @@ public class MainActivity extends Activity {
             mainHandler.post(() -> {
                 lookupBtn.setEnabled(true);
                 if (intelJson == null) {
-                    statusText.setText("❌  Network error");
+                    statusText.setText(isRussian ? "❌  Ошибка сети" : "❌  Network error");
                     return;
                 }
-                statusText.setText("✅  Scan complete for " + domain);
+                statusText.setText(isRussian ? "✅  Сканирование завершено: " + domain : "✅  Scan complete for " + domain);
                 lastDomainForExport    = domain;
                 lastIntelJsonForExport = intelJson != null ? intelJson : "";
                 lastProbeJsonForExport = "";
@@ -967,7 +992,7 @@ public class MainActivity extends Activity {
     }
 
     private void exportDomainIntel() {
-        if (lastDomainForExport.isEmpty()) { showToast("Run a scan first"); return; }
+        if (lastDomainForExport.isEmpty()) { showToast(isRussian ? "Сначала выполните сканирование" : "Run a scan first"); return; }
         String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
         StringBuilder sb = new StringBuilder();
 
@@ -1039,7 +1064,7 @@ public class MainActivity extends Activity {
     }
 
     private void exportTrafficLog() {
-        if (trafficLogForExport.isEmpty()) { showToast("No traffic data to export"); return; }
+        if (trafficLogForExport.isEmpty()) { showToast(isRussian ? "Нет данных трафика для экспорта" : "No traffic data to export"); return; }
         String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new Date());
         String appLabel = selectedApp != null ? selectedApp.label : "Device";
         StringBuilder sb = new StringBuilder();
@@ -1075,14 +1100,14 @@ public class MainActivity extends Activity {
             share.putExtra(Intent.EXTRA_SUBJECT, filename);
             share.putExtra(Intent.EXTRA_STREAM, uri);
             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(share, "Export CSV via…"));
+            startActivity(Intent.createChooser(share, isRussian ? "Экспорт CSV через…" : "Export CSV via…"));
         } catch (Exception e) {
             // Fallback: share as plain text
             Intent share = new Intent(Intent.ACTION_SEND);
             share.setType("text/csv");
             share.putExtra(Intent.EXTRA_SUBJECT, filename);
             share.putExtra(Intent.EXTRA_TEXT, csvText);
-            startActivity(Intent.createChooser(share, "Export CSV via…"));
+            startActivity(Intent.createChooser(share, isRussian ? "Экспорт CSV через…" : "Export CSV via…"));
         }
     }
 
@@ -1192,7 +1217,7 @@ public class MainActivity extends Activity {
                 // ── Maps shortcut ──
                 if (!fLat.isEmpty() && !fLon.isEmpty() && !fLat.equals("0.0")) {
                     Button mapsBtn = new Button(MainActivity.this);
-                    mapsBtn.setText("📍  Open in Maps");
+                    mapsBtn.setText(isRussian ? "📍  Открыть на карте" : "📍  Open in Maps");
                     mapsBtn.setTextColor(0xFFFFFFFF);
                     mapsBtn.setBackground(getResources().getDrawable(R.drawable.btn_primary));
                     android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
@@ -1205,7 +1230,7 @@ public class MainActivity extends Activity {
                         android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW,
                             android.net.Uri.parse(mapsUri));
                         if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
-                        else showToast("No maps app found");
+                        else showToast(isRussian ? "Приложение карт не найдено" : "No maps app found");
                     });
                     myInfoContainer.addView(mapsBtn);
                 }
@@ -1496,7 +1521,7 @@ public class MainActivity extends Activity {
                 done++;
                 final int fdone = done;
                 mainHandler.post(() ->
-                    checkStatusText.setText("Checking " + fdone + "/" + allEntries.size() + " — " + host));
+                    checkStatusText.setText((isRussian ? "Проверка " : "Checking ") + fdone + "/" + allEntries.size() + " — " + host));
 
                 long[] result = probeHost(host);
                 // result[0] = 1 reachable / 0 blocked, result[1] = latency ms
@@ -1524,9 +1549,9 @@ public class MainActivity extends Activity {
                 checkAllBtn.setEnabled(true);
                 stopCheckBtn.setEnabled(false);
                 if (fd == allEntries.size()) {
-                    checkStatusText.setText("Done — ✅ " + fr + " reachable   🚫 " + fb + " blocked");
+                    checkStatusText.setText(isRussian ? "Готово — ✅ " + fr + " доступно   🚫 " + fb + " заблокировано" : "Done — ✅ " + fr + " reachable   🚫 " + fb + " blocked");
                 } else {
-                    checkStatusText.setText("Stopped — ✅ " + fr + "  🚫 " + fb + " (of " + fd + " checked)");
+                    checkStatusText.setText(isRussian ? "Остановлено — ✅ " + fr + "  🚫 " + fb + " (из " + fd + " проверено)" : "Stopped — ✅ " + fr + "  🚫 " + fb + " (of " + fd + " checked)");
                 }
                 checkStatusText.setTextColor(fb > 0 ? Color.parseColor("#EF9A9A") : Color.parseColor("#66BB6A"));
             });
@@ -1585,7 +1610,7 @@ public class MainActivity extends Activity {
     // ─────────────────────────────────────────────────────────────
     private void checkCustomDomain() {
         String raw = customDomainInput.getText().toString().trim();
-        if (raw.isEmpty()) { showToast("Enter a domain or IP first"); return; }
+        if (raw.isEmpty()) { showToast(isRussian ? "Введите домен или IP" : "Enter a domain or IP first"); return; }
         // Strip protocol prefix if pasted in
         raw = raw.replaceFirst("^https?://", "").replaceFirst("/.*$", "");
         final String host = raw;
@@ -1671,7 +1696,7 @@ public class MainActivity extends Activity {
         final TextView fStatus = statusView;
         final TextView fDot    = dotView;
 
-        checkStatusText.setText("Checking " + host + "…");
+        checkStatusText.setText((isRussian ? "Проверка " : "Checking ") + host + "…");
         checkStatusText.setTextColor(Color.parseColor("#00E5FF"));
 
         executor.execute(() -> {
