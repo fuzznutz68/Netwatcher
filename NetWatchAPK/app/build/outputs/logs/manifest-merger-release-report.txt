@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:41:9-49:20
+INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:40:9-48:20
 	android:grantUriPermissions
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:45:13-47
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:44:13-47
 	android:authorities
 		INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:43:13-60
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:42:13-60
 	android:exported
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:44:13-37
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:43:13-37
 	android:name
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:42:13-62
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:41:13-62
 manifest
-ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-52:12
-INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-52:12
-INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-52:12
-INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-52:12
+ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-51:12
+INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-51:12
+INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-51:12
+INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:2:1-51:12
 MERGED from [com.google.android.material:material:1.11.0] /tmp/gradle_home/caches/transforms-3/99dc24b8086e9e02f60cbc0643cdc897/transformed/material-1.11.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /tmp/gradle_home/caches/transforms-3/1f371f754bd6786f9a76f8e2fd18482b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /tmp/gradle_home/caches/transforms-3/6bb17d2c54c905aa7b0c5b5bfe3537f3/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
@@ -79,10 +79,6 @@ uses-permission#android.permission.FOREGROUND_SERVICE
 ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:5-77
 	android:name
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:7:22-74
-uses-permission#android.permission.FOREGROUND_SERVICE_DATA_SYNC
-ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:8:5-87
-	android:name
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:8:22-84
 uses-permission#android.permission.POST_NOTIFICATIONS
 ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:9:5-77
 	android:name
@@ -98,7 +94,7 @@ ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:12:5-66
 	android:name
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:12:22-63
 application
-ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:5-51:19
+ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:5-50:19
 MERGED from [com.google.android.material:material:1.11.0] /tmp/gradle_home/caches/transforms-3/99dc24b8086e9e02f60cbc0643cdc897/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] /tmp/gradle_home/caches/transforms-3/99dc24b8086e9e02f60cbc0643cdc897/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /tmp/gradle_home/caches/transforms-3/1f371f754bd6786f9a76f8e2fd18482b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -156,19 +152,17 @@ ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:17-77
 	android:name
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:27-74
 service#com.netwatch.app.TrafficMonitorService
-ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:36:9-39:55
+ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:36:9-38:39
 	android:exported
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:38:13-37
-	android:foregroundServiceType
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:39:13-53
 	android:name
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:37:13-50
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:46:13-48:62
+ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:45:13-47:62
 	android:resource
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:48:17-60
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:47:17-60
 	android:name
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:47:17-67
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:46:17-67
 uses-sdk
 INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml

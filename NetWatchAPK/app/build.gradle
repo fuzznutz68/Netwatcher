@@ -10,7 +10,7 @@ android {
         applicationId "com.netwatch.app"
         minSdk 30
         targetSdk 34
-        versionCode 42
+        versionCode 43
         versionName "1.4.5"
     }
 

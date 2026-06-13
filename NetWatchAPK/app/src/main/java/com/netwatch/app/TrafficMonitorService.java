@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Handler;
@@ -99,11 +98,7 @@ public class TrafficMonitorService extends Service {
 
         createChannel();
         Notification n = buildNotification();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-        } else {
-            startForeground(NOTIF_ID, n);
-        }
+        startForeground(NOTIF_ID, n);
 
         dnsCache.clear(); geoCache.clear();
         submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
