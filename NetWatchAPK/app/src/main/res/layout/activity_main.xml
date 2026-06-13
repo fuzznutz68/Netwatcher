@@ -10,25 +10,48 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:background="#0D1117"
-        android:padding="16dp">
-        <TextView
-            android:layout_width="wrap_content"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Title block -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="◈ NETWATCH"
-            android:textSize="20sp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="◈ NETWATCH"
+                android:textSize="20sp"
+                android:textColor="#00E5FF"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.15"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="// domain intelligence &amp; traffic monitor"
+                android:textSize="11sp"
+                android:textColor="#2A4A5A"
+                android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <!-- Menu button top-right -->
+        <TextView
+            android:id="@+id/menuBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="⋮"
+            android:textSize="24sp"
             android:textColor="#00E5FF"
-            android:textStyle="bold"
+            android:gravity="center"
             android:fontFamily="monospace"
-            android:letterSpacing="0.15"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="// domain intelligence &amp; traffic monitor"
-            android:textSize="11sp"
-            android:textColor="#2A4A5A"
-            android:fontFamily="monospace"/>
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"/>
     </LinearLayout>
 
     <!-- Tab Bar -->

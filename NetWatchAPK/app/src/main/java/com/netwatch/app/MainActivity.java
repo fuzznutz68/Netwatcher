@@ -65,6 +65,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.app.AlertDialog;
+import android.view.MenuItem;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
@@ -145,6 +149,79 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
         tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
+
+        // ── Top-right menu button ────────────────────────────────────────────
+        TextView menuBtn = findViewById(R.id.menuBtn);
+        menuBtn.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this, v);
+            popup.getMenuInflater().inflate(R.menu.main_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.menu_instructions_domain) {
+                    showInfoDialog("🔍 Domain Intel — Help",
+                        "Enter any domain name and tap Lookup.\n\n" +
+                        "Results include:\n" +
+                        "  • IP Addresses (A records)\n" +
+                        "  • Subdomains detected\n" +
+                        "  • WHOIS registration info\n" +
+                        "  • Geo-IP location of the server\n\n" +
+                        "Tap Export to save results as a CSV file.");
+                    return true;
+                } else if (id == R.id.menu_instructions_traffic) {
+                    showInfoDialog("📡 Traffic Monitor — Help",
+                        "Monitor live network connections for any installed app or the whole device.\n\n" +
+                        "How to use:\n" +
+                        "  1. Select an app from the dropdown (or 'Whole Device')\n" +
+                        "  2. Tap Start — the selected app launches automatically\n" +
+                        "  3. NetWatch captures all outbound connections in real-time\n\n" +
+                        "Features:\n" +
+                        "  • Geo-IP lookup for every connection\n" +
+                        "  • Companion domain detection (CDNs, subdomains)\n" +
+                        "  • Vibration alert for unknown/unlisted domains\n" +
+                        "  • Export connection log as RFC 4180 CSV");
+                    return true;
+                } else if (id == R.id.menu_instructions_checker) {
+                    showInfoDialog("✅ Domain Checker — Help",
+                        "Quickly verify connectivity to well-known service domains.\n\n" +
+                        "Categories include:\n" +
+                        "  • Microsoft, Google, Apple, Cloudflare\n" +
+                        "  • Social & Messaging\n" +
+                        "  • Finance & Payments\n" +
+                        "  • Gaming (Xbox, PlayStation)\n\n" +
+                        "Each domain shows a live status:\n" +
+                        "  🟢 Reachable  |  🔴 Blocked / Unreachable\n\n" +
+                        "Tap Check All to run all tests at once.\n" +
+                        "Use the custom input at the top to test any domain manually.");
+                    return true;
+                } else if (id == R.id.menu_instructions_myinfo) {
+                    showInfoDialog("🌐 My Info — Help",
+                        "Displays live information about your current network connection.\n\n" +
+                        "Shown details:\n" +
+                        "  • Public IP Address\n" +
+                        "  • ISP / Network Provider\n" +
+                        "  • City, Region, Country\n" +
+                        "  • GPS Coordinates (tap for Google Maps)\n" +
+                        "  • Timezone\n\n" +
+                        "Data is fetched from ipinfo.io.\n" +
+                        "Tap Refresh to update at any time.");
+                    return true;
+                } else if (id == R.id.menu_about) {
+                    showInfoDialog("ℹ️ About NetWatch",
+                        "◈ NETWATCH\n" +
+                        "Version 1.4.2\n\n" +
+                        "A professional-grade network intelligence tool for Android.\n\n" +
+                        "Features:\n" +
+                        "  • Domain Intelligence & WHOIS lookup\n" +
+                        "  • Real-time per-app traffic monitoring\n" +
+                        "  • Domain reachability checker\n" +
+                        "  • Live network & geo-IP info\n\n" +
+                        "Built with ❤️ using Base44 Superagent.");
+                    return true;
+                }
+                return false;
+            });
+            popup.show();
+        });
 
         // Tab 1
         domainInput      = findViewById(R.id.domainInput);
@@ -304,6 +381,15 @@ public class MainActivity extends Activity {
     }
 
     // ── App List ─────────────────────────────────────────────────────────────
+
+    // ── Info / Help Dialog ───────────────────────────────────────────────────
+    private void showInfoDialog(String title, String message) {
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Got it", null)
+            .show();
+    }
 
     private void loadAppList() {
         executor.execute(() -> {
