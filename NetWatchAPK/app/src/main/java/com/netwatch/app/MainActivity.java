@@ -904,14 +904,57 @@ public class MainActivity extends Activity {
             }
 
             if (intel != null) {
-                StringBuilder sb = new StringBuilder();
                 JSONArray ipv4 = intel.optJSONArray("ipv4");
-                if (ipv4 != null) for (int i=0;i<ipv4.length();i++) sb.append("IPv4:  ").append(ipv4.optString(i)).append("\n");
                 JSONArray ipv6 = intel.optJSONArray("ipv6");
-                if (ipv6 != null) for (int i=0;i<ipv6.length();i++) sb.append("IPv6:  ").append(ipv6.optString(i)).append("\n");
                 String cname = intel.optString("cname","");
-                if (!cname.isEmpty() && !cname.equals("null")) sb.append("CNAME: ").append(cname);
-                if (sb.length() > 0) addCard("🌐  " + domain, sb.toString().trim(), "#A5D6A7");
+
+                // Build IP list for geo lookup
+                java.util.List<String> allIps = new java.util.ArrayList<>();
+                if (ipv4 != null) for (int i=0;i<ipv4.length();i++) allIps.add(ipv4.optString(i));
+
+                // Geo-IP lookup for each IPv4 (run on executor, then post result)
+                final String finalDomain = domain;
+                final String finalCname = cname;
+                final java.util.List<String> ipv6List = new java.util.ArrayList<>();
+                if (ipv6 != null) for (int i=0;i<ipv6.length();i++) ipv6List.add(ipv6.optString(i));
+
+                executor.execute(() -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (String ip : allIps) {
+                        sb.append("IPv4:  ").append(ip);
+                        // Geo-IP lookup
+                        try {
+                            java.net.URL geoUrl = new java.net.URL("https://ipinfo.io/" + ip + "/json");
+                            java.net.HttpURLConnection gc = (java.net.HttpURLConnection) geoUrl.openConnection();
+                            gc.setRequestProperty("Accept", "application/json");
+                            gc.setConnectTimeout(5000); gc.setReadTimeout(5000);
+                            org.json.JSONObject g = new org.json.JSONObject(
+                                new String(gc.getInputStream().readAllBytes(), "UTF-8").trim());
+                            gc.disconnect();
+                            String countryCode = g.optString("country","");
+                            String cityName    = g.optString("city","");
+                            String orgName     = g.optString("org","");
+                            String countryFull = countryCode;
+                            try { countryFull = new java.util.Locale("", countryCode).getDisplayCountry(); } catch (Exception ignored) {}
+                            String flagStr = "";
+                            if (countryCode.length() == 2) {
+                                int f1 = 0x1F1E6 + (countryCode.charAt(0) - 'A');
+                                int f2 = 0x1F1E6 + (countryCode.charAt(1) - 'A');
+                                flagStr = new String(Character.toChars(f1)) + new String(Character.toChars(f2));
+                            }
+                            if (!countryFull.isEmpty()) sb.append("  ").append(flagStr).append(" ").append(countryFull);
+                            if (!cityName.isEmpty()) sb.append(", ").append(cityName);
+                            if (!orgName.isEmpty()) sb.append("\n       ").append(orgName);
+                        } catch (Exception ignored) {}
+                        sb.append("\n");
+                    }
+                    for (String ip : ipv6List) sb.append("IPv6:  ").append(ip).append("\n");
+                    if (!finalCname.isEmpty() && !finalCname.equals("null")) sb.append("CNAME: ").append(finalCname);
+                    final String result = sb.toString().trim();
+                    mainHandler.post(() -> {
+                        if (result.length() > 0) addCard("🌐  " + finalDomain, result, "#A5D6A7");
+                    });
+                });
             }
 
             if (intel != null) {
