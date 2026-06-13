@@ -14,16 +14,25 @@ android {
         versionName "1.4.5"
     }
 
+    signingConfigs {
+        release {
+            storeFile file("../netwatch-debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix ""
             debuggable true
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
         release {
             minifyEnabled false
             debuggable false
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 
