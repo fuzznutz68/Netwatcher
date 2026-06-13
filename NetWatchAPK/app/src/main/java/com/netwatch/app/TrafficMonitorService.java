@@ -98,7 +98,11 @@ public class TrafficMonitorService extends Service {
 
         createChannel();
         Notification n = buildNotification();
-        startForeground(NOTIF_ID, n);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NOTIF_ID, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        } else {
+            startForeground(NOTIF_ID, n);
+        }
 
         dnsCache.clear(); geoCache.clear();
         submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
