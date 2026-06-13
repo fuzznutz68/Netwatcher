@@ -30,5 +30,9 @@
     {
         "merged": "com.netwatch.app-merged_res-4:/xml_file_provider_paths.xml.flat",
         "source": "com.netwatch.app-main-6:/xml/file_provider_paths.xml"
+    },
+    {
+        "merged": "com.netwatch.app-merged_res-4:/menu_main_menu.xml.flat",
+        "source": "com.netwatch.app-main-6:/menu/main_menu.xml"
     }
 ]

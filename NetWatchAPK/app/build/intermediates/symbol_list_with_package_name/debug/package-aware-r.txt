@@ -749,6 +749,12 @@ id line3
 id listMode
 id list_item
 id lookupBtn
+id menuBtn
+id menu_about
+id menu_instructions_checker
+id menu_instructions_domain
+id menu_instructions_myinfo
+id menu_instructions_traffic
 id message
 id middle
 id monStatusText
@@ -901,6 +907,7 @@ layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
+menu main_menu
 string abc_action_bar_home_description
 string abc_action_bar_up_description
 string abc_action_menu_overflow_description

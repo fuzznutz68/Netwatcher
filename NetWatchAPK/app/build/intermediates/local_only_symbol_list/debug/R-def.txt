@@ -21,6 +21,12 @@ id exportTrafficBtn
 id hostLogContainer
 id hostLogScroll
 id lookupBtn
+id menuBtn
+id menu_about
+id menu_instructions_checker
+id menu_instructions_domain
+id menu_instructions_myinfo
+id menu_instructions_traffic
 id monStatusText
 id myInfoContainer
 id myInfoRefreshBtn
@@ -43,6 +49,7 @@ id tabTrafficBtn
 id txRateText
 id txTotalText
 layout activity_main
+menu main_menu
 string app_name
 string domain_hint
 string scan_btn
