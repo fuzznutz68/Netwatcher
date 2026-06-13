@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0A0E17">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#0D1117"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Title block -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="◈ NETWATCH"
+                android:textSize="20sp"
+                android:textColor="#00E5FF"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.15"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="// domain intelligence &amp; traffic monitor"
+                android:textSize="11sp"
+                android:textColor="#2A4A5A"
+                android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <!-- Menu button top-right -->
+        <TextView
+            android:id="@+id/menuBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="⋮"
+            android:textSize="24sp"
+            android:textColor="#00E5FF"
+            android:gravity="center"
+            android:fontFamily="monospace"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"/>
+    </LinearLayout>
+
+    <!-- Tab Bar -->
+    <LinearLayout
+        android:id="@+id/tabBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#0D1117">
+        <Button
+            android:id="@+id/tabDomainBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="🔍 Domain Intel"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="13sp"/>
+        <Button
+            android:id="@+id/tabTrafficBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="📡 Traffic"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabCheckerBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="✅ Checker"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabMyInfoBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="🌐 My Info"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 1 — Domain Intel                          -->
+    <!-- ══════════════════════════════════════════════ -->
+    <ScrollView
+        android:id="@+id/tab1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <EditText
+                    android:id="@+id/domainInput"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="48dp"
+                    android:hint="Enter domain (e.g. paypal.com)"
+                    android:textColor="#00E5FF"
+                    android:textColorHint="#546E7A"
+                    android:background="@drawable/input_background"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
+                    android:textSize="14sp"/>
+                <Button
+                    android:id="@+id/lookupBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="SCAN"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_primary"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="10dp">
+                <TextView
+                    android:id="@+id/statusText"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Enter a domain and tap SCAN"
+                    android:textColor="#78909C"
+                    android:textSize="13sp"/>
+                <Button
+                    android:id="@+id/exportDomainBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="⬆ Export"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_primary"
+                    android:textSize="12sp"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 2 — Traffic Monitor                       -->
+    <!-- ══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tab2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <!-- App Picker Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/selectAppLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SELECT APP TO MONITOR"
+                android:textSize="11sp"
+                android:textColor="#00E5FF"
+                android:textAllCaps="true"
+                android:layout_marginBottom="6dp"/>
+
+            <Spinner
+                android:id="@+id/appSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/input_background"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:layout_marginBottom="10dp"/>
+
+
+            <!-- Alert toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="🔔  Alert on unknown hosts"
+                    android:textColor="#6A7A8A"
+                    android:textSize="13sp"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/alertSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"/>
+            </LinearLayout>
+
+            <!-- Button Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/startMonBtn"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="44dp"
+                    android:text="▶  START"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_primary"
+                    android:textSize="13sp"/>
+                <Button
+                    android:id="@+id/stopMonBtn"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="44dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="■  STOP"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_danger"
+                    android:textSize="13sp"
+                    android:enabled="false"/>
+                <Button
+                    android:id="@+id/clearMonBtn"
+                    android:layout_width="48dp"
+                    android:layout_height="44dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="🗑"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_danger"
+                    android:textSize="16sp"/>
+                <Button
+                    android:id="@+id/exportTrafficBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="⬆ Export"
+                    android:textColor="#E0E8F0"
+                    android:background="@drawable/btn_primary"
+                    android:textSize="12sp"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Status row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+            <TextView
+                android:id="@+id/monStatusText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="⚫  Monitoring inactive"
+                android:textColor="#78909C"
+                android:textSize="13sp"/>
+            <TextView
+                android:id="@+id/connectionCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#00E5FF"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <!-- Traffic Stats Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="10dp">
+
+            <!-- TX column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/txTotalText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TX  —"
+                    android:textSize="15sp"
+                    android:textColor="#EF9A9A"
+                    android:textStyle="bold"
+                    android:typeface="monospace"/>
+                <TextView
+                    android:id="@+id/txRateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑ 0 B/s"
+                    android:textSize="12sp"
+                    android:textColor="#546E7A"
+                    android:typeface="monospace"/>
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#1A3A5C"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"/>
+
+            <!-- RX column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/rxTotalText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RX  —"
+                    android:textSize="15sp"
+                    android:textColor="#A5D6A7"
+                    android:textStyle="bold"
+                    android:typeface="monospace"/>
+                <TextView
+                    android:id="@+id/rxRateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↓ 0 B/s"
+                    android:textSize="12sp"
+                    android:textColor="#546E7A"
+                    android:typeface="monospace"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Host Log -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
+            <TextView
+                android:id="@+id/liveHostsLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="LIVE CONNECTION HOSTS"
+                android:textSize="11sp"
+                android:textColor="#00E5FF"
+                android:textAllCaps="true"/>
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/hostLogScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/card_background">
+            <LinearLayout
+                android:id="@+id/hostLogContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"/>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 3 — Domain Checker                        -->
+    <!-- ══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tab3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="12dp">
+
+        <!-- Custom domain input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/customDomainInput"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:hint="Enter domain or IP…"
+                android:textColorHint="#546E7A"
+                android:textColor="#00E5FF"
+                android:textSize="13sp"
+                android:background="@drawable/input_background"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:inputType="textUri"
+                android:imeOptions="actionSearch"
+                android:singleLine="true"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/checkCustomBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:text="Check"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"/>
+        </LinearLayout>
+
+        <!-- Control row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+            <Button
+                android:id="@+id/checkAllBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="▶  Check All"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/stopCheckBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="■  Stop"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_danger"
+                android:textSize="13sp"
+                android:enabled="false"/>
+        </LinearLayout>
+
+        <!-- Progress / status -->
+        <TextView
+            android:id="@+id/checkStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tap ▶ Check All to test reachability"
+            android:textColor="#4A5A6A"
+            android:textSize="12sp"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Results list -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/checkResultsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="4dp"/>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 4 — My Network Info                       -->
+    <!-- ══════════════════════════════════════════════ -->
+    <ScrollView
+        android:id="@+id/tab4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Header -->
+            <TextView
+                android:id="@+id/myInfoTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🌐 My Network Info"
+                android:textColor="#E0F7FA"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/myInfoDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your public IP address, ISP, and location as seen from the internet."
+                android:textColor="#4A5A6A"
+                android:textSize="12sp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Lookup button -->
+            <Button
+                android:id="@+id/myInfoRefreshBtn"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="▶  Lookup My Info"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_primary"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Results card container -->
+            <LinearLayout
+                android:id="@+id/myInfoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -3,8 +3,9 @@
     package="com.netwatch.app"
     minSdkVersion="30"
     targetSdkVersion="34"
+    shrinking="true"
     mergedManifest="build/intermediates/merged_manifest/release/AndroidManifest.xml"
-    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android.txt-8.2.2"
+    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2:proguard-rules.pro"
     partialResultsDir="build/intermediates/lint_vital_partial_results/release/out"
     desugaredMethodsFiles="/tmp/gradle_home/caches/transforms-3/c53e198a15af26ea3acbbfc37da9bc11/transformed/D8BackportedDesugaredMethods.txt">
   <buildFeatures

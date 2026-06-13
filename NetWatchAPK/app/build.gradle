@@ -10,7 +10,7 @@ android {
         applicationId "com.netwatch.app"
         minSdk 30
         targetSdk 34
-        versionCode 48
+        versionCode 50
         versionName "1.4.6"
     }
 
@@ -30,9 +30,11 @@ android {
             signingConfig signingConfigs.release
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             debuggable false
             signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
