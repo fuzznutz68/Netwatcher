@@ -10,24 +10,20 @@ android {
         applicationId "com.netwatch.app"
         minSdk 30
         targetSdk 34
-        versionCode 36
+        versionCode 38
         versionName "1.4.4"
     }
 
-    signingConfigs {
-        release {
-            storeFile     file("/root/.android/debug.keystore")
-            storePassword "android"
-            keyAlias      "androiddebugkey"
-            keyPassword   "android"
-        }
-    }
-
     buildTypes {
+        debug {
+            applicationIdSuffix ""
+            debuggable true
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled false
-            debuggable    false
-            signingConfig signingConfigs.release
+            debuggable false
+            signingConfig signingConfigs.debug
         }
     }
 
