@@ -426,7 +426,7 @@ public class MainActivity extends Activity {
                         "  • Публичный IP-адрес\n" +
                         "  • Провайдер / Сеть\n" +
                         "  • Город, регион, страна\n" +
-                        "  • GPS-координаты (нажмите для открытия в Google Maps)\n" +
+                        "  • GPS-координаты (нажмите для выбора приложения карт)\n" +
                         "  • Часовой пояс\n\n" +
                         "Данные получены от ipinfo.io.\n" +
                         "Нажмите Обновить для актуализации информации.");
@@ -437,7 +437,7 @@ public class MainActivity extends Activity {
                         "  • Public IP Address\n" +
                         "  • ISP / Network Provider\n" +
                         "  • City, Region, Country\n" +
-                        "  • GPS Coordinates (tap for Google Maps)\n" +
+                        "  • GPS Coordinates (tap to open in your preferred maps app)\n" +
                         "  • Timezone\n\n" +
                         "Data is fetched from ipinfo.io.\n" +
                         "Tap Refresh to update at any time.");
@@ -1245,7 +1245,10 @@ public class MainActivity extends Activity {
                     mapsBtn.setOnClickListener(v -> {
                         android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW,
                             android.net.Uri.parse(mapsUri));
-                        if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
+                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                        android.content.Intent chooser = android.content.Intent.createChooser(intent,
+                            isRussian ? "Открыть в приложении карт" : "Open with maps app");
+                        if (intent.resolveActivity(getPackageManager()) != null) startActivity(chooser);
                         else showToast(isRussian ? "Приложение карт не найдено" : "No maps app found");
                     });
                     myInfoContainer.addView(mapsBtn);
