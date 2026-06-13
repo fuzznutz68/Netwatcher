@@ -526,6 +526,7 @@
 
             <!-- Header -->
             <TextView
+                android:id="@+id/myInfoTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="🌐 My Network Info"
@@ -535,6 +536,7 @@
                 android:layout_marginBottom="6dp"/>
 
             <TextView
+                android:id="@+id/myInfoDescText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Your public IP address, ISP, and location as seen from the internet."
