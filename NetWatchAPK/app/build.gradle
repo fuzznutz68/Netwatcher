@@ -8,9 +8,9 @@ android {
 
     defaultConfig {
         applicationId "com.netwatch.app"
-        minSdk 30
+        minSdk 26
         targetSdk 34
-        versionCode 29
+        versionCode 30
         versionName "1.4.4"
     }
 
@@ -20,6 +20,9 @@ android {
             storePassword "netwatch2024"
             keyAlias      "netwatch"
             keyPassword   "netwatch2024"
+            v1SigningEnabled true
+            v2SigningEnabled true
+            enableV3Signing true
         }
     }
 
@@ -29,7 +32,7 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            debuggable true
+            debuggable false
             signingConfig signingConfigs.release
         }
     }
