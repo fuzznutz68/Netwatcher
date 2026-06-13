@@ -20,6 +20,7 @@ id exportDomainBtn
 id exportTrafficBtn
 id hostLogContainer
 id hostLogScroll
+id liveHostsLabel
 id lookupBtn
 id menuBtn
 id menu_about
@@ -36,6 +37,7 @@ id myInfoTitleText
 id resultsContainer
 id rxRateText
 id rxTotalText
+id selectAppLabel
 id startMonBtn
 id statusText
 id stopCheckBtn
