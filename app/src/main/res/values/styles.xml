@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#00E5FF</item>
+        <item name="colorPrimaryDark">#0A0E17</item>
+        <item name="colorAccent">#00E5FF</item>
+        <item name="android:windowBackground">#0A0E17</item>
+        <item name="android:textColorPrimary">#E0E8F0</item>
+        <item name="android:editTextColor">#E0E8F0</item>
+        <item name="android:textColorHint">#3A4A5A</item>
+    </style>
+
+    <style name="CardStyle">
+        <item name="android:background">@drawable/card_background</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+    </style>
+
+    <style name="SectionTitle">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#00E5FF</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
+
+    <style name="ValueText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#C8D8E8</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
+
+    <style name="TabButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textColor">#8892A4</item>
+        <item name="android:background">@drawable/tab_selector</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
+</resources>
