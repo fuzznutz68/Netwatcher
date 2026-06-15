@@ -3,8 +3,8 @@
 # min_api: 30
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 5d8a029
-# pg_map_hash: SHA-256 5d8a029b2332edb79159ff92c42225069015a84e707647349e7960585591be2f
+# pg_map_id: 5c40769
+# pg_map_hash: SHA-256 5c40769836c42d5ea97dc325fa1da076c413c2ecafe5dd1e66e4632f654e984b
 android.app.UiModeManager$ContrastChangeListener -> android.app.UiModeManager$ContrastChangeListener:
 # {"id":"com.android.tools.r8.synthesized"}
 android.os.OutcomeReceiver -> android.os.OutcomeReceiver:
@@ -61036,7 +61036,7 @@ androidx.profileinstaller.DeviceProfileWriter -> androidx.profileinstaller.Devic
     53:64:androidx.profileinstaller.DexProfileData[] readProfileInternal(java.io.InputStream):236:236 -> readProfileInternal
     65:67:androidx.profileinstaller.DexProfileData[] readProfileInternal(java.io.InputStream):238:238 -> readProfileInternal
     68:68:androidx.profileinstaller.DexProfileData[] readProfileInternal(java.io.InputStream):240:240 -> readProfileInternal
-    2:11:void result(int,java.lang.Object):87:87 -> result
+    2:10:void result(int,java.lang.Object):87:87 -> result
     9:12:androidx.profileinstaller.DeviceProfileWriter transcodeIfNeeded():301:301 -> transcodeIfNeeded
     13:17:androidx.profileinstaller.DeviceProfileWriter transcodeIfNeeded():302:302 -> transcodeIfNeeded
     18:20:androidx.profileinstaller.DeviceProfileWriter transcodeIfNeeded():303:303 -> transcodeIfNeeded
@@ -61058,6 +61058,24 @@ androidx.profileinstaller.DeviceProfileWriter -> androidx.profileinstaller.Devic
     68:76:boolean write():353:353 -> write
     77:85:boolean write():351:351 -> write
     86:86:boolean write():357:357 -> write
+androidx.profileinstaller.DeviceProfileWriter$$ExternalSyntheticLambda0 -> androidx.profileinstaller.a:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.$r8$classId -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    int androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.f$1 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    androidx.profileinstaller.DeviceProfileWriter androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.f$0 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/lang/Object;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.Object androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.f$2 -> e
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.$r8$init$synthetic(androidx.profileinstaller.DeviceProfileWriter,int,java.lang.Object):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:void androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.$r8$init$synthetic(com.netwatch.app.NetWatchVpnService,byte[],int):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:25:void androidx.profileinstaller.DeviceProfileWriter$$InternalSyntheticLambda$1$ff8c5bd5af23f4910bcb3842df39c45d97ff518106242665abad96f9ce8992ee$0.run$bridge():0:0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
 androidx.profileinstaller.DexProfileData -> androidx.profileinstaller.DexProfileData:
 # {"id":"sourceFile","fileName":"DexProfileData.java"}
     0:21:void <init>(java.lang.String,java.lang.String,long,long,int,int,int,int[],java.util.TreeMap):47:47 -> <init>
@@ -61221,22 +61239,21 @@ androidx.profileinstaller.ProfileInstaller -> androidx.profileinstaller.ProfileI
     21:26:void writeSkipFile(android.content.Context,java.util.concurrent.Executor,androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback):612:612 -> writeSkipFile
     27:32:void writeSkipFile(android.content.Context,java.util.concurrent.Executor,androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback):613:613 -> writeSkipFile
     33:36:void writeSkipFile(android.content.Context,java.util.concurrent.Executor,androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback):608:608 -> writeSkipFile
-androidx.profileinstaller.ProfileInstaller$$ExternalSyntheticLambda0 -> androidx.profileinstaller.a:
+androidx.profileinstaller.ProfileInstaller$$ExternalSyntheticLambda0 -> androidx.profileinstaller.b:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     int androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.$r8$classId -> b
       # {"id":"com.android.tools.r8.synthesized"}
     androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.f$0 -> c
-      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/lang/Object;"}
       # {"id":"com.android.tools.r8.synthesized"}
     int androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.f$1 -> d
       # {"id":"com.android.tools.r8.synthesized"}
     java.lang.Object androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.f$2 -> e
       # {"id":"com.android.tools.r8.synthesized"}
     0:11:void androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.<init>(androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback,int,java.lang.Object):0:0 -> <init>
-    0:11:void androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.$r8$init$synthetic(java.lang.Object,int,java.lang.Object,int):0 -> <init>
+    0:11:void androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.$r8$init$synthetic(androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback,int,java.lang.Object,int):0 -> <init>
       # {"id":"com.android.tools.r8.synthesized"}
-    0:29:void androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.run$bridge():0:0 -> run
+    0:19:void androidx.profileinstaller.ProfileInstaller$$InternalSyntheticLambda$1$65490b9c13bc944dbb73adee505080a4d07beef482bc93a2158a7f2f0fd1d69f$0.run$bridge():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
 androidx.profileinstaller.ProfileInstaller$1 -> androidx.profileinstaller.ProfileInstaller$1:
 # {"id":"sourceFile","fileName":"ProfileInstaller.java"}
@@ -61272,7 +61289,7 @@ androidx.profileinstaller.ProfileInstallerInitializer -> androidx.profileinstall
     0:3:void lambda$writeInBackground$2(android.content.Context):145:145 -> lambda$writeInBackground$2
     0:16:void writeInBackground(android.content.Context):138:138 -> writeInBackground
     17:26:void writeInBackground(android.content.Context):145:145 -> writeInBackground
-androidx.profileinstaller.ProfileInstallerInitializer$$ExternalSyntheticLambda0 -> androidx.profileinstaller.b:
+androidx.profileinstaller.ProfileInstallerInitializer$$ExternalSyntheticLambda0 -> androidx.profileinstaller.c:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     int androidx.profileinstaller.ProfileInstallerInitializer$$InternalSyntheticLambda$1$03a6ae1fad12ddf91cb6ffc3c686c10ad059d5325c1df7cdae6dc2cb5a8d8b96$0.$r8$classId -> b
@@ -61291,7 +61308,7 @@ androidx.profileinstaller.ProfileInstallerInitializer$Choreographer16Impl -> and
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void lambda$postFrameCallback$0(java.lang.Runnable,long):161:161 -> lambda$postFrameCallback$0
     0:12:void postFrameCallback(java.lang.Runnable):161:161 -> postFrameCallback
-androidx.profileinstaller.ProfileInstallerInitializer$Choreographer16Impl$$ExternalSyntheticLambda0 -> androidx.profileinstaller.c:
+androidx.profileinstaller.ProfileInstallerInitializer$Choreographer16Impl$$ExternalSyntheticLambda0 -> androidx.profileinstaller.d:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     java.lang.Runnable androidx.profileinstaller.ProfileInstallerInitializer$Choreographer16Impl$$InternalSyntheticLambda$1$dd4b7bded0037cdb0fa34ef5820826a5e0fd89e1034ce4aa9969280fa8f012f3$0.f$0 -> a
@@ -102168,20 +102185,20 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     77:82:void <init>():137:137 -> <init>
     83:93:void <init>():138:138 -> <init>
     94:104:void <init>():1541:1541 -> <init>
-    105:112:void <init>():2010:2010 -> <init>
+    105:112:void <init>():1988:1988 -> <init>
     0:3:void $r8$lambda$e0AAsEWB0TSWr41ofv3uaniNYKA(com.netwatch.app.MainActivity,android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):0:0 -> A
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$e5BgHgBkbw-V8YUCXwjoMWNzWZU(com.netwatch.app.MainActivity,android.view.View):0:0 -> B
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$eY8d2sShC3le5wwNyKpyuNEcsVg(com.netwatch.app.MainActivity,android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):0:0 -> C
+    0:3:void $r8$lambda$enK_FKtS-U9dkgH5kJbPuND5u3s(com.netwatch.app.MainActivity):0:0 -> C
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$enK_FKtS-U9dkgH5kJbPuND5u3s(com.netwatch.app.MainActivity):0:0 -> D
+    0:3:void $r8$lambda$fbUpnB89cQUEgUxpGFdbb211c-o(com.netwatch.app.MainActivity,java.lang.String,java.lang.String):0:0 -> D
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$fbUpnB89cQUEgUxpGFdbb211c-o(com.netwatch.app.MainActivity,java.lang.String,java.lang.String):0:0 -> E
+    0:3:void $r8$lambda$gkZhQ_rGbBGpKZb5mqhLmFkabGw(com.netwatch.app.MainActivity):0:0 -> E
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$gkZhQ_rGbBGpKZb5mqhLmFkabGw(com.netwatch.app.MainActivity):0:0 -> F
+    0:3:void $r8$lambda$h2EmlypgmkzkGM1MEu4fT6kAZ4A(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView):0:0 -> F
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$h2EmlypgmkzkGM1MEu4fT6kAZ4A(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView):0:0 -> G
+    0:3:void $r8$lambda$hwwwhT87VKWRGPMMhgp7WddrisI(com.netwatch.app.MainActivity,android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):0:0 -> G
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$i2Rs9-DiUS7Dj1nJEhhLoG321as(com.netwatch.app.MainActivity,java.lang.String,android.view.View):0:0 -> H
       # {"id":"com.android.tools.r8.synthesized"}
@@ -102401,47 +102418,47 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     312:314:void buildCheckerRows():1606:1606 -> buildCheckerRows
     315:319:void buildCheckerRows():1608:1608 -> buildCheckerRows
     320:330:void buildCheckerRows():1609:1609 -> buildCheckerRows
-    0:5:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2140:2140 -> buildDeviceRow
-    6:11:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2141:2141 -> buildDeviceRow
-    12:14:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2142:2142 -> buildDeviceRow
-    15:18:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2143:2143 -> buildDeviceRow
-    19:25:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2144:2144 -> buildDeviceRow
-    26:30:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2143:2143 -> buildDeviceRow
-    31:49:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2146:2146 -> buildDeviceRow
-    50:63:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2147:2147 -> buildDeviceRow
-    64:68:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2148:2148 -> buildDeviceRow
-    69:77:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2151:2151 -> buildDeviceRow
-    78:90:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2152:2152 -> buildDeviceRow
-    91:115:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2153:2153 -> buildDeviceRow
-    116:124:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2154:2154 -> buildDeviceRow
-    125:127:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2155:2155 -> buildDeviceRow
-    128:132:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2156:2156 -> buildDeviceRow
-    133:137:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2159:2159 -> buildDeviceRow
-    138:140:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2160:2160 -> buildDeviceRow
-    141:145:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2162:2162 -> buildDeviceRow
-    146:154:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2163:2163 -> buildDeviceRow
-    155:163:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2164:2164 -> buildDeviceRow
-    164:166:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2165:2165 -> buildDeviceRow
-    167:169:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2166:2166 -> buildDeviceRow
-    170:174:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2168:2168 -> buildDeviceRow
-    175:194:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2169:2169 -> buildDeviceRow
-    195:201:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2170:2170 -> buildDeviceRow
-    202:204:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2171:2171 -> buildDeviceRow
-    205:207:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2172:2172 -> buildDeviceRow
-    208:212:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2174:2174 -> buildDeviceRow
-    213:217:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2175:2175 -> buildDeviceRow
-    218:224:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2176:2176 -> buildDeviceRow
-    225:227:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2177:2177 -> buildDeviceRow
-    228:230:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2178:2178 -> buildDeviceRow
-    231:233:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2180:2180 -> buildDeviceRow
-    234:236:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2181:2181 -> buildDeviceRow
-    237:239:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2182:2182 -> buildDeviceRow
-    240:244:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2185:2185 -> buildDeviceRow
-    245:255:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2186:2186 -> buildDeviceRow
-    256:262:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2188:2188 -> buildDeviceRow
-    263:265:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2190:2190 -> buildDeviceRow
-    266:268:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2191:2191 -> buildDeviceRow
-    269:272:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2192:2192 -> buildDeviceRow
+    0:5:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2118:2118 -> buildDeviceRow
+    6:11:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2119:2119 -> buildDeviceRow
+    12:14:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2120:2120 -> buildDeviceRow
+    15:18:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2121:2121 -> buildDeviceRow
+    19:25:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2122:2122 -> buildDeviceRow
+    26:30:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2121:2121 -> buildDeviceRow
+    31:49:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2124:2124 -> buildDeviceRow
+    50:63:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2125:2125 -> buildDeviceRow
+    64:68:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2126:2126 -> buildDeviceRow
+    69:77:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2129:2129 -> buildDeviceRow
+    78:90:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2130:2130 -> buildDeviceRow
+    91:115:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2131:2131 -> buildDeviceRow
+    116:124:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2132:2132 -> buildDeviceRow
+    125:127:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2133:2133 -> buildDeviceRow
+    128:132:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2134:2134 -> buildDeviceRow
+    133:137:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2137:2137 -> buildDeviceRow
+    138:140:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2138:2138 -> buildDeviceRow
+    141:145:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2140:2140 -> buildDeviceRow
+    146:154:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2141:2141 -> buildDeviceRow
+    155:163:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2142:2142 -> buildDeviceRow
+    164:166:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2143:2143 -> buildDeviceRow
+    167:169:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2144:2144 -> buildDeviceRow
+    170:174:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2146:2146 -> buildDeviceRow
+    175:194:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2147:2147 -> buildDeviceRow
+    195:201:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2148:2148 -> buildDeviceRow
+    202:204:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2149:2149 -> buildDeviceRow
+    205:207:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2150:2150 -> buildDeviceRow
+    208:212:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2152:2152 -> buildDeviceRow
+    213:217:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2153:2153 -> buildDeviceRow
+    218:224:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2154:2154 -> buildDeviceRow
+    225:227:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2155:2155 -> buildDeviceRow
+    228:230:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2156:2156 -> buildDeviceRow
+    231:233:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2158:2158 -> buildDeviceRow
+    234:236:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2159:2159 -> buildDeviceRow
+    237:239:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2160:2160 -> buildDeviceRow
+    240:244:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2163:2163 -> buildDeviceRow
+    245:255:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2164:2164 -> buildDeviceRow
+    256:262:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2166:2166 -> buildDeviceRow
+    263:265:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2168:2168 -> buildDeviceRow
+    266:268:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2169:2169 -> buildDeviceRow
+    269:272:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):2170:2170 -> buildDeviceRow
     6:17:void buildReport(java.lang.String,java.lang.String,java.lang.String):948:948 -> buildReport
     18:26:void buildReport(java.lang.String,java.lang.String,java.lang.String):949:949 -> buildReport
     27:40:void buildReport(java.lang.String,java.lang.String,java.lang.String):951:951 -> buildReport
@@ -102548,28 +102565,28 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     0:2:com.netwatch.app.AppEntry -$$Nest$fgetselectedApp(com.netwatch.app.MainActivity):0:0 -> e0
       # {"id":"com.android.tools.r8.synthesized"}
-    3:14:void exportDeviceLog():2198:2198 -> exportDeviceLog
-    15:27:void exportDeviceLog():2199:2199 -> exportDeviceLog
-    28:48:void exportDeviceLog():2200:2200 -> exportDeviceLog
-    49:67:void exportDeviceLog():2202:2202 -> exportDeviceLog
-    68:79:void exportDeviceLog():2203:2203 -> exportDeviceLog
-    80:84:void exportDeviceLog():2204:2204 -> exportDeviceLog
-    85:87:void exportDeviceLog():2205:2205 -> exportDeviceLog
-    88:103:void exportDeviceLog():2206:2206 -> exportDeviceLog
-    104:188:void exportDeviceLog():2207:2207 -> exportDeviceLog
-    189:190:void exportDeviceLog():2209:2210 -> exportDeviceLog
-    191:192:void exportDeviceLog():2210:2210 -> exportDeviceLog
-    193:197:void exportDeviceLog():2211:2211 -> exportDeviceLog
-    198:213:void exportDeviceLog():2212:2212 -> exportDeviceLog
-    214:217:void exportDeviceLog():2211:2211 -> exportDeviceLog
-    218:226:void exportDeviceLog():2213:2213 -> exportDeviceLog
-    227:231:void exportDeviceLog():2214:2214 -> exportDeviceLog
-    232:234:void exportDeviceLog():2215:2215 -> exportDeviceLog
-    235:239:void exportDeviceLog():2216:2216 -> exportDeviceLog
-    240:247:void exportDeviceLog():2217:2217 -> exportDeviceLog
-    248:249:void exportDeviceLog():2209:2209 -> exportDeviceLog
-    250:271:void exportDeviceLog():2219:2219 -> exportDeviceLog
-    272:275:void exportDeviceLog():2220:2220 -> exportDeviceLog
+    3:14:void exportDeviceLog():2176:2176 -> exportDeviceLog
+    15:27:void exportDeviceLog():2177:2177 -> exportDeviceLog
+    28:48:void exportDeviceLog():2178:2178 -> exportDeviceLog
+    49:67:void exportDeviceLog():2180:2180 -> exportDeviceLog
+    68:79:void exportDeviceLog():2181:2181 -> exportDeviceLog
+    80:84:void exportDeviceLog():2182:2182 -> exportDeviceLog
+    85:87:void exportDeviceLog():2183:2183 -> exportDeviceLog
+    88:103:void exportDeviceLog():2184:2184 -> exportDeviceLog
+    104:188:void exportDeviceLog():2185:2185 -> exportDeviceLog
+    189:190:void exportDeviceLog():2187:2188 -> exportDeviceLog
+    191:192:void exportDeviceLog():2188:2188 -> exportDeviceLog
+    193:197:void exportDeviceLog():2189:2189 -> exportDeviceLog
+    198:213:void exportDeviceLog():2190:2190 -> exportDeviceLog
+    214:217:void exportDeviceLog():2189:2189 -> exportDeviceLog
+    218:226:void exportDeviceLog():2191:2191 -> exportDeviceLog
+    227:231:void exportDeviceLog():2192:2192 -> exportDeviceLog
+    232:234:void exportDeviceLog():2193:2193 -> exportDeviceLog
+    235:239:void exportDeviceLog():2194:2194 -> exportDeviceLog
+    240:247:void exportDeviceLog():2195:2195 -> exportDeviceLog
+    248:249:void exportDeviceLog():2187:2187 -> exportDeviceLog
+    250:271:void exportDeviceLog():2197:2197 -> exportDeviceLog
+    272:275:void exportDeviceLog():2198:2198 -> exportDeviceLog
     10:28:void exportDomainIntel():1107:1107 -> exportDomainIntel
     29:46:void exportDomainIntel():1108:1108 -> exportDomainIntel
     47:55:void exportDomainIntel():1109:1109 -> exportDomainIntel
@@ -102661,22 +102678,22 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void -$$Nest$mseedTrustedDomains(com.netwatch.app.MainActivity,java.lang.String):0:0 -> i0
       # {"id":"com.android.tools.r8.synthesized"}
-    10:17:void initDeviceTab():2018:2018 -> initDeviceTab
-    18:25:void initDeviceTab():2019:2019 -> initDeviceTab
-    26:31:void initDeviceTab():2020:2020 -> initDeviceTab
-    32:41:void initDeviceTab():2022:2022 -> initDeviceTab
-    42:51:void initDeviceTab():2023:2023 -> initDeviceTab
-    52:62:void initDeviceTab():2024:2024 -> initDeviceTab
-    12:20:void initSpeedTab():1851:1851 -> initSpeedTab
-    21:29:void initSpeedTab():1852:1852 -> initSpeedTab
-    30:38:void initSpeedTab():1853:1853 -> initSpeedTab
-    39:47:void initSpeedTab():1854:1854 -> initSpeedTab
-    48:56:void initSpeedTab():1855:1855 -> initSpeedTab
-    57:135:void initSpeedTab():1856:1856 -> initSpeedTab
-    136:146:void initSpeedTab():1897:1897 -> initSpeedTab
-    147:149:void initSpeedTab():1899:1899 -> initSpeedTab
-    150:152:void initSpeedTab():1900:1900 -> initSpeedTab
-    153:165:void initSpeedTab():1902:1902 -> initSpeedTab
+    10:17:void initDeviceTab():1996:1996 -> initDeviceTab
+    18:25:void initDeviceTab():1997:1997 -> initDeviceTab
+    26:31:void initDeviceTab():1998:1998 -> initDeviceTab
+    32:41:void initDeviceTab():2000:2000 -> initDeviceTab
+    42:51:void initDeviceTab():2001:2001 -> initDeviceTab
+    52:62:void initDeviceTab():2002:2002 -> initDeviceTab
+    10:18:void initSpeedTab():1851:1851 -> initSpeedTab
+    19:27:void initSpeedTab():1852:1852 -> initSpeedTab
+    28:36:void initSpeedTab():1853:1853 -> initSpeedTab
+    37:45:void initSpeedTab():1854:1854 -> initSpeedTab
+    46:54:void initSpeedTab():1855:1855 -> initSpeedTab
+    55:96:void initSpeedTab():1856:1856 -> initSpeedTab
+    97:107:void initSpeedTab():1878:1878 -> initSpeedTab
+    108:110:void initSpeedTab():1880:1880 -> initSpeedTab
+    111:113:void initSpeedTab():1881:1881 -> initSpeedTab
+    114:125:void initSpeedTab():1883:1883 -> initSpeedTab
     58:73:boolean isGlobalCdn(java.lang.String):867:867 -> isGlobalCdn
     3:9:boolean isTrustedHost(java.lang.String):829:829 -> isTrustedHost
     10:15:boolean isTrustedHost(java.lang.String):830:830 -> isTrustedHost
@@ -102688,11 +102705,11 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void -$$Nest$mstartMonitoring(com.netwatch.app.MainActivity):0:0 -> j0
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$ISOmXBmVBjvsj9mgsjCC9V9SPO4(com.netwatch.app.MainActivity,android.content.DialogInterface,int):0:0 -> k
+    0:3:void $r8$lambda$HgvWMm3THYEdWzdOUUO7p9EGclw(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):0:0 -> k
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void -$$Nest$mstopMonitoring(com.netwatch.app.MainActivity):0:0 -> k0
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$LIAjARAth84jJ3sEmkXmBs9zPvk(com.netwatch.app.MainActivity,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> l
+    0:3:void $r8$lambda$ISOmXBmVBjvsj9mgsjCC9V9SPO4(com.netwatch.app.MainActivity,android.content.DialogInterface,int):0:0 -> l
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void -$$Nest$mupdateStats(com.netwatch.app.MainActivity,long,long,long,long,java.lang.String):0:0 -> l0
       # {"id":"com.android.tools.r8.synthesized"}
@@ -102761,71 +102778,70 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     5:16:void lambda$checkCustomDomain$40(java.lang.String,android.widget.TextView,android.widget.TextView):1826:1826 -> lambda$checkCustomDomain$40
     17:20:void lambda$checkCustomDomain$40(java.lang.String,android.widget.TextView,android.widget.TextView):1827:1827 -> lambda$checkCustomDomain$40
     21:34:void lambda$checkCustomDomain$40(java.lang.String,android.widget.TextView,android.widget.TextView):1828:1828 -> lambda$checkCustomDomain$40
-    0:3:void lambda$initDeviceTab$47(android.view.View):2022:2022 -> lambda$initDeviceTab$47
-    0:3:void lambda$initDeviceTab$48(android.view.View):2023:2023 -> lambda$initDeviceTab$48
-    0:3:void lambda$initDeviceTab$49(android.view.View):2024:2024 -> lambda$initDeviceTab$49
-    6:37:void lambda$initSpeedTab$41(android.widget.TextView,long,android.widget.TextView):1935:1935 -> lambda$initSpeedTab$41
-    38:41:void lambda$initSpeedTab$41(android.widget.TextView,long,android.widget.TextView):1936:1936 -> lambda$initSpeedTab$41
-    6:36:void lambda$initSpeedTab$42(android.widget.TextView,double,android.widget.TextView):1959:1959 -> lambda$initSpeedTab$42
-    37:40:void lambda$initSpeedTab$42(android.widget.TextView,double,android.widget.TextView):1960:1960 -> lambda$initSpeedTab$42
-    6:28:void lambda$initSpeedTab$43(android.widget.TextView,double):1993:1993 -> lambda$initSpeedTab$43
-    9:12:void lambda$initSpeedTab$44(android.widget.TextView,android.widget.Button):1998:1998 -> lambda$initSpeedTab$44
-    13:16:void lambda$initSpeedTab$44(android.widget.TextView,android.widget.Button):1999:1999 -> lambda$initSpeedTab$44
-    9:15:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1922:1922 -> lambda$initSpeedTab$45
-    16:23:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1923:1923 -> lambda$initSpeedTab$45
-    24:26:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1924:1924 -> lambda$initSpeedTab$45
-    27:31:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1925:1925 -> lambda$initSpeedTab$45
-    32:34:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1926:1926 -> lambda$initSpeedTab$45
-    35:37:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1927:1927 -> lambda$initSpeedTab$45
-    38:41:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1928:1928 -> lambda$initSpeedTab$45
-    42:44:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1929:1929 -> lambda$initSpeedTab$45
-    45:49:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1930:1930 -> lambda$initSpeedTab$45
-    50:59:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1931:1931 -> lambda$initSpeedTab$45
-    60:92:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1934:1934 -> lambda$initSpeedTab$45
-    93:99:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1941:1941 -> lambda$initSpeedTab$45
-    100:105:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1942:1942 -> lambda$initSpeedTab$45
-    106:108:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1943:1943 -> lambda$initSpeedTab$45
-    109:111:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1944:1944 -> lambda$initSpeedTab$45
-    112:114:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1945:1945 -> lambda$initSpeedTab$45
-    115:122:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1946:1946 -> lambda$initSpeedTab$45
-    123:132:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1948:1948 -> lambda$initSpeedTab$45
-    133:150:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1951:1951 -> lambda$initSpeedTab$45
-    151:153:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1952:1952 -> lambda$initSpeedTab$45
-    154:156:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1953:1953 -> lambda$initSpeedTab$45
-    157:192:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1954:1954 -> lambda$initSpeedTab$45
-    193:214:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1958:1958 -> lambda$initSpeedTab$45
-    215:222:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1966:1966 -> lambda$initSpeedTab$45
-    223:229:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1967:1967 -> lambda$initSpeedTab$45
-    230:235:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1968:1968 -> lambda$initSpeedTab$45
-    236:240:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1969:1969 -> lambda$initSpeedTab$45
-    241:244:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1970:1970 -> lambda$initSpeedTab$45
-    245:247:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1971:1971 -> lambda$initSpeedTab$45
-    248:252:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1972:1972 -> lambda$initSpeedTab$45
-    253:259:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1973:1973 -> lambda$initSpeedTab$45
-    260:263:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1974:1974 -> lambda$initSpeedTab$45
-    264:266:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1975:1975 -> lambda$initSpeedTab$45
-    267:273:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1976:1976 -> lambda$initSpeedTab$45
-    274:279:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1979:1979 -> lambda$initSpeedTab$45
-    280:287:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1980:1980 -> lambda$initSpeedTab$45
-    288:297:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1981:1981 -> lambda$initSpeedTab$45
-    298:300:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1984:1984 -> lambda$initSpeedTab$45
-    301:303:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1985:1985 -> lambda$initSpeedTab$45
-    304:306:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1986:1986 -> lambda$initSpeedTab$45
-    307:309:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1987:1987 -> lambda$initSpeedTab$45
-    310:341:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1988:1988 -> lambda$initSpeedTab$45
-    342:353:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1992:1992 -> lambda$initSpeedTab$45
-    354:373:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):1997:1997 -> lambda$initSpeedTab$45
-    374:374:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):2001:2001 -> lambda$initSpeedTab$45
-    1:4:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1903:1903 -> lambda$initSpeedTab$46
-    5:6:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1904:1904 -> lambda$initSpeedTab$46
-    7:8:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1905:1905 -> lambda$initSpeedTab$46
-    9:13:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1906:1906 -> lambda$initSpeedTab$46
-    14:28:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1909:1909 -> lambda$initSpeedTab$46
-    29:35:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1910:1910 -> lambda$initSpeedTab$46
-    36:40:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1911:1911 -> lambda$initSpeedTab$46
-    41:45:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1912:1912 -> lambda$initSpeedTab$46
-    46:50:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1913:1913 -> lambda$initSpeedTab$46
-    51:65:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1915:1915 -> lambda$initSpeedTab$46
+    0:3:void lambda$initDeviceTab$47(android.view.View):2000:2000 -> lambda$initDeviceTab$47
+    0:3:void lambda$initDeviceTab$48(android.view.View):2001:2001 -> lambda$initDeviceTab$48
+    0:3:void lambda$initDeviceTab$49(android.view.View):2002:2002 -> lambda$initDeviceTab$49
+    6:37:void lambda$initSpeedTab$41(android.widget.TextView,long,android.widget.TextView):1914:1914 -> lambda$initSpeedTab$41
+    38:41:void lambda$initSpeedTab$41(android.widget.TextView,long,android.widget.TextView):1915:1915 -> lambda$initSpeedTab$41
+    6:36:void lambda$initSpeedTab$42(android.widget.TextView,double,android.widget.TextView):1938:1938 -> lambda$initSpeedTab$42
+    37:40:void lambda$initSpeedTab$42(android.widget.TextView,double,android.widget.TextView):1939:1939 -> lambda$initSpeedTab$42
+    6:28:void lambda$initSpeedTab$43(android.widget.TextView,double):1972:1972 -> lambda$initSpeedTab$43
+    9:12:void lambda$initSpeedTab$44(android.widget.TextView,android.widget.Button):1976:1976 -> lambda$initSpeedTab$44
+    13:16:void lambda$initSpeedTab$44(android.widget.TextView,android.widget.Button):1977:1977 -> lambda$initSpeedTab$44
+    11:17:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1901:1901 -> lambda$initSpeedTab$45
+    18:25:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1902:1902 -> lambda$initSpeedTab$45
+    26:28:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1903:1903 -> lambda$initSpeedTab$45
+    29:33:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1904:1904 -> lambda$initSpeedTab$45
+    34:36:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1905:1905 -> lambda$initSpeedTab$45
+    37:39:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1906:1906 -> lambda$initSpeedTab$45
+    40:43:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1907:1907 -> lambda$initSpeedTab$45
+    44:46:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1908:1908 -> lambda$initSpeedTab$45
+    47:51:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1909:1909 -> lambda$initSpeedTab$45
+    52:61:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1910:1910 -> lambda$initSpeedTab$45
+    62:96:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1913:1913 -> lambda$initSpeedTab$45
+    97:101:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1920:1920 -> lambda$initSpeedTab$45
+    102:107:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1921:1921 -> lambda$initSpeedTab$45
+    108:110:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1922:1922 -> lambda$initSpeedTab$45
+    111:113:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1923:1923 -> lambda$initSpeedTab$45
+    114:116:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1924:1924 -> lambda$initSpeedTab$45
+    117:124:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1925:1925 -> lambda$initSpeedTab$45
+    125:134:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1927:1927 -> lambda$initSpeedTab$45
+    135:157:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1930:1930 -> lambda$initSpeedTab$45
+    158:160:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1931:1931 -> lambda$initSpeedTab$45
+    161:163:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1932:1932 -> lambda$initSpeedTab$45
+    164:201:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1933:1933 -> lambda$initSpeedTab$45
+    202:225:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1937:1937 -> lambda$initSpeedTab$45
+    226:233:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1945:1945 -> lambda$initSpeedTab$45
+    234:238:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1946:1946 -> lambda$initSpeedTab$45
+    239:244:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1947:1947 -> lambda$initSpeedTab$45
+    245:247:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1948:1948 -> lambda$initSpeedTab$45
+    248:251:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1949:1949 -> lambda$initSpeedTab$45
+    252:254:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1950:1950 -> lambda$initSpeedTab$45
+    255:259:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1951:1951 -> lambda$initSpeedTab$45
+    260:266:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1952:1952 -> lambda$initSpeedTab$45
+    267:270:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1953:1953 -> lambda$initSpeedTab$45
+    271:273:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1954:1954 -> lambda$initSpeedTab$45
+    274:280:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1955:1955 -> lambda$initSpeedTab$45
+    281:286:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1958:1958 -> lambda$initSpeedTab$45
+    287:294:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1959:1959 -> lambda$initSpeedTab$45
+    295:304:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1960:1960 -> lambda$initSpeedTab$45
+    305:307:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1963:1963 -> lambda$initSpeedTab$45
+    308:310:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1964:1964 -> lambda$initSpeedTab$45
+    311:313:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1965:1965 -> lambda$initSpeedTab$45
+    314:316:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1966:1966 -> lambda$initSpeedTab$45
+    317:348:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1967:1967 -> lambda$initSpeedTab$45
+    349:360:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1971:1971 -> lambda$initSpeedTab$45
+    361:380:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1975:1975 -> lambda$initSpeedTab$45
+    381:381:void lambda$initSpeedTab$45(java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):1979:1979 -> lambda$initSpeedTab$45
+    1:4:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1884:1884 -> lambda$initSpeedTab$46
+    5:6:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1885:1885 -> lambda$initSpeedTab$46
+    7:10:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1886:1886 -> lambda$initSpeedTab$46
+    11:25:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1888:1888 -> lambda$initSpeedTab$46
+    26:32:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1889:1889 -> lambda$initSpeedTab$46
+    33:37:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1890:1890 -> lambda$initSpeedTab$46
+    38:42:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1891:1891 -> lambda$initSpeedTab$46
+    43:47:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1892:1892 -> lambda$initSpeedTab$46
+    48:61:void lambda$initSpeedTab$46(android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.view.View):1894:1894 -> lambda$initSpeedTab$46
     0:8:int lambda$loadAppList$22(com.netwatch.app.AppEntry,com.netwatch.app.AppEntry):643:643 -> lambda$loadAppList$22
     0:14:void lambda$loadAppList$23():647:647 -> lambda$loadAppList$23
     15:21:void lambda$loadAppList$23():649:649 -> lambda$loadAppList$23
@@ -102961,7 +102977,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     31:31:void lambda$performLookup$29(java.lang.String):930:930 -> lambda$performLookup$29
     35:35:void lambda$performLookup$29(java.lang.String):930:930 -> lambda$performLookup$29
     40:40:void lambda$performLookup$29(java.lang.String):930:930 -> lambda$performLookup$29
-    2:5:void lambda$refreshDeviceLog$50(android.widget.ScrollView):2136:2136 -> lambda$refreshDeviceLog$50
+    2:5:void lambda$refreshDeviceLog$50(android.widget.ScrollView):2114:2114 -> lambda$refreshDeviceLog$50
     0:6:boolean lambda$seedTrustedDomains$27(java.lang.String):853:853 -> lambda$seedTrustedDomains$27
     14:17:void lambda$showLanguageDialog$21(android.content.DialogInterface,int):541:541 -> lambda$showLanguageDialog$21
     18:32:void lambda$showLanguageDialog$21(android.content.DialogInterface,int):542:542 -> lambda$showLanguageDialog$21
@@ -103036,26 +103052,26 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     15:29:void launchApp(java.lang.String):327:327 -> launchApp
     30:33:void launchApp(java.lang.String):329:329 -> launchApp
     34:55:void launchApp(java.lang.String):332:332 -> launchApp
-    2:9:void launchDeviceVpn():2046:2046 -> launchDeviceVpn
-    10:17:void launchDeviceVpn():2047:2047 -> launchDeviceVpn
-    18:23:void launchDeviceVpn():2048:2048 -> launchDeviceVpn
-    24:30:void launchDeviceVpn():2051:2051 -> launchDeviceVpn
-    31:43:void launchDeviceVpn():2085:2085 -> launchDeviceVpn
-    44:46:void launchDeviceVpn():2086:2086 -> launchDeviceVpn
-    47:55:void launchDeviceVpn():2090:2090 -> launchDeviceVpn
-    56:58:void launchDeviceVpn():2091:2091 -> launchDeviceVpn
-    59:64:void launchDeviceVpn():2092:2092 -> launchDeviceVpn
-    65:70:void launchDeviceVpn():2094:2094 -> launchDeviceVpn
-    71:77:void launchDeviceVpn():2095:2095 -> launchDeviceVpn
-    78:82:void launchDeviceVpn():2096:2096 -> launchDeviceVpn
-    83:90:void launchDeviceVpn():2097:2097 -> launchDeviceVpn
+    2:9:void launchDeviceVpn():2024:2024 -> launchDeviceVpn
+    10:17:void launchDeviceVpn():2025:2025 -> launchDeviceVpn
+    18:23:void launchDeviceVpn():2026:2026 -> launchDeviceVpn
+    24:30:void launchDeviceVpn():2029:2029 -> launchDeviceVpn
+    31:43:void launchDeviceVpn():2063:2063 -> launchDeviceVpn
+    44:46:void launchDeviceVpn():2064:2064 -> launchDeviceVpn
+    47:55:void launchDeviceVpn():2068:2068 -> launchDeviceVpn
+    56:58:void launchDeviceVpn():2069:2069 -> launchDeviceVpn
+    59:64:void launchDeviceVpn():2070:2070 -> launchDeviceVpn
+    65:70:void launchDeviceVpn():2072:2072 -> launchDeviceVpn
+    71:77:void launchDeviceVpn():2073:2073 -> launchDeviceVpn
+    78:82:void launchDeviceVpn():2074:2074 -> launchDeviceVpn
+    83:90:void launchDeviceVpn():2075:2075 -> launchDeviceVpn
     2:11:void loadAppList():604:604 -> loadAppList
     2:10:void lookupMyInfo():1229:1229 -> lookupMyInfo
     11:16:void lookupMyInfo():1231:1231 -> lookupMyInfo
     17:19:void lookupMyInfo():1232:1232 -> lookupMyInfo
     20:30:void lookupMyInfo():1234:1234 -> lookupMyInfo
     31:34:void lookupMyInfo():1353:1353 -> lookupMyInfo
-    0:3:void $r8$lambda$LbqyrK8LcpV4abQnTTKyRQwYZaU(com.netwatch.app.MainActivity,android.view.View):0:0 -> m
+    0:3:void $r8$lambda$LIAjARAth84jJ3sEmkXmBs9zPvk(com.netwatch.app.MainActivity,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> m
       # {"id":"com.android.tools.r8.synthesized"}
     0:5:android.widget.LinearLayout makeCardContainer():1088:1088 -> makeCardContainer
     6:10:android.widget.LinearLayout makeCardContainer():1089:1089 -> makeCardContainer
@@ -103063,12 +103079,12 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     16:36:android.widget.LinearLayout makeCardContainer():1091:1091 -> makeCardContainer
     37:45:android.widget.LinearLayout makeCardContainer():1092:1092 -> makeCardContainer
     46:55:android.widget.LinearLayout makeCardContainer():1094:1094 -> makeCardContainer
-    0:3:void $r8$lambda$M-2ThvOq7qkMZK-FOIzqNh3p48o(com.netwatch.app.MainActivity,java.lang.String):0:0 -> n
+    0:3:void $r8$lambda$LbqyrK8LcpV4abQnTTKyRQwYZaU(com.netwatch.app.MainActivity,android.view.View):0:0 -> n
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$OIcWIgAgSBfb6SA3AAxhtluG200(com.netwatch.app.MainActivity,android.view.View):0:0 -> o
+    0:3:void $r8$lambda$M-2ThvOq7qkMZK-FOIzqNh3p48o(com.netwatch.app.MainActivity,java.lang.String):0:0 -> o
       # {"id":"com.android.tools.r8.synthesized"}
-    0:9:void onActivityResult(int,int,android.content.Intent):2039:2039 -> onActivityResult
-    10:13:void onActivityResult(int,int,android.content.Intent):2041:2041 -> onActivityResult
+    0:9:void onActivityResult(int,int,android.content.Intent):2017:2017 -> onActivityResult
+    10:13:void onActivityResult(int,int,android.content.Intent):2019:2019 -> onActivityResult
     2:6:void onCreate(android.os.Bundle):142:142 -> onCreate
     7:12:void onCreate(android.os.Bundle):143:143 -> onCreate
     13:20:void onCreate(android.os.Bundle):146:146 -> onCreate
@@ -103161,7 +103177,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     0:4:void onDestroy():1458:1458 -> onDestroy
     5:9:void onDestroy():1459:1459 -> onDestroy
     10:13:void onDestroy():1460:1460 -> onDestroy
-    0:3:void $r8$lambda$PxzRhzTDveY3lCM4a-qLae1MN3I(android.widget.TextView,double):0:0 -> p
+    0:3:void $r8$lambda$OIcWIgAgSBfb6SA3AAxhtluG200(com.netwatch.app.MainActivity,android.view.View):0:0 -> p
       # {"id":"com.android.tools.r8.synthesized"}
     3:11:java.lang.String packageToRootDomain(java.lang.String):872:872 -> packageToRootDomain
     12:15:java.lang.String packageToRootDomain(java.lang.String):873:873 -> packageToRootDomain
@@ -103224,19 +103240,19 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     131:133:long[] probeHost(java.lang.String):1718:1718 -> probeHost
     134:149:long[] probeHost(java.lang.String):1719:1719 -> probeHost
     150:161:long[] probeHost(java.lang.String):1724:1724 -> probeHost
-    0:3:void $r8$lambda$S-VMz8NJP-DZwfv2U76sr8k9on8(com.netwatch.app.MainActivity,java.lang.String,android.widget.LinearLayout,android.widget.TextView,boolean,android.widget.TextView,android.widget.TextView,android.widget.Button,android.view.View):0:0 -> q
+    0:3:void $r8$lambda$PxzRhzTDveY3lCM4a-qLae1MN3I(android.widget.TextView,double):0:0 -> q
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$SbhzmYoHr7SheddjQu06y5AAFek(com.netwatch.app.MainActivity,android.view.View):0:0 -> r
+    0:3:void $r8$lambda$S-VMz8NJP-DZwfv2U76sr8k9on8(com.netwatch.app.MainActivity,java.lang.String,android.widget.LinearLayout,android.widget.TextView,boolean,android.widget.TextView,android.widget.TextView,android.widget.Button,android.view.View):0:0 -> r
       # {"id":"com.android.tools.r8.synthesized"}
-    2:10:void refreshDeviceLog():2127:2127 -> refreshDeviceLog
-    11:15:void refreshDeviceLog():2129:2129 -> refreshDeviceLog
-    16:18:void refreshDeviceLog():2130:2130 -> refreshDeviceLog
-    19:36:void refreshDeviceLog():2131:2131 -> refreshDeviceLog
-    37:63:void refreshDeviceLog():2132:2132 -> refreshDeviceLog
-    64:66:void refreshDeviceLog():2134:2134 -> refreshDeviceLog
-    67:74:void refreshDeviceLog():2135:2135 -> refreshDeviceLog
-    75:83:void refreshDeviceLog():2136:2136 -> refreshDeviceLog
-    84:85:void refreshDeviceLog():2134:2134 -> refreshDeviceLog
+    2:10:void refreshDeviceLog():2105:2105 -> refreshDeviceLog
+    11:15:void refreshDeviceLog():2107:2107 -> refreshDeviceLog
+    16:18:void refreshDeviceLog():2108:2108 -> refreshDeviceLog
+    19:36:void refreshDeviceLog():2109:2109 -> refreshDeviceLog
+    37:63:void refreshDeviceLog():2110:2110 -> refreshDeviceLog
+    64:66:void refreshDeviceLog():2112:2112 -> refreshDeviceLog
+    67:74:void refreshDeviceLog():2113:2113 -> refreshDeviceLog
+    75:83:void refreshDeviceLog():2114:2114 -> refreshDeviceLog
+    84:85:void refreshDeviceLog():2112:2112 -> refreshDeviceLog
     11:24:void refreshTabLabels():559:559 -> refreshTabLabels
     25:38:void refreshTabLabels():560:560 -> refreshTabLabels
     39:52:void refreshTabLabels():561:561 -> refreshTabLabels
@@ -103262,7 +103278,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     233:246:void refreshUiStrings():589:589 -> refreshUiStrings
     247:260:void refreshUiStrings():590:590 -> refreshUiStrings
     261:264:void refreshUiStrings():591:591 -> refreshUiStrings
-    0:3:void $r8$lambda$T14H8Ka3NVi9q5nCYKFQ3MKAmCY(com.netwatch.app.MainActivity,android.view.View):0:0 -> s
+    0:3:void $r8$lambda$SbhzmYoHr7SheddjQu06y5AAFek(com.netwatch.app.MainActivity,android.view.View):0:0 -> s
       # {"id":"com.android.tools.r8.synthesized"}
     2:3:void seedTrustedDomains(java.lang.String):853:853 -> seedTrustedDomains
     4:6:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$42458dfe9a17722a624eae5c719f8ce97aa0a05c455b5fb37c1f6d6b03d3e0e2$0.<init>():0:0 -> seedTrustedDomains
@@ -103310,9 +103326,9 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     40:47:void showMainMenu(android.view.View):347:347 -> showMainMenu
     48:51:void showMainMenu(android.view.View):528:528 -> showMainMenu
     1:8:void showToast(java.lang.String):1453:1453 -> showToast
-    0:7:void startDeviceMonitor():2029:2029 -> startDeviceMonitor
-    8:11:void startDeviceMonitor():2031:2031 -> startDeviceMonitor
-    12:15:void startDeviceMonitor():2034:2034 -> startDeviceMonitor
+    0:7:void startDeviceMonitor():2007:2007 -> startDeviceMonitor
+    8:11:void startDeviceMonitor():2009:2009 -> startDeviceMonitor
+    12:15:void startDeviceMonitor():2012:2012 -> startDeviceMonitor
     2:11:void startDomainCheck():1615:1615 -> startDomainCheck
     12:17:void startDomainCheck():1616:1616 -> startDomainCheck
     18:22:void startDomainCheck():1617:1617 -> startDomainCheck
@@ -103341,19 +103357,19 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     101:109:void startMonitoring():672:672 -> startMonitoring
     110:116:void startMonitoring():673:673 -> startMonitoring
     117:120:void startMonitoring():674:674 -> startMonitoring
-    2:9:void stopDeviceMonitor():2101:2101 -> stopDeviceMonitor
-    10:17:void stopDeviceMonitor():2102:2102 -> stopDeviceMonitor
-    18:27:void stopDeviceMonitor():2103:2103 -> stopDeviceMonitor
-    28:33:void stopDeviceMonitor():2107:2107 -> stopDeviceMonitor
-    34:39:void stopDeviceMonitor():2108:2108 -> stopDeviceMonitor
-    40:48:void stopDeviceMonitor():2113:2113 -> stopDeviceMonitor
-    49:51:void stopDeviceMonitor():2114:2114 -> stopDeviceMonitor
-    52:54:void stopDeviceMonitor():2115:2115 -> stopDeviceMonitor
-    55:65:void stopDeviceMonitor():2116:2116 -> stopDeviceMonitor
-    66:71:void stopDeviceMonitor():2118:2118 -> stopDeviceMonitor
-    72:78:void stopDeviceMonitor():2119:2119 -> stopDeviceMonitor
-    79:83:void stopDeviceMonitor():2121:2121 -> stopDeviceMonitor
-    84:91:void stopDeviceMonitor():2122:2122 -> stopDeviceMonitor
+    2:9:void stopDeviceMonitor():2079:2079 -> stopDeviceMonitor
+    10:17:void stopDeviceMonitor():2080:2080 -> stopDeviceMonitor
+    18:27:void stopDeviceMonitor():2081:2081 -> stopDeviceMonitor
+    28:33:void stopDeviceMonitor():2085:2085 -> stopDeviceMonitor
+    34:39:void stopDeviceMonitor():2086:2086 -> stopDeviceMonitor
+    40:48:void stopDeviceMonitor():2091:2091 -> stopDeviceMonitor
+    49:51:void stopDeviceMonitor():2092:2092 -> stopDeviceMonitor
+    52:54:void stopDeviceMonitor():2093:2093 -> stopDeviceMonitor
+    55:65:void stopDeviceMonitor():2094:2094 -> stopDeviceMonitor
+    66:71:void stopDeviceMonitor():2096:2096 -> stopDeviceMonitor
+    72:78:void stopDeviceMonitor():2097:2097 -> stopDeviceMonitor
+    79:83:void stopDeviceMonitor():2099:2099 -> stopDeviceMonitor
+    84:91:void stopDeviceMonitor():2100:2100 -> stopDeviceMonitor
     3:7:void stopDomainCheck():1684:1684 -> stopDomainCheck
     8:11:void stopDomainCheck():1685:1685 -> stopDomainCheck
     6:10:void stopMonitoring():679:679 -> stopMonitoring
@@ -103385,9 +103401,9 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     239:276:void switchTab(int):1417:1417 -> switchTab
     277:298:void switchTab(int):1418:1418 -> switchTab
     299:311:void switchTab(int):1419:1419 -> switchTab
-    0:4:int $r8$lambda$TTmu6oO7n9PNNc5atOmPaZkAXgM(com.netwatch.app.AppEntry,com.netwatch.app.AppEntry):0:0 -> t
+    0:3:void $r8$lambda$T14H8Ka3NVi9q5nCYKFQ3MKAmCY(com.netwatch.app.MainActivity,android.view.View):0:0 -> t
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$WLbAQSwMex7qhH8BgWikOaQc-2o(android.widget.ScrollView):0:0 -> u
+    0:4:int $r8$lambda$TTmu6oO7n9PNNc5atOmPaZkAXgM(com.netwatch.app.AppEntry,com.netwatch.app.AppEntry):0:0 -> u
       # {"id":"com.android.tools.r8.synthesized"}
     10:42:void updateStats(long,long,long,long,java.lang.String):710:710 -> updateStats
     43:71:void updateStats(long,long,long,long,java.lang.String):711:711 -> updateStats
@@ -103420,9 +103436,9 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     341:341:void updateStats(long,long,long,long,java.lang.String):713:713 -> updateStats
     343:343:void updateStats(long,long,long,long,java.lang.String):713:713 -> updateStats
     346:346:void updateStats(long,long,long,long,java.lang.String):713:713 -> updateStats
-    0:3:void $r8$lambda$Wv02SEYysa9O_edsJl7kvOe7bBw(com.netwatch.app.MainActivity,android.view.View):0:0 -> v
+    0:3:void $r8$lambda$WLbAQSwMex7qhH8BgWikOaQc-2o(android.widget.ScrollView):0:0 -> v
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$XdYs5wmJVNYkfK8RkhZEQPPth_8(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):0:0 -> w
+    0:3:void $r8$lambda$Wv02SEYysa9O_edsJl7kvOe7bBw(com.netwatch.app.MainActivity,android.view.View):0:0 -> w
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$XnnRwfY-y1Cif43Cu8fMSh-qzXM(com.netwatch.app.MainActivity,android.view.View):0:0 -> x
       # {"id":"com.android.tools.r8.synthesized"}
@@ -103448,20 +103464,36 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda1 -> com.netwatch.app.k:
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda10 -> com.netwatch.app.a:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-    int com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.$r8$classId -> b
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.f$0 -> c
+    java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$1 -> c
       # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.f$1 -> d
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$2 -> d
       # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.f$2 -> e
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$3 -> e
       # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.<init>(com.netwatch.app.MainActivity,android.widget.TextView,android.widget.Button):0:0 -> <init>
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.$r8$init$synthetic(com.netwatch.app.MainActivity,android.widget.TextView,android.widget.Button,int):0 -> <init>
+    java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$4 -> f
       # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$3.run$bridge():0:0 -> run
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$5 -> g
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$6 -> h
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.f$7 -> i
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:19:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.<init>(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.TextView,android.widget.Button):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:19:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$711e5d49b1591b5d968645fe37e8b3646b4e700ac05c0d64d4f25a09df788536$0.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda11 -> com.netwatch.app.b:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.f$0 -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:5:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.<init>(com.netwatch.app.MainActivity):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:5:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.onClick(android.content.DialogInterface,int):0:0 -> onClick
+      # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda12 -> com.netwatch.app.c:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$0 -> a
@@ -103472,9 +103504,9 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda11 -> com.netwatch.app.b:
       # {"id":"com.android.tools.r8.synthesized"}
     java.lang.String[] com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$3 -> d
       # {"id":"com.android.tools.r8.synthesized"}
-    java.lang.String[] com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$4 -> e
+    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$4 -> e
       # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$5 -> f
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$5 -> f
       # {"id":"com.android.tools.r8.synthesized"}
     android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$6 -> g
       # {"id":"com.android.tools.r8.synthesized"}
@@ -103482,36 +103514,9 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda11 -> com.netwatch.app.b:
       # {"id":"com.android.tools.r8.synthesized"}
     android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$8 -> i
       # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.f$9 -> j
+    0:21:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.<init>(com.netwatch.app.MainActivity,android.widget.Spinner,java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView):0:0 -> <init>
       # {"id":"com.android.tools.r8.synthesized"}
-    0:23:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.<init>(com.netwatch.app.MainActivity,android.widget.Spinner,java.lang.String[],java.lang.String[],java.lang.String[],android.widget.Button,android.widget.TextView,android.widget.TextView,android.widget.TextView,android.widget.TextView):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:24:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.onClick(android.view.View):0:0 -> onClick
-      # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda12 -> com.netwatch.app.c:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
-# {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$0 -> b
-      # {"id":"com.android.tools.r8.synthesized"}
-    java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$1 -> c
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$2 -> d
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$3 -> e
-      # {"id":"com.android.tools.r8.synthesized"}
-    java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$4 -> f
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$5 -> g
-      # {"id":"com.android.tools.r8.synthesized"}
-    java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$6 -> h
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$7 -> i
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.f$8 -> j
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:21:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.<init>(com.netwatch.app.MainActivity,java.lang.String,android.widget.TextView,android.widget.TextView,java.lang.String,android.widget.TextView,java.lang.String,android.widget.TextView,android.widget.Button):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:21:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$a4109f5835eee2fd88ae18e913d9b84a9ed7112a27949f4fa7a33279866a776c$0.run():0:0 -> run
+    0:22:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$90d1f9c22ef2ce113f78ad3ea7f57b4c2bd368db8a8b8b43ea8dff314fe47b0d$0.onClick(android.view.View):0:0 -> onClick
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda13 -> com.netwatch.app.d:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
@@ -103634,14 +103639,17 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda19 -> com.netwatch.app.j:
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda2 -> com.netwatch.app.o:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-    int com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.$r8$classId -> b
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.f$0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.f$0 -> c
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.f$1 -> c
       # {"id":"com.android.tools.r8.synthesized"}
-    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.<init>(com.netwatch.app.MainActivity):0:0 -> <init>
-    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.$r8$init$synthetic(com.netwatch.app.MainActivity,int):0 -> <init>
+    long com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.f$2 -> d
       # {"id":"com.android.tools.r8.synthesized"}
-    0:23:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.run$bridge():0:0 -> run
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.f$3 -> e
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.<init>(com.netwatch.app.MainActivity,android.widget.TextView,long,android.widget.TextView):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$0.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda20 -> com.netwatch.app.l:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
@@ -103693,27 +103701,82 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda22 -> com.netwatch.app.n:
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda3 -> com.netwatch.app.p:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-    0:6:boolean com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$42458dfe9a17722a624eae5c719f8ce97aa0a05c455b5fb37c1f6d6b03d3e0e2$0.test(java.lang.Object):0:0 -> test
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.f$0 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.f$1 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    double com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.f$2 -> d
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.f$3 -> e
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.<init>(com.netwatch.app.MainActivity,android.widget.TextView,double,android.widget.TextView):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$1.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.MainActivity$$ExternalSyntheticLambda4 -> com.netwatch.app.q:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$2.f$0 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    double com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$2.f$1 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$2.<init>(android.widget.TextView,double):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$2.run():0:0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda5 -> com.netwatch.app.s:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.$r8$classId -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.f$0 -> c
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Landroid/content/ContextWrapper;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.f$1 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/lang/Object;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    android.widget.Button com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.f$2 -> e
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/lang/Object;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.<init>(com.netwatch.app.MainActivity,android.widget.TextView,android.widget.Button):0:0 -> <init>
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.$r8$init$synthetic(android.content.ContextWrapper,java.lang.Object,java.lang.Object,int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:41:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$2910377e831bd06a9865fbc870bc657ffc3e8a2e86e33bb472e9e8acb026a5ee$3.run$bridge():0:0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda6 -> com.netwatch.app.t:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.$r8$classId -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.f$0 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.<init>(com.netwatch.app.MainActivity):0:0 -> <init>
+    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.$r8$init$synthetic(com.netwatch.app.MainActivity,int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:23:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$33637ec83a209e1aba53de317b51b7b389c84574f37cd20e66f760533b8c54b0$1.run$bridge():0:0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda7 -> com.netwatch.app.u:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    0:6:boolean com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$42458dfe9a17722a624eae5c719f8ce97aa0a05c455b5fb37c1f6d6b03d3e0e2$0.test(java.lang.Object):0:0 -> test
+      # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda8 -> com.netwatch.app.v:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     int com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.$r8$classId -> b
       # {"id":"com.android.tools.r8.synthesized"}
     com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.f$0 -> c
-      # {"id":"com.android.tools.r8.residualsignature","signature":"Landroid/content/ContextWrapper;"}
       # {"id":"com.android.tools.r8.synthesized"}
     java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.f$1 -> d
       # {"id":"com.android.tools.r8.synthesized"}
     java.lang.String com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.f$2 -> e
-      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/lang/Object;"}
       # {"id":"com.android.tools.r8.synthesized"}
     0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.<init>(com.netwatch.app.MainActivity,java.lang.String,java.lang.String):0:0 -> <init>
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.$r8$init$synthetic(android.content.ContextWrapper,java.lang.String,java.lang.Object,int):0 -> <init>
+    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.$r8$init$synthetic(com.netwatch.app.MainActivity,java.lang.String,java.lang.String,int):0 -> <init>
       # {"id":"com.android.tools.r8.synthesized"}
-    0:35:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.run$bridge():0:0 -> run
+    0:19:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$4e1c38fb96295760f065b369bc047f676670fc7b69a4f3a78198f45d0ab2a704$0.run$bridge():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda5 -> com.netwatch.app.s:
+com.netwatch.app.MainActivity$$ExternalSyntheticLambda9 -> com.netwatch.app.w:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$55c3c8d68aaca4be7d2185621df3b18a003f73fe4e086bd19faf670113b1f618$0.f$0 -> b
@@ -103730,56 +103793,6 @@ com.netwatch.app.MainActivity$$ExternalSyntheticLambda5 -> com.netwatch.app.s:
       # {"id":"com.android.tools.r8.synthesized"}
       # {"id":"com.android.tools.r8.residualsignature","signature":"(Lcom/netwatch/app/MainActivity;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/lang/String;Ljava/lang/String;)V"}
     0:13:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$55c3c8d68aaca4be7d2185621df3b18a003f73fe4e086bd19faf670113b1f618$0.run():0:0 -> run
-      # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda6 -> com.netwatch.app.t:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
-# {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.f$0 -> a
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:5:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.<init>(com.netwatch.app.MainActivity):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:5:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$78d0a783a10cfcdf0bd64b14b7751f73ec94c7c35bb1f3e1ec693fcdde686a51$0.onClick(android.content.DialogInterface,int):0:0 -> onClick
-      # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda7 -> com.netwatch.app.u:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
-# {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.f$0 -> b
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.f$1 -> c
-      # {"id":"com.android.tools.r8.synthesized"}
-    long com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.f$2 -> d
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.f$3 -> e
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.<init>(com.netwatch.app.MainActivity,android.widget.TextView,long,android.widget.TextView):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$0.run():0:0 -> run
-      # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda8 -> com.netwatch.app.v:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
-# {"id":"com.android.tools.r8.synthesized"}
-    com.netwatch.app.MainActivity com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.f$0 -> b
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.f$1 -> c
-      # {"id":"com.android.tools.r8.synthesized"}
-    double com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.f$2 -> d
-      # {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.f$3 -> e
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.<init>(com.netwatch.app.MainActivity,android.widget.TextView,double,android.widget.TextView):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:11:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$1.run():0:0 -> run
-      # {"id":"com.android.tools.r8.synthesized"}
-com.netwatch.app.MainActivity$$ExternalSyntheticLambda9 -> com.netwatch.app.w:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
-# {"id":"com.android.tools.r8.synthesized"}
-    android.widget.TextView com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$2.f$0 -> b
-      # {"id":"com.android.tools.r8.synthesized"}
-    double com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$2.f$1 -> c
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$2.<init>(android.widget.TextView,double):0:0 -> <init>
-      # {"id":"com.android.tools.r8.synthesized"}
-    0:7:void com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$86887584a43dff60a831e2aa649624136e9c6760da4ed252bcd09c4ca966f046$2.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.MainActivity$1 -> com.netwatch.app.MainActivity$1:
 # {"id":"sourceFile","fileName":"MainActivity.java"}
@@ -103820,31 +103833,31 @@ com.netwatch.app.MainActivity$2 -> com.netwatch.app.MainActivity$2:
     34:37:void onReceive(android.content.Context,android.content.Intent):293:293 -> onReceive
 com.netwatch.app.MainActivity$3 -> com.netwatch.app.MainActivity$3:
 # {"id":"sourceFile","fileName":"MainActivity.java"}
-    2:5:void <init>(com.netwatch.app.MainActivity):2051:2051 -> <init>
+    2:5:void <init>(com.netwatch.app.MainActivity):2029:2029 -> <init>
     0:3:void $r8$lambda$8rFKez_Nzjman5ghkKaSKOlebus(com.netwatch.app.MainActivity$3):0:0 -> a
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$WkTphWGsIEfB13wxAgWeYcqj3Nw(com.netwatch.app.MainActivity$3):0:0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    2:5:void lambda$onReceive$0():2073:2073 -> lambda$onReceive$0
-    2:5:void lambda$onReceive$1():2081:2081 -> lambda$onReceive$1
-    2:7:void onReceive(android.content.Context,android.content.Intent):2054:2054 -> onReceive
-    8:13:void onReceive(android.content.Context,android.content.Intent):2055:2055 -> onReceive
-    14:19:void onReceive(android.content.Context,android.content.Intent):2056:2056 -> onReceive
-    20:25:void onReceive(android.content.Context,android.content.Intent):2057:2057 -> onReceive
-    26:49:void onReceive(android.content.Context,android.content.Intent):2058:2058 -> onReceive
-    50:58:void onReceive(android.content.Context,android.content.Intent):2064:2064 -> onReceive
-    59:69:void onReceive(android.content.Context,android.content.Intent):2065:2065 -> onReceive
-    70:77:void onReceive(android.content.Context,android.content.Intent):2067:2067 -> onReceive
-    78:85:void onReceive(android.content.Context,android.content.Intent):2069:2069 -> onReceive
-    86:105:void onReceive(android.content.Context,android.content.Intent):2070:2070 -> onReceive
-    106:121:void onReceive(android.content.Context,android.content.Intent):2071:2071 -> onReceive
-    122:125:void onReceive(android.content.Context,android.content.Intent):2072:2072 -> onReceive
-    126:133:void onReceive(android.content.Context,android.content.Intent):2073:2073 -> onReceive
-    134:139:void onReceive(android.content.Context,android.content.Intent):2074:2074 -> onReceive
-    140:167:void onReceive(android.content.Context,android.content.Intent):2079:2079 -> onReceive
-    168:170:void onReceive(android.content.Context,android.content.Intent):2080:2080 -> onReceive
-    171:179:void onReceive(android.content.Context,android.content.Intent):2081:2081 -> onReceive
-    180:181:void onReceive(android.content.Context,android.content.Intent):2080:2080 -> onReceive
+    2:5:void lambda$onReceive$0():2051:2051 -> lambda$onReceive$0
+    2:5:void lambda$onReceive$1():2059:2059 -> lambda$onReceive$1
+    2:7:void onReceive(android.content.Context,android.content.Intent):2032:2032 -> onReceive
+    8:13:void onReceive(android.content.Context,android.content.Intent):2033:2033 -> onReceive
+    14:19:void onReceive(android.content.Context,android.content.Intent):2034:2034 -> onReceive
+    20:25:void onReceive(android.content.Context,android.content.Intent):2035:2035 -> onReceive
+    26:49:void onReceive(android.content.Context,android.content.Intent):2036:2036 -> onReceive
+    50:58:void onReceive(android.content.Context,android.content.Intent):2042:2042 -> onReceive
+    59:69:void onReceive(android.content.Context,android.content.Intent):2043:2043 -> onReceive
+    70:77:void onReceive(android.content.Context,android.content.Intent):2045:2045 -> onReceive
+    78:85:void onReceive(android.content.Context,android.content.Intent):2047:2047 -> onReceive
+    86:105:void onReceive(android.content.Context,android.content.Intent):2048:2048 -> onReceive
+    106:121:void onReceive(android.content.Context,android.content.Intent):2049:2049 -> onReceive
+    122:125:void onReceive(android.content.Context,android.content.Intent):2050:2050 -> onReceive
+    126:133:void onReceive(android.content.Context,android.content.Intent):2051:2051 -> onReceive
+    134:139:void onReceive(android.content.Context,android.content.Intent):2052:2052 -> onReceive
+    140:167:void onReceive(android.content.Context,android.content.Intent):2057:2057 -> onReceive
+    168:170:void onReceive(android.content.Context,android.content.Intent):2058:2058 -> onReceive
+    171:179:void onReceive(android.content.Context,android.content.Intent):2059:2059 -> onReceive
+    180:181:void onReceive(android.content.Context,android.content.Intent):2058:2058 -> onReceive
 com.netwatch.app.MainActivity$3$$ExternalSyntheticLambda0 -> com.netwatch.app.y:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
@@ -103859,105 +103872,132 @@ com.netwatch.app.MainActivity$3$$ExternalSyntheticLambda0 -> com.netwatch.app.y:
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
 # {"id":"sourceFile","fileName":"NetWatchVpnService.java"}
-    0:9:void <init>():28:28 -> <init>
-    10:16:void <init>():41:41 -> <init>
-    17:24:void <init>():43:43 -> <init>
-    0:3:void $r8$lambda$IAMKdZmnKk51y8A0pfxLDzMP8eQ(com.netwatch.app.NetWatchVpnService,java.lang.String,java.lang.String,java.lang.String,int,int):0:0 -> a
+    0:9:void <init>():33:33 -> <init>
+    10:16:void <init>():46:46 -> <init>
+    17:24:void <init>():48:48 -> <init>
+    0:3:void $r8$lambda$4kBRnn7ooD7dVSj9zcVJKOle6QE(com.netwatch.app.NetWatchVpnService,byte[],int):0:0 -> a
       # {"id":"com.android.tools.r8.synthesized"}
-    0:3:void $r8$lambda$qshPru-EgEVvEiwggroQ7HH2S2I(com.netwatch.app.NetWatchVpnService):0:0 -> b
+    0:3:void $r8$lambda$EjU_zP-fRSyheNKLXjA0AUtYLFo(com.netwatch.app.NetWatchVpnService,java.lang.String,java.lang.String,java.lang.String,int,int):0:0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    2:26:android.app.Notification buildNotification():243:243 -> buildNotification
-    27:35:android.app.Notification buildNotification():244:244 -> buildNotification
-    36:39:android.app.Notification buildNotification():245:245 -> buildNotification
-    40:46:android.app.Notification buildNotification():246:246 -> buildNotification
-    47:50:android.app.Notification buildNotification():247:247 -> buildNotification
-    51:55:android.app.Notification buildNotification():248:248 -> buildNotification
-    7:13:void closeVpn():222:222 -> closeVpn
-    2:7:void createNotificationChannel():236:236 -> createNotificationChannel
-    8:17:void createNotificationChannel():237:237 -> createNotificationChannel
-    18:21:void createNotificationChannel():239:239 -> createNotificationChannel
-    2:7:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):198:198 -> emit
-    8:19:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):199:199 -> emit
-    20:33:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):200:200 -> emit
-    34:51:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):204:204 -> emit
-    52:60:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):205:205 -> emit
-    61:65:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):206:206 -> emit
-    66:68:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):207:207 -> emit
-    69:81:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):208:208 -> emit
-    82:108:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):209:209 -> emit
-    109:113:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):210:210 -> emit
-    114:116:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):211:211 -> emit
-    117:124:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):212:212 -> emit
-    0:54:java.lang.String ipBytes(byte[],int):216:216 -> ipBytes
-    0:7:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):177:177 -> lambda$parseAndReport$0
-    8:15:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):178:178 -> lambda$parseAndReport$0
-    16:20:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):179:179 -> lambda$parseAndReport$0
-    21:42:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):181:181 -> lambda$parseAndReport$0
-    43:58:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):182:182 -> lambda$parseAndReport$0
-    59:64:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):183:183 -> lambda$parseAndReport$0
-    65:70:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):186:186 -> lambda$parseAndReport$0
-    71:74:void lambda$parseAndReport$0(java.lang.String,java.lang.String,java.lang.String,int,int):189:189 -> lambda$parseAndReport$0
-    7:13:void onDestroy():229:229 -> onDestroy
-    14:16:void onDestroy():230:230 -> onDestroy
-    17:19:void onDestroy():231:231 -> onDestroy
-    20:23:void onDestroy():232:232 -> onDestroy
-    5:14:int onStartCommand(android.content.Intent,int,int):54:54 -> onStartCommand
-    15:22:int onStartCommand(android.content.Intent,int,int):55:55 -> onStartCommand
-    23:36:int onStartCommand(android.content.Intent,int,int):59:59 -> onStartCommand
-    37:46:int onStartCommand(android.content.Intent,int,int):61:61 -> onStartCommand
-    47:49:int onStartCommand(android.content.Intent,int,int):64:64 -> onStartCommand
-    50:62:int onStartCommand(android.content.Intent,int,int):65:65 -> onStartCommand
-    63:66:int onStartCommand(android.content.Intent,int,int):67:67 -> onStartCommand
-    67:70:int onStartCommand(android.content.Intent,int,int):69:69 -> onStartCommand
-    71:76:int onStartCommand(android.content.Intent,int,int):72:72 -> onStartCommand
-    77:82:int onStartCommand(android.content.Intent,int,int):73:73 -> onStartCommand
-    83:91:int onStartCommand(android.content.Intent,int,int):74:74 -> onStartCommand
-    6:21:void parseAndReport(byte[],int):129:129 -> parseAndReport
-    22:35:void parseAndReport(byte[],int):134:134 -> parseAndReport
-    36:41:void parseAndReport(byte[],int):139:139 -> parseAndReport
-    42:50:void parseAndReport(byte[],int):140:140 -> parseAndReport
-    51:65:void parseAndReport(byte[],int):143:143 -> parseAndReport
-    66:80:void parseAndReport(byte[],int):144:144 -> parseAndReport
-    81:107:void parseAndReport(byte[],int):147:147 -> parseAndReport
-    108:123:void parseAndReport(byte[],int):154:154 -> parseAndReport
-    124:142:void parseAndReport(byte[],int):155:155 -> parseAndReport
-    143:165:void parseAndReport(byte[],int):159:159 -> parseAndReport
-    166:171:void parseAndReport(byte[],int):160:160 -> parseAndReport
-    172:174:void parseAndReport(byte[],int):161:161 -> parseAndReport
-    175:182:void parseAndReport(byte[],int):162:162 -> parseAndReport
-    183:200:void parseAndReport(byte[],int):163:163 -> parseAndReport
-    201:207:void parseAndReport(byte[],int):164:164 -> parseAndReport
-    208:210:void parseAndReport(byte[],int):165:165 -> parseAndReport
-    211:225:void parseAndReport(byte[],int):168:168 -> parseAndReport
-    226:236:void parseAndReport(byte[],int):170:170 -> parseAndReport
-    237:241:void parseAndReport(byte[],int):173:173 -> parseAndReport
-    242:255:void parseAndReport(byte[],int):175:175 -> parseAndReport
-    256:258:void parseAndReport(byte[],int):165:165 -> parseAndReport
-    4:10:void runVpnLoop():81:81 -> runVpnLoop
-    11:17:void runVpnLoop():82:82 -> runVpnLoop
-    18:23:void runVpnLoop():83:83 -> runVpnLoop
-    24:28:void runVpnLoop():84:84 -> runVpnLoop
-    29:33:void runVpnLoop():85:85 -> runVpnLoop
-    34:36:void runVpnLoop():86:86 -> runVpnLoop
-    37:39:void runVpnLoop():87:87 -> runVpnLoop
-    40:46:void runVpnLoop():89:89 -> runVpnLoop
-    47:56:void runVpnLoop():91:91 -> runVpnLoop
-    57:59:void runVpnLoop():93:93 -> runVpnLoop
-    60:68:void runVpnLoop():122:122 -> runVpnLoop
-    69:88:void runVpnLoop():96:96 -> runVpnLoop
-    89:99:void runVpnLoop():99:99 -> runVpnLoop
-    100:118:void runVpnLoop():100:100 -> runVpnLoop
-    119:126:void runVpnLoop():104:104 -> runVpnLoop
-    127:130:void runVpnLoop():106:106 -> runVpnLoop
-    131:133:void runVpnLoop():110:110 -> runVpnLoop
-    134:135:void runVpnLoop():112:112 -> runVpnLoop
-    136:138:void runVpnLoop():113:113 -> runVpnLoop
-    139:142:void runVpnLoop():114:114 -> runVpnLoop
-    143:146:void runVpnLoop():122:122 -> runVpnLoop
-    147:171:void runVpnLoop():120:120 -> runVpnLoop
-    172:180:void runVpnLoop():118:118 -> runVpnLoop
-    181:183:void runVpnLoop():122:122 -> runVpnLoop
-    184:184:void runVpnLoop():123:123 -> runVpnLoop
+    2:26:android.app.Notification buildNotification():303:303 -> buildNotification
+    27:35:android.app.Notification buildNotification():304:304 -> buildNotification
+    36:39:android.app.Notification buildNotification():305:305 -> buildNotification
+    40:46:android.app.Notification buildNotification():306:306 -> buildNotification
+    47:50:android.app.Notification buildNotification():307:307 -> buildNotification
+    51:55:android.app.Notification buildNotification():308:308 -> buildNotification
+    0:3:void $r8$lambda$qByvLjkjm08n4p-GUDDIyB3fzg8(com.netwatch.app.NetWatchVpnService,java.lang.String,int,byte[],int,int):0:0 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    7:13:void closeVpn():282:282 -> closeVpn
+    2:7:void createNotificationChannel():296:296 -> createNotificationChannel
+    8:17:void createNotificationChannel():297:297 -> createNotificationChannel
+    18:21:void createNotificationChannel():299:299 -> createNotificationChannel
+    0:3:void $r8$lambda$qshPru-EgEVvEiwggroQ7HH2S2I(com.netwatch.app.NetWatchVpnService):0:0 -> d
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:7:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):259:259 -> emit
+    8:19:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):260:260 -> emit
+    20:33:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):261:261 -> emit
+    34:51:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):264:264 -> emit
+    52:60:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):265:265 -> emit
+    61:65:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):266:266 -> emit
+    66:70:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):267:267 -> emit
+    71:73:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):268:268 -> emit
+    74:100:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):269:269 -> emit
+    101:105:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):270:270 -> emit
+    106:108:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):271:271 -> emit
+    109:116:void emit(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,int):272:272 -> emit
+    0:54:java.lang.String ipBytes(byte[],int):276:276 -> ipBytes
+    2:9:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):243:243 -> lambda$parseAndReport$2
+    10:17:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):244:244 -> lambda$parseAndReport$2
+    18:26:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):245:245 -> lambda$parseAndReport$2
+    27:32:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):246:246 -> lambda$parseAndReport$2
+    33:38:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):248:248 -> lambda$parseAndReport$2
+    39:42:void lambda$parseAndReport$2(java.lang.String,java.lang.String,java.lang.String,int,int):251:251 -> lambda$parseAndReport$2
+    0:3:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):180:180 -> lambda$relayPacket$1
+    4:11:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):181:181 -> lambda$relayPacket$1
+    12:14:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):182:182 -> lambda$relayPacket$1
+    15:23:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):183:183 -> lambda$relayPacket$1
+    24:33:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):184:184 -> lambda$relayPacket$1
+    34:45:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):186:186 -> lambda$relayPacket$1
+    46:52:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):190:190 -> lambda$relayPacket$1
+    53:56:void lambda$relayPacket$1(java.lang.String,int,byte[],int,int):192:192 -> lambda$relayPacket$1
+    0:3:void lambda$runVpnLoop$0(byte[],int):129:129 -> lambda$runVpnLoop$0
+    7:13:void onDestroy():289:289 -> onDestroy
+    14:16:void onDestroy():290:290 -> onDestroy
+    17:19:void onDestroy():291:291 -> onDestroy
+    20:23:void onDestroy():292:292 -> onDestroy
+    5:17:int onStartCommand(android.content.Intent,int,int):57:57 -> onStartCommand
+    18:31:int onStartCommand(android.content.Intent,int,int):59:59 -> onStartCommand
+    32:45:int onStartCommand(android.content.Intent,int,int):67:67 -> onStartCommand
+    46:55:int onStartCommand(android.content.Intent,int,int):69:69 -> onStartCommand
+    56:58:int onStartCommand(android.content.Intent,int,int):72:72 -> onStartCommand
+    59:70:int onStartCommand(android.content.Intent,int,int):73:73 -> onStartCommand
+    71:74:int onStartCommand(android.content.Intent,int,int):75:75 -> onStartCommand
+    75:78:int onStartCommand(android.content.Intent,int,int):77:77 -> onStartCommand
+    79:84:int onStartCommand(android.content.Intent,int,int):80:80 -> onStartCommand
+    85:90:int onStartCommand(android.content.Intent,int,int):81:81 -> onStartCommand
+    91:99:int onStartCommand(android.content.Intent,int,int):82:82 -> onStartCommand
+    6:19:void parseAndReport(byte[],int):201:201 -> parseAndReport
+    20:38:void parseAndReport(byte[],int):204:204 -> parseAndReport
+    39:44:void parseAndReport(byte[],int):208:208 -> parseAndReport
+    45:48:void parseAndReport(byte[],int):209:209 -> parseAndReport
+    49:63:void parseAndReport(byte[],int):210:210 -> parseAndReport
+    64:78:void parseAndReport(byte[],int):211:211 -> parseAndReport
+    79:105:void parseAndReport(byte[],int):214:214 -> parseAndReport
+    106:121:void parseAndReport(byte[],int):221:221 -> parseAndReport
+    122:137:void parseAndReport(byte[],int):222:222 -> parseAndReport
+    138:148:void parseAndReport(byte[],int):223:223 -> parseAndReport
+    149:168:void parseAndReport(byte[],int):227:227 -> parseAndReport
+    169:174:void parseAndReport(byte[],int):228:228 -> parseAndReport
+    175:177:void parseAndReport(byte[],int):229:229 -> parseAndReport
+    178:185:void parseAndReport(byte[],int):230:230 -> parseAndReport
+    186:203:void parseAndReport(byte[],int):231:231 -> parseAndReport
+    204:210:void parseAndReport(byte[],int):232:232 -> parseAndReport
+    211:213:void parseAndReport(byte[],int):233:233 -> parseAndReport
+    214:228:void parseAndReport(byte[],int):235:235 -> parseAndReport
+    229:240:void parseAndReport(byte[],int):237:237 -> parseAndReport
+    241:245:void parseAndReport(byte[],int):239:239 -> parseAndReport
+    246:259:void parseAndReport(byte[],int):241:241 -> parseAndReport
+    260:262:void parseAndReport(byte[],int):233:233 -> parseAndReport
+    6:20:void relayPacket(byte[],int):144:144 -> relayPacket
+    21:31:void relayPacket(byte[],int):147:147 -> relayPacket
+    32:37:void relayPacket(byte[],int):150:150 -> relayPacket
+    38:53:void relayPacket(byte[],int):151:151 -> relayPacket
+    54:69:void relayPacket(byte[],int):154:154 -> relayPacket
+    70:85:void relayPacket(byte[],int):155:155 -> relayPacket
+    86:104:void relayPacket(byte[],int):156:156 -> relayPacket
+    105:108:void relayPacket(byte[],int):160:160 -> relayPacket
+    109:115:void relayPacket(byte[],int):161:161 -> relayPacket
+    116:118:void relayPacket(byte[],int):162:162 -> relayPacket
+    119:131:void relayPacket(byte[],int):163:163 -> relayPacket
+    132:135:void relayPacket(byte[],int):169:169 -> relayPacket
+    136:138:void relayPacket(byte[],int):170:170 -> relayPacket
+    139:147:void relayPacket(byte[],int):172:172 -> relayPacket
+    148:160:void relayPacket(byte[],int):178:178 -> relayPacket
+    4:10:void runVpnLoop():88:88 -> runVpnLoop
+    11:17:void runVpnLoop():89:89 -> runVpnLoop
+    18:23:void runVpnLoop():90:90 -> runVpnLoop
+    24:28:void runVpnLoop():91:91 -> runVpnLoop
+    29:33:void runVpnLoop():92:92 -> runVpnLoop
+    34:36:void runVpnLoop():93:93 -> runVpnLoop
+    37:39:void runVpnLoop():94:94 -> runVpnLoop
+    40:46:void runVpnLoop():95:95 -> runVpnLoop
+    47:56:void runVpnLoop():97:97 -> runVpnLoop
+    57:59:void runVpnLoop():99:99 -> runVpnLoop
+    60:68:void runVpnLoop():137:137 -> runVpnLoop
+    69:93:void runVpnLoop():102:102 -> runVpnLoop
+    94:112:void runVpnLoop():105:105 -> runVpnLoop
+    113:120:void runVpnLoop():111:111 -> runVpnLoop
+    121:124:void runVpnLoop():117:117 -> runVpnLoop
+    125:126:void runVpnLoop():122:122 -> runVpnLoop
+    127:129:void runVpnLoop():123:123 -> runVpnLoop
+    130:134:void runVpnLoop():126:126 -> runVpnLoop
+    135:148:void runVpnLoop():129:129 -> runVpnLoop
+    149:172:void runVpnLoop():113:113 -> runVpnLoop
+    173:176:void runVpnLoop():137:137 -> runVpnLoop
+    177:201:void runVpnLoop():135:135 -> runVpnLoop
+    202:210:void runVpnLoop():133:133 -> runVpnLoop
+    211:213:void runVpnLoop():137:137 -> runVpnLoop
+    214:214:void runVpnLoop():138:138 -> runVpnLoop
 com.netwatch.app.NetWatchVpnService$$ExternalSyntheticLambda0 -> com.netwatch.app.z:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
@@ -103977,10 +104017,29 @@ com.netwatch.app.NetWatchVpnService$$ExternalSyntheticLambda0 -> com.netwatch.ap
       # {"id":"com.android.tools.r8.synthesized"}
     0:15:void com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$27686b89fecc23cc73bb36c7acc541a3d2a8e6e471708f95a7e787f275be0410$0.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}
+com.netwatch.app.NetWatchVpnService$$ExternalSyntheticLambda1 -> com.netwatch.app.a0:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.netwatch.app.NetWatchVpnService com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$0 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.String com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$1 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    int com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$2 -> d
+      # {"id":"com.android.tools.r8.synthesized"}
+    byte[] com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$3 -> e
+      # {"id":"com.android.tools.r8.synthesized"}
+    int com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$4 -> f
+      # {"id":"com.android.tools.r8.synthesized"}
+    int com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.f$5 -> g
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:15:void com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.<init>(com.netwatch.app.NetWatchVpnService,java.lang.String,int,byte[],int,int):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    0:15:void com.netwatch.app.NetWatchVpnService$$InternalSyntheticLambda$1$66f16e38c657904cbd3ca6fcef9abd52d4e4b0065fbc2d7f0fc79cd5ff643c8b$0.run():0:0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.NetWatchVpnService$1 -> com.netwatch.app.NetWatchVpnService$1:
 # {"id":"sourceFile","fileName":"NetWatchVpnService.java"}
-    2:5:void <init>(com.netwatch.app.NetWatchVpnService):43:43 -> <init>
-    0:11:boolean removeEldestEntry(java.util.Map$Entry):45:45 -> removeEldestEntry
+    2:5:void <init>(com.netwatch.app.NetWatchVpnService):48:48 -> <init>
+    0:11:boolean removeEldestEntry(java.util.Map$Entry):49:49 -> removeEldestEntry
 com.netwatch.app.TrafficEntry -> com.netwatch.app.TrafficEntry:
 # {"id":"sourceFile","fileName":"TrafficEntry.java"}
     0:15:void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String):15:15 -> <init>
@@ -104257,7 +104316,7 @@ com.netwatch.app.TrafficMonitorService -> com.netwatch.app.TrafficMonitorService
     53:57:void sendStatsBroadcast(long,long,long,long,java.lang.String):420:420 -> sendStatsBroadcast
     58:64:void sendStatsBroadcast(long,long,long,long,java.lang.String):421:421 -> sendStatsBroadcast
     65:68:void sendStatsBroadcast(long,long,long,long,java.lang.String):422:422 -> sendStatsBroadcast
-com.netwatch.app.TrafficMonitorService$$ExternalSyntheticLambda0 -> com.netwatch.app.a0:
+com.netwatch.app.TrafficMonitorService$$ExternalSyntheticLambda0 -> com.netwatch.app.b0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
     int com.netwatch.app.TrafficMonitorService$$InternalSyntheticLambda$1$aca0700b78ca26448b478b18fb9c407cfd8eb709131adab8022ba9b9c7d723fa$0.$r8$classId -> b

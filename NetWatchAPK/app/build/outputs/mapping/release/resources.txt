@@ -273,7 +273,6 @@ checkedIconEnabled
 shortcutId
 SplineSet
 youtu.be
-https://speed.cloudflare.com/
 translateY
 appwidget
 translateX
@@ -1126,6 +1125,7 @@ layout_constraintHorizontal_bias
 android.support.v4.app.INotificationS...
 androidx.core.app.NotificationCompat$...
 application/json
+https://speedtest.frankfurt.linode.com/
 overshootInterpolator
 java.util.Set
 inverse_surface
@@ -1482,7 +1482,6 @@ app:layout_constraintEnd_toEndOf
 Theme.MaterialComponents
 interpolatedPos
 ARRAY
-https://speed.cloudflare.com/__up
 UTC
 kotlin.collections.Collection
 DesignTool

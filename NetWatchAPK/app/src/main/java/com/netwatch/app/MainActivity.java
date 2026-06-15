@@ -1855,42 +1855,23 @@ public class MainActivity extends Activity {
         TextView latTv     = findViewById(R.id.speedLatencyVal);
         Button   runBtn    = findViewById(R.id.speedRunBtn);
 
-        // ── Server list ─────────────────────────────────────────────────
-        // All endpoints verified reachable. Linode names kept for continuity with v2.0.3.
+        // ── Servers — same 4 Linode endpoints as v2.0.3 ─────────────────
         final String[] regions = {
-            "Cloudflare  (Global CDN)",
-            "US East  — Linode Newark",
-            "US West  — Linode Fremont",
-            "EU  — Hetzner Ashburn",
-            "EU  — Hetzner Helsinki",
-            "Asia  — Hetzner Singapore",
-            "Asia  — Linode Tokyo"
+            "US East  — Newark, NJ",
+            "US West  — Fremont, CA",
+            "Europe  — Frankfurt, DE",
+            "Asia  — Tokyo, JP"
         };
         final String[] dlUrls = {
-            "https://speed.cloudflare.com/__down?bytes=104857600",
             "https://speedtest.newark.linode.com/100MB-newark.bin",
             "https://speedtest.fremont.linode.com/100MB-fremont.bin",
-            "https://ash-speed.hetzner.com/100MB.bin",
-            "https://hel1-speed.hetzner.com/100MB.bin",
-            "https://sin-speed.hetzner.com/100MB.bin",
+            "https://speedtest.frankfurt.linode.com/100MB-frankfurt.bin",
             "https://speedtest.tokyo2.linode.com/100MB-tokyo2.bin"
         };
         final String[] pingUrls = {
-            "https://speed.cloudflare.com/",
             "https://speedtest.newark.linode.com/",
             "https://speedtest.fremont.linode.com/",
-            "https://ash-speed.hetzner.com/",
-            "https://hel1-speed.hetzner.com/",
-            "https://sin-speed.hetzner.com/",
-            "https://speedtest.tokyo2.linode.com/"
-        };
-        final String[] ulUrls = {
-            "https://speed.cloudflare.com/__up",
-            "https://speedtest.newark.linode.com/",
-            "https://speedtest.fremont.linode.com/",
-            "https://ash-speed.hetzner.com/",
-            "https://hel1-speed.hetzner.com/",
-            "https://sin-speed.hetzner.com/",
+            "https://speedtest.frankfurt.linode.com/",
             "https://speedtest.tokyo2.linode.com/"
         };
 
@@ -1900,11 +1881,9 @@ public class MainActivity extends Activity {
         spinner.setAdapter(adp);
 
         runBtn.setOnClickListener(v -> {
-            int    idx  = spinner.getSelectedItemPosition();
+            int    idx     = spinner.getSelectedItemPosition();
             String dlUrl   = dlUrls[idx];
             String pingUrl = pingUrls[idx];
-            String ulUrl   = ulUrls[idx];
-            boolean isCF   = idx == 0;
 
             runBtn.setEnabled(false);
             statusTv.setText(isRussian ? "Измерение задержки…" : "Testing latency…");
@@ -1917,7 +1896,7 @@ public class MainActivity extends Activity {
                 double dlMbps = -1;
                 double ulMbps = -1;
                 try {
-                    // ── Latency ─────────────────────────────────────────
+                    // ── Latency ──────────────────────────────────────────
                     try {
                         java.net.HttpURLConnection c =
                             (java.net.HttpURLConnection) new java.net.URL(pingUrl).openConnection();
@@ -1965,7 +1944,7 @@ public class MainActivity extends Activity {
                         byte[] chunk = new byte[512 * 1024];
                         new java.util.Random().nextBytes(chunk);
                         java.net.HttpURLConnection c =
-                            (java.net.HttpURLConnection) new java.net.URL(ulUrl).openConnection();
+                            (java.net.HttpURLConnection) new java.net.URL(dlUrl).openConnection();
                         c.setConnectTimeout(8000);
                         c.setReadTimeout(30000);
                         c.setDoOutput(true);
@@ -1993,7 +1972,6 @@ public class MainActivity extends Activity {
                         ulTv.setText(fUl >= 0 ? String.format(Locale.US, "%.1f Mbps", fUl) : "Error"));
 
                 } finally {
-                    // Always re-enable button regardless of errors
                     mainHandler.post(() -> {
                         statusTv.setText(isRussian ? "Тест завершён  ✓" : "Test complete  ✓");
                         runBtn.setEnabled(true);
