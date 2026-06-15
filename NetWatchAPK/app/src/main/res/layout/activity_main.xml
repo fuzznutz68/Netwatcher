@@ -54,68 +54,68 @@
             android:focusable="true"/>
     </LinearLayout>
 
-    <!-- Tab Bar -->
-    <LinearLayout
-        android:id="@+id/tabBar"
+    <!-- Tab Bar — scrollable so all 6 tabs remain tappable -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:background="#0D1117">
-        <Button
-            android:id="@+id/tabDomainBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        android:background="#0D1117"
+        android:scrollbars="none"
+        android:fillViewport="true">
+        <LinearLayout
+            android:id="@+id/tabBar"
+            android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="🔍 Domain Intel"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="13sp"/>
-        <Button
-            android:id="@+id/tabTrafficBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="📡 Traffic"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-        <Button
-            android:id="@+id/tabCheckerBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="✅ Checker"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-        <Button
-            android:id="@+id/tabMyInfoBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="🌐 My Info"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-        <Button
-            android:id="@+id/tabSpeedBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="⚡ Speed"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-        <Button
-            android:id="@+id/tabDeviceBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="📶 Device"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-    </LinearLayout>
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/tabDomainBtn"
+                android:layout_width="110dp"
+                android:layout_height="48dp"
+                android:text="🔍 Domain"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+            <Button
+                android:id="@+id/tabTrafficBtn"
+                android:layout_width="90dp"
+                android:layout_height="48dp"
+                android:text="📡 Traffic"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+            <Button
+                android:id="@+id/tabCheckerBtn"
+                android:layout_width="90dp"
+                android:layout_height="48dp"
+                android:text="✅ Checker"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+            <Button
+                android:id="@+id/tabMyInfoBtn"
+                android:layout_width="90dp"
+                android:layout_height="48dp"
+                android:text="🌐 My Info"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+            <Button
+                android:id="@+id/tabSpeedBtn"
+                android:layout_width="85dp"
+                android:layout_height="48dp"
+                android:text="⚡ Speed"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+            <Button
+                android:id="@+id/tabDeviceBtn"
+                android:layout_width="90dp"
+                android:layout_height="48dp"
+                android:text="📶 Device"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/tab_selector"
+                android:textSize="11sp"/>
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- ══════════════════════════════════════════════ -->
     <!-- TAB 1 — Domain Intel                          -->

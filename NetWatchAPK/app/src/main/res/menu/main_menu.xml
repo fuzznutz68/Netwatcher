@@ -14,6 +14,12 @@
         android:id="@+id/menu_instructions_myinfo"
         android:title="📖 My Info — Help"/>
     <item
+        android:id="@+id/menu_instructions_speed"
+        android:title="📖 Speed Test — Help"/>
+    <item
+        android:id="@+id/menu_instructions_device"
+        android:title="📖 Device Monitor — Help"/>
+    <item
         android:id="@+id/menu_language"
         android:title="🌍 Language / Язык"/>
     <item

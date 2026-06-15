@@ -33,8 +33,10 @@ id lookupBtn
 id menuBtn
 id menu_about
 id menu_instructions_checker
+id menu_instructions_device
 id menu_instructions_domain
 id menu_instructions_myinfo
+id menu_instructions_speed
 id menu_instructions_traffic
 id menu_language
 id monStatusText

@@ -440,6 +440,46 @@ public class MainActivity extends Activity {
                         "Tap Refresh to update at any time.");
                 }
                 return true;
+            } else if (id == R.id.menu_instructions_speed) {
+                if (isRussian) {
+                    showInfoDialog("\u26a1 \u0422\u0435\u0441\u0442 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438 \u2014 \u0421\u043f\u0440\u0430\u0432\u043a\u0430",
+                        "\u0418\u0437\u043c\u0435\u0440\u0435\u043d\u0438\u0435 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438, \u043e\u0442\u0434\u0430\u0447\u0438 \u0438 \u0437\u0430\u0434\u0435\u0440\u0436\u043a\u0438.\n\n" +
+                        "\u041a\u0430\u043a \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c:\n" +
+                        "  1. \u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0440\u0435\u0433\u0438\u043e\u043d\n" +
+                        "  2. \u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u00ab\u0417\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u0442\u0435\u0441\u0442\u00bb\n" +
+                        "  3. \u0414\u043e\u0436\u0434\u0438\u0442\u0435\u0441\u044c ~15 \u0441\u0435\u043a\u0443\u043d\u0434\n\n" +
+                        "\u0420\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b: \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0430, \u043e\u0442\u0434\u0430\u0447\u0430 (\u041c\u0431\u0438\u0442/\u0441), \u0437\u0430\u0434\u0435\u0440\u0436\u043a\u0430 (\u043c\u0441).");
+                } else {
+                    showInfoDialog("Speed Test \u2014 Help",
+                        "Measure download speed, upload speed, and latency to public test servers.\n\n" +
+                        "How to use:\n" +
+                        "  1. Select a region from the dropdown\n" +
+                        "  2. Tap Run Speed Test\n" +
+                        "  3. Wait ~15 seconds for results\n\n" +
+                        "Results: download, upload (Mbps), latency (ms).");
+                }
+                return true;
+            } else if (id == R.id.menu_instructions_device) {
+                if (isRussian) {
+                    showInfoDialog("\ud83d\udcf6 \u041c\u043e\u043d\u0438\u0442\u043e\u0440 \u0443\u0441\u0442\u0440\u043e\u0439\u0441\u0442\u0432\u0430 \u2014 \u0421\u043f\u0440\u0430\u0432\u043a\u0430",
+                        "\u041c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433 \u0432\u0441\u0435\u0433\u043e \u0442\u0440\u0430\u0444\u0438\u043a\u0430 \u0447\u0435\u0440\u0435\u0437 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0439 VPN-\u0442\u0443\u043d\u043d\u0435\u043b\u044c.\n\n" +
+                        "\u041a\u0430\u043a \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c:\n" +
+                        "  1. \u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u0421\u0442\u0430\u0440\u0442 \u2014 Android \u0437\u0430\u043f\u0440\u043e\u0441\u0438\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u0438\u0435 VPN\n" +
+                        "  2. \u041f\u0440\u0438\u043c\u0438\u0442\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\n" +
+                        "  3. \u0412\u0441\u0435 \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u044f \u043e\u0442\u043e\u0431\u0440\u0430\u0436\u0430\u044e\u0442\u0441\u044f \u0432 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u0438\n\n" +
+                        "\u041a\u0430\u0436\u0434\u0430\u044f \u0437\u0430\u043f\u0438\u0441\u044c: \u0445\u043e\u0441\u0442, \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b, \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435, \u0432\u0440\u0435\u043c\u044f.\n" +
+                        "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u043b\u043e\u0433\u0430 \u0432 CSV, \u043a\u043d\u043e\u043f\u043a\u0430 \u0421\u0442\u043e\u043f \u0434\u043b\u044f \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438.");
+                } else {
+                    showInfoDialog("Device Monitor \u2014 Help",
+                        "Monitor all device network traffic using a local VPN tunnel.\n\n" +
+                        "How to use:\n" +
+                        "  1. Tap Start \u2014 Android will ask for VPN permission\n" +
+                        "  2. Accept the prompt\n" +
+                        "  3. All connections are logged in real-time\n\n" +
+                        "Each entry: host/IP, protocol, app name, timestamp.\n" +
+                        "Tap Export to save as CSV. Tap Stop to close the tunnel.");
+                }
+                return true;
             } else if (id == R.id.menu_language) {
                 showLanguageDialog();
                 return true;
@@ -457,7 +497,9 @@ public class MainActivity extends Activity {
                         "  • Анализ доменов и WHOIS-запросы\n" +
                         "  • Мониторинг трафика приложений в реальном времени\n" +
                         "  • Проверка доступности доменов\n" +
-                        "  • Актуальная информация о сети и Geo-IP\n\n" +
+                        "  • Актуальная информация о сети и Geo-IP\n" +
+                        "  • Тест скорости (загрузка, отдача, задержка)\n" +
+                        "  • Монитор трафика устройства (VPN)\n\n" +
                         "Создано с ❤️ с помощью Base44 Superagent.");
                 } else {
                     showInfoDialog("ℹ️ About NetWatch",
@@ -468,7 +510,9 @@ public class MainActivity extends Activity {
                         "  • Domain Intelligence & WHOIS lookup\n" +
                         "  • Real-time per-app traffic monitoring\n" +
                         "  • Domain reachability checker\n" +
-                        "  • Live network & geo-IP info\n\n" +
+                        "  • Live network & geo-IP info\n" +
+                        "  • Speed Test (download, upload, latency)\n" +
+                        "  • Device-wide traffic monitor (VPN)\n\n" +
                         "Built with ❤️ using Base44 Superagent.");
                 }
                 return true;
