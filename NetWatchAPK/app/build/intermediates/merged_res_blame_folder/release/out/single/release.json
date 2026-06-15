@@ -1064,6 +1064,10 @@
         "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-core-1.9.0-28:/layout/custom_dialog.xml"
     },
     {
+        "merged": "com.netwatch.app-merged_res-5:/drawable_btn_speed.xml.flat",
+        "source": "com.netwatch.app-main-6:/drawable/btn_speed.xml"
+    },
+    {
         "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-5:/drawable_mtrl_popupmenu_background.xml.flat",
         "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-material-1.11.0-25:/drawable/mtrl_popupmenu_background.xml"
     },
@@ -2142,10 +2146,6 @@
     {
         "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-5:/color-v31_m3_ref_palette_dynamic_neutral_variant4.xml.flat",
         "source": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-material-1.11.0-25:/color-v31/m3_ref_palette_dynamic_neutral_variant4.xml"
-    },
-    {
-        "merged": "com.netwatch.app-merged_res-5:/layout_activity_main.xml.flat",
-        "source": "com.netwatch.app-main-6:/layout/activity_main.xml"
     },
     {
         "merged": "/tmp/gradle_home/daemon/8.2/com.netwatch.app-merged_res-5:/color_m3_timepicker_button_ripple_color.xml.flat",

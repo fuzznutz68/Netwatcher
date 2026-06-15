@@ -11,10 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
@@ -25,493 +22,594 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+/* loaded from: classes.dex */
 public class TrafficMonitorService extends Service {
-
-    private static final String TAG = "NetWatch";
-
-    public static final String ACTION_STOP    = "com.netwatch.app.STOP_MONITOR";
-    public static final String EVENT_ACTION   = "com.netwatch.app.TRAFFIC_EVENT";
-
-    public static final String EXTRA_TX_BYTES  = "tx_bytes";
-    public static final String EXTRA_RX_BYTES  = "rx_bytes";
-    public static final String EXTRA_TX_RATE   = "tx_rate";
-    public static final String EXTRA_RX_RATE   = "rx_rate";
-    public static final String EXTRA_HOSTS     = "hosts";       // newline-separated "flag host (city, country) [org]"
-    public static final String EXTRA_TIMESTAMP = "timestamp";
-
-    private static final String CHANNEL_ID      = "netwatch_monitor";
-    private static final int    NOTIF_ID        = 43;
-    private static final long   POLL_MS         = 1000L;
+    public static final String ACTION_STOP = "com.netwatch.app.STOP_MONITOR";
+    private static final String CHANNEL_ID = "netwatch_monitor";
+    private static final LinkedHashMap<String, String[]> COMPANION_DOMAINS;
     private static final String DOMAIN_INTEL_URL = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
-    private static final String GEO_IP_URL       = "https://superagent-cfb25b3e.base44.app/functions/geoIp";
-
-    private int     targetUid  = -1;
-    private String  targetPkg  = "";
-    private String  targetName = "";
-    private boolean running    = false;
-
-    private long lastTx = TrafficStats.UNSUPPORTED;
-    private long lastRx = TrafficStats.UNSUPPORTED;
-
-    private final Handler         handler = new Handler(Looper.getMainLooper());
-    private final ExecutorService ioExec  = Executors.newFixedThreadPool(6);
-
-    // ip → hostname
-    private final ConcurrentHashMap<String, String>  dnsCache    = new ConcurrentHashMap<>();
-    // ip → GeoInfo string e.g. "🇺🇸 Ashburn, US · Google LLC"
-    private final ConcurrentHashMap<String, String>  geoCache    = new ConcurrentHashMap<>();
-    // IPs already submitted for PTR lookup
-    private final Set<String> submittedIps    = Collections.synchronizedSet(new HashSet<>());
-    // IPs already submitted for Geo lookup (batch pending)
-    private final Set<String> geoSubmitted    = Collections.synchronizedSet(new HashSet<>());
-    private final Set<String> submittedDomains = Collections.synchronizedSet(new HashSet<>());
-    // Full host lines already broadcast to avoid duplicates
-    private final Set<String> broadcastHosts  = Collections.synchronizedSet(new HashSet<>());
-
-    private final Runnable pollRunnable = new Runnable() {
-        @Override public void run() {
-            if (!running) return;
-            poll();
-            handler.postDelayed(this, POLL_MS);
+    public static final String EVENT_ACTION = "com.netwatch.app.TRAFFIC_EVENT";
+    public static final String EXTRA_HOSTS = "hosts";
+    public static final String EXTRA_RX_BYTES = "rx_bytes";
+    public static final String EXTRA_RX_RATE = "rx_rate";
+    public static final String EXTRA_TIMESTAMP = "timestamp";
+    public static final String EXTRA_TX_BYTES = "tx_bytes";
+    public static final String EXTRA_TX_RATE = "tx_rate";
+    private static final String GEO_IP_URL = "https://superagent-cfb25b3e.base44.app/functions/geoIp";
+    private static final int NOTIF_ID = 43;
+    private static final long POLL_MS = 1000;
+    private static final String TAG = "NetWatch";
+    private int targetUid = -1;
+    private String targetPkg = "";
+    private String targetName = "";
+    private boolean running = false;
+    private long lastTx = -1;
+    private long lastRx = -1;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService ioExec = Executors.newFixedThreadPool(6);
+    private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> geoCache = new ConcurrentHashMap<>();
+    private final Set<String> submittedIps = Collections.synchronizedSet(new HashSet());
+    private final Set<String> geoSubmitted = Collections.synchronizedSet(new HashSet());
+    private final Set<String> submittedDomains = Collections.synchronizedSet(new HashSet());
+    private final Set<String> broadcastHosts = Collections.synchronizedSet(new HashSet());
+    private final Runnable pollRunnable = new Runnable() { // from class: com.netwatch.app.TrafficMonitorService.1
+        @Override // java.lang.Runnable
+        public void run() {
+            if (TrafficMonitorService.this.running) {
+                TrafficMonitorService.this.poll();
+                TrafficMonitorService.this.handler.postDelayed(this, TrafficMonitorService.POLL_MS);
+            }
         }
     };
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
-            stopSelf();
-            return START_NOT_STICKY;
+    /* renamed from: com.netwatch.app.TrafficMonitorService$1 */
+    /* loaded from: classes.dex */
+    public class AnonymousClass1 implements Runnable {
+        @Override // java.lang.Runnable
+        public void run() {
+            if (TrafficMonitorService.this.running) {
+                TrafficMonitorService.this.poll();
+                TrafficMonitorService.this.handler.postDelayed(this, TrafficMonitorService.POLL_MS);
+            }
         }
-
-        if (intent != null) {
-            targetUid  = intent.getIntExtra("target_uid", -1);
-            targetPkg  = intent.getStringExtra("target_pkg");  if (targetPkg  == null) targetPkg  = "";
-            targetName = intent.getStringExtra("target_name"); if (targetName == null) targetName = "";
-        }
-
-        createChannel();
-        Notification n = buildNotification();
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIF_ID, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-        } else {
-            startForeground(NOTIF_ID, n);
-        }
-
-        dnsCache.clear(); geoCache.clear();
-        submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
-        lastTx = TrafficStats.UNSUPPORTED;
-        lastRx = TrafficStats.UNSUPPORTED;
-        running = true;
-
-        if (!targetPkg.isEmpty()) seedDomainsFromBackend(targetPkg);
-        handler.post(pollRunnable);
-        return START_STICKY;
     }
 
-    // ── Domain seeding ────────────────────────────────────────────────────────
-
-    private void seedDomainsFromBackend(String pkg) {
-        ioExec.submit(() -> {
-            String rootDomain = packageToRootDomain(pkg);
-            if (rootDomain == null) return;
-            try {
-                String json = postJson(DOMAIN_INTEL_URL, "{\"domain\":\"" + rootDomain + "\"}");
-                if (json == null) return;
-                JSONObject obj = new JSONObject(json);
-                List<String> domains = new ArrayList<>();
-                domains.add(rootDomain);
-                JSONArray subs = obj.optJSONArray("subdomains");
-                if (subs != null) {
-                    for (int i = 0; i < subs.length(); i++) {
-                        JSONObject sub = subs.optJSONObject(i);
-                        if (sub != null) { String name = sub.optString("name",""); if (!name.isEmpty()) domains.add(name); }
-                    }
-                }
-                // Forward-DNS each seeded domain to populate ip→host map
-                List<String> seedIps = new ArrayList<>();
-                for (String d : domains) {
-                    final String dom = d;
-                    ioExec.submit(() -> {
-                        try {
-                            InetAddress[] addrs = InetAddress.getAllByName(dom);
-                            for (InetAddress addr : addrs) {
-                                String ip = addr.getHostAddress();
-                                dnsCache.put(ip, dom);
-                                submittedIps.add(ip);
-                                synchronized (seedIps) { seedIps.add(ip); }
-                            }
-                        } catch (Exception ignored) {}
-                    });
-                }
-                // Broadcast seeded domain names immediately (without geo yet)
-                broadcastNewHosts(domains);
-            } catch (Exception e) { Log.w(TAG, "seedDomains: " + e.getMessage()); }
-        });
-    }
-
-    private static String packageToRootDomain(String pkg) {
-        if (pkg == null || pkg.isEmpty()) return null;
-        String[] parts = pkg.split("\\.");
-        if (parts.length < 2) return null;
-        String tld = parts[0]; String name = parts[1];
-        if ("com".equals(tld) || "org".equals(tld) || "io".equals(tld)) return name + ".com";
-        return name + "." + tld;
-    }
-
-    // ── Companion-domain map ──────────────────────────────────────────────────
-    // Maps package-name substrings → additional domains the app is known to use.
-    // Also used as an org-name → domain lookup when geo data comes back.
-    private static final java.util.LinkedHashMap<String, String[]> COMPANION_DOMAINS;
     static {
-        COMPANION_DOMAINS = new java.util.LinkedHashMap<>();
-        // OpenAI / ChatGPT
-        COMPANION_DOMAINS.put("openai",         new String[]{"openai.com","oaiusercontent.com","oaidatastatic.com","chatgpt.com","cdn.openai.com","auth0.openai.com"});
-        // Google
-        COMPANION_DOMAINS.put("google",         new String[]{"google.com","googleapis.com","gstatic.com","googleusercontent.com","googlevideo.com","ggpht.com","googleadservices.com"});
-        // YouTube
-        COMPANION_DOMAINS.put("youtube",        new String[]{"youtube.com","youtu.be","ytimg.com","ggpht.com","googlevideo.com","googleapis.com"});
-        // Meta / Facebook / Instagram
-        COMPANION_DOMAINS.put("facebook",       new String[]{"facebook.com","fbcdn.net","instagram.com","whatsapp.com","cdninstagram.com","fb.com"});
-        COMPANION_DOMAINS.put("instagram",      new String[]{"instagram.com","cdninstagram.com","fbcdn.net","facebook.com"});
-        COMPANION_DOMAINS.put("whatsapp",       new String[]{"whatsapp.com","whatsapp.net","fbcdn.net"});
-        // Microsoft
-        COMPANION_DOMAINS.put("microsoft",      new String[]{"microsoft.com","live.com","office.com","office365.com","microsoftonline.com","azure.com","azureedge.net","bing.com","msn.com","msocdn.com","skype.com","teams.microsoft.com"});
-        COMPANION_DOMAINS.put("teams",          new String[]{"teams.microsoft.com","microsoft.com","live.com","skype.com","microsoftonline.com"});
-        // Twitter / X
-        COMPANION_DOMAINS.put("twitter",        new String[]{"twitter.com","x.com","t.co","twimg.com","abs.twimg.com"});
-        // TikTok / ByteDance
-        COMPANION_DOMAINS.put("tiktok",         new String[]{"tiktok.com","tiktokcdn.com","muscdn.com","musical.ly","byteoversea.com","bytecdn.com"});
-        // Snapchat
-        COMPANION_DOMAINS.put("snapchat",       new String[]{"snapchat.com","sc-cdn.net","snap.com","snapkit.com"});
-        // Telegram
-        COMPANION_DOMAINS.put("telegram",       new String[]{"telegram.org","t.me","telesco.pe"});
-        // Netflix
-        COMPANION_DOMAINS.put("netflix",        new String[]{"netflix.com","nflxvideo.net","nflximg.net","nflxext.com","netflixdns.net"});
-        // Spotify
-        COMPANION_DOMAINS.put("spotify",        new String[]{"spotify.com","scdn.co","spotifycdn.com","audio-sp.spotify.com"});
-        // Amazon
-        COMPANION_DOMAINS.put("amazon",         new String[]{"amazon.com","amazonaws.com","cloudfront.net","ssl-images-amazon.com","media-amazon.com","primevideo.com"});
-        // Apple
-        COMPANION_DOMAINS.put("apple",          new String[]{"apple.com","icloud.com","mzstatic.com","aaplimg.com","cdn-apple.com","appleid.apple.com"});
-        // Reddit
-        COMPANION_DOMAINS.put("reddit",         new String[]{"reddit.com","redd.it","redditmedia.com","redditstatic.com","reddituploads.com"});
-        // Discord
-        COMPANION_DOMAINS.put("discord",        new String[]{"discord.com","discordapp.com","discordcdn.com","discord.gg"});
-        // LinkedIn
-        COMPANION_DOMAINS.put("linkedin",       new String[]{"linkedin.com","licdn.com"});
-        // Twitch
-        COMPANION_DOMAINS.put("twitch",         new String[]{"twitch.tv","twitchapps.com","jtvnw.net","twitchsvc.net","amazonaws.com"});
-        // GitHub
-        COMPANION_DOMAINS.put("github",         new String[]{"github.com","githubusercontent.com","githubassets.com","github.io"});
-        // Cloudflare
-        COMPANION_DOMAINS.put("cloudflare",     new String[]{"cloudflare.com","cloudflare-dns.com","1.1.1.1","1.0.0.1"});
+        LinkedHashMap<String, String[]> linkedHashMap = new LinkedHashMap<>();
+        COMPANION_DOMAINS = linkedHashMap;
+        linkedHashMap.put("openai", new String[]{"openai.com", "oaiusercontent.com", "oaidatastatic.com", "chatgpt.com", "cdn.openai.com", "auth0.openai.com"});
+        linkedHashMap.put("google", new String[]{"google.com", "googleapis.com", "gstatic.com", "googleusercontent.com", "googlevideo.com", "ggpht.com", "googleadservices.com"});
+        linkedHashMap.put("youtube", new String[]{"youtube.com", "youtu.be", "ytimg.com", "ggpht.com", "googlevideo.com", "googleapis.com"});
+        linkedHashMap.put("facebook", new String[]{"facebook.com", "fbcdn.net", "instagram.com", "whatsapp.com", "cdninstagram.com", "fb.com"});
+        linkedHashMap.put("instagram", new String[]{"instagram.com", "cdninstagram.com", "fbcdn.net", "facebook.com"});
+        linkedHashMap.put("whatsapp", new String[]{"whatsapp.com", "whatsapp.net", "fbcdn.net"});
+        linkedHashMap.put("microsoft", new String[]{"microsoft.com", "live.com", "office.com", "office365.com", "microsoftonline.com", "azure.com", "azureedge.net", "bing.com", "msn.com", "msocdn.com", "skype.com", "teams.microsoft.com"});
+        linkedHashMap.put("teams", new String[]{"teams.microsoft.com", "microsoft.com", "live.com", "skype.com", "microsoftonline.com"});
+        linkedHashMap.put("twitter", new String[]{"twitter.com", "x.com", "t.co", "twimg.com", "abs.twimg.com"});
+        linkedHashMap.put("tiktok", new String[]{"tiktok.com", "tiktokcdn.com", "muscdn.com", "musical.ly", "byteoversea.com", "bytecdn.com"});
+        linkedHashMap.put("snapchat", new String[]{"snapchat.com", "sc-cdn.net", "snap.com", "snapkit.com"});
+        linkedHashMap.put("telegram", new String[]{"telegram.org", "t.me", "telesco.pe"});
+        linkedHashMap.put("netflix", new String[]{"netflix.com", "nflxvideo.net", "nflximg.net", "nflxext.com", "netflixdns.net"});
+        linkedHashMap.put("spotify", new String[]{"spotify.com", "scdn.co", "spotifycdn.com", "audio-sp.spotify.com"});
+        linkedHashMap.put("amazon", new String[]{"amazon.com", "amazonaws.com", "cloudfront.net", "ssl-images-amazon.com", "media-amazon.com", "primevideo.com"});
+        linkedHashMap.put("apple", new String[]{"apple.com", "icloud.com", "mzstatic.com", "aaplimg.com", "cdn-apple.com", "appleid.apple.com"});
+        linkedHashMap.put("reddit", new String[]{"reddit.com", "redd.it", "redditmedia.com", "redditstatic.com", "reddituploads.com"});
+        linkedHashMap.put("discord", new String[]{"discord.com", "discordapp.com", "discordcdn.com", "discord.gg"});
+        linkedHashMap.put("linkedin", new String[]{"linkedin.com", "licdn.com"});
+        linkedHashMap.put("twitch", new String[]{"twitch.tv", "twitchapps.com", "jtvnw.net", "twitchsvc.net", "amazonaws.com"});
+        linkedHashMap.put("github", new String[]{"github.com", "githubusercontent.com", "githubassets.com", "github.io"});
+        linkedHashMap.put("cloudflare", new String[]{"cloudflare.com", "cloudflare-dns.com", "1.1.1.1", "1.0.0.1"});
     }
 
-    /** Return all companion domains for a given package name. */
-    private static List<String> companionDomainsForPackage(String pkg) {
-        List<String> result = new ArrayList<>();
-        if (pkg == null) return result;
-        String lc = pkg.toLowerCase(java.util.Locale.US);
-        for (java.util.Map.Entry<String, String[]> e : COMPANION_DOMAINS.entrySet()) {
-            if (lc.contains(e.getKey())) {
-                for (String d : e.getValue()) result.add(d);
-            }
-        }
-        return result;
+    private void broadcastIpAsHost(String str) {
+        String buildHostLine = buildHostLine(this.dnsCache.getOrDefault(str, str), this.geoCache.get(str));
+        ArrayList arrayList = new ArrayList();
+        arrayList.add(buildHostLine);
+        broadcastNewHosts(arrayList);
     }
 
-    /** Return companion domains that match the given org string (from Geo-IP). */
-    private List<String> companionDomainsForOrg(String org) {
-        List<String> result = new ArrayList<>();
-        if (org == null || org.isEmpty()) return result;
-        String lc = org.toLowerCase(java.util.Locale.US);
-        for (java.util.Map.Entry<String, String[]> e : COMPANION_DOMAINS.entrySet()) {
-            if (lc.contains(e.getKey())) {
-                for (String d : e.getValue()) {
-                    if (!submittedDomains.contains(d)) result.add(d);
+    private void broadcastNewHosts(List<String> list) {
+        ArrayList arrayList = new ArrayList();
+        for (String str : list) {
+            if (str != null && !str.isEmpty()) {
+                String trim = str.trim();
+                if (!this.broadcastHosts.contains(trim)) {
+                    this.broadcastHosts.add(trim);
+                    arrayList.add(trim);
                 }
             }
         }
-        return result;
-    }
-
-    // ── Poll loop ─────────────────────────────────────────────────────────────
-
-    private void poll() {
-        // TrafficStats — prefer per-UID, fall back to device total for whole-device mode
-        long tx, rx;
-        if (targetUid == -1) {
-            tx = TrafficStats.getTotalTxBytes();
-            rx = TrafficStats.getTotalRxBytes();
-        } else {
-            tx = TrafficStats.getUidTxBytes(targetUid);
-            rx = TrafficStats.getUidRxBytes(targetUid);
-            // Some devices return UNSUPPORTED for UID stats — fall back gracefully
-            if (tx == TrafficStats.UNSUPPORTED || tx < 0) {
-                tx = TrafficStats.getTotalTxBytes();
-                rx = TrafficStats.getTotalRxBytes();
-            }
+        if (arrayList.isEmpty()) {
+            return;
         }
-        // Sanitize
-        if (tx < 0) tx = TrafficStats.UNSUPPORTED;
-        if (rx < 0) rx = TrafficStats.UNSUPPORTED;
-
-        long txRate = 0, rxRate = 0;
-        if (lastTx != TrafficStats.UNSUPPORTED && tx != TrafficStats.UNSUPPORTED && lastTx >= 0 && tx >= 0) {
-            txRate = Math.max(0, tx - lastTx);
-            rxRate = Math.max(0, rx - lastRx);
-        }
-        lastTx = tx; lastRx = rx;
-
-        // Active IPs from /proc/net/tcp
-        List<String> activeIps = readAllEstablishedIps();
-
-        // Collect IPs needing geo lookup
-        List<String> needGeo = new ArrayList<>();
-        for (String ip : activeIps) {
-            if (!geoSubmitted.contains(ip)) { needGeo.add(ip); geoSubmitted.add(ip); }
-        }
-        if (!needGeo.isEmpty()) fetchGeoInBackground(new ArrayList<>(needGeo));
-
-        // PTR reverse DNS for new IPs
-        for (String ip : activeIps) {
-            if (!submittedIps.contains(ip)) {
-                submittedIps.add(ip);
-                final String toResolve = ip;
-                ioExec.submit(() -> {
-                    try {
-                        String host = InetAddress.getByName(toResolve).getHostName();
-                        String resolved = host.equals(toResolve) ? toResolve : host;
-                        dnsCache.put(toResolve, resolved);
-                        broadcastIpAsHost(toResolve);
-                    } catch (Exception e) {
-                        dnsCache.put(toResolve, toResolve);
-                        broadcastIpAsHost(toResolve);
-                    }
-                });
-            }
-        }
-
-        // Broadcast any cached IPs not yet sent
-        for (String ip : activeIps) {
-            if (dnsCache.containsKey(ip)) broadcastIpAsHost(ip);
-        }
-
-        // Stats-only broadcast so byte counters always update
-        sendStatsBroadcast(tx, rx, txRate, rxRate, "");
-    }
-
-    /** Broadcast a single IP using the best available info (host + geo) */
-    private void broadcastIpAsHost(String ip) {
-        String host = dnsCache.getOrDefault(ip, ip);
-        String geo  = geoCache.get(ip);  // may be null if not yet resolved
-        String line = buildHostLine(host, geo);
-        List<String> single = new ArrayList<>();
-        single.add(line);
-        broadcastNewHosts(single);
-    }
-
-    /** Assembles the display line: "🇺🇸 api.paypal.com · Ashburn, US · PayPal Inc" */
-    private static String buildHostLine(String host, String geo) {
-        if (geo == null || geo.isEmpty()) return host;
-        return geo + "  " + host;
-    }
-
-    private void fetchGeoInBackground(final List<String> ips) {
-        ioExec.submit(() -> {
-            try {
-                StringBuilder sb = new StringBuilder("{\"ips\":[");
-                for (int i = 0; i < ips.size(); i++) {
-                    if (i > 0) sb.append(",");
-                    sb.append("\"").append(ips.get(i)).append("\"");
-                }
-                sb.append("]}");
-                String resp = postJson(GEO_IP_URL, sb.toString());
-                if (resp == null) return;
-                JSONObject obj = new JSONObject(resp);
-                JSONObject results = obj.optJSONObject("results");
-                if (results == null) return;
-                for (String ip : ips) {
-                    JSONObject info = results.optJSONObject(ip);
-                    if (info == null) continue;
-                    String flag    = info.optString("flag", "🌐");
-                    String city    = info.optString("city", "");
-                    String country = info.optString("countryCode", "");
-                    String org     = info.optString("org", "");
-                    // Shorten org: strip leading "AS12345 " prefix if present
-                    org = org.replaceAll("^AS\\d+\\s+", "");
-                    // Build compact geo string: "🇺🇸 Ashburn US · Google LLC"
-                    StringBuilder geo = new StringBuilder(flag).append(" ");
-                    if (!city.isEmpty()) geo.append(city).append(", ");
-                    geo.append(country);
-                    if (!org.isEmpty()) geo.append(" · ").append(org);
-                    geoCache.put(ip, geo.toString());
-                    // Re-broadcast the updated line (with geo now filled in)
-                    broadcastIpAsHost(ip);
-
-                    // Org-based companion domain expansion:
-                    // If the org matches a known provider (e.g. "OpenAI"), seed their
-                    // companion domains so we catch CDN/asset hosts like oaiusercontent.com
-                    if (!org.isEmpty()) {
-                        List<String> orgCompanions = companionDomainsForOrg(org);
-                        if (!orgCompanions.isEmpty()) {
-                            for (String cd : orgCompanions) {
-                                submittedDomains.add(cd);
-                                final String dom = cd;
-                                ioExec.submit(() -> {
-                                    try {
-                                        InetAddress[] addrs = InetAddress.getAllByName(dom);
-                                        for (InetAddress addr : addrs) {
-                                            String cdIp = addr.getHostAddress();
-                                            dnsCache.put(cdIp, dom);
-                                            submittedIps.add(cdIp);
-                                        }
-                                    } catch (Exception ignored) {}
-                                });
-                            }
-                            broadcastNewHosts(orgCompanions);
-                        }
-                    }
-                }
-            } catch (Exception e) { Log.w(TAG, "fetchGeo: " + e.getMessage()); }
-        });
-    }
-
-    /** Broadcast only host lines not yet sent */
-    private void broadcastNewHosts(List<String> lines) {
-        List<String> newOnes = new ArrayList<>();
-        for (String h : lines) {
-            if (h == null || h.isEmpty()) continue;
-            // Use the host part (before any geo prefix) as dedup key
-            String key = h.trim();
-            if (!broadcastHosts.contains(key)) {
-                broadcastHosts.add(key);
-                newOnes.add(key);
-            }
-        }
-        if (newOnes.isEmpty()) return;
         StringBuilder sb = new StringBuilder();
-        for (String h : newOnes) sb.append(h).append("\n");
-        Intent ev = new Intent(EVENT_ACTION);
-        ev.setPackage(getPackageName());
-        ev.putExtra(EXTRA_TX_BYTES,  lastTx == TrafficStats.UNSUPPORTED ? -1L : lastTx);
-        ev.putExtra(EXTRA_RX_BYTES,  lastRx == TrafficStats.UNSUPPORTED ? -1L : lastRx);
-        ev.putExtra(EXTRA_TX_RATE,   0L);
-        ev.putExtra(EXTRA_RX_RATE,   0L);
-        ev.putExtra(EXTRA_HOSTS,     sb.toString().trim());
-        ev.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
-        sendBroadcast(ev);
+        Iterator it = arrayList.iterator();
+        while (it.hasNext()) {
+            sb.append((String) it.next());
+            sb.append("\n");
+        }
+        Intent intent = new Intent(EVENT_ACTION);
+        intent.setPackage(getPackageName());
+        long j2 = this.lastTx;
+        if (j2 == -1) {
+            j2 = -1;
+        }
+        intent.putExtra(EXTRA_TX_BYTES, j2);
+        long j3 = this.lastRx;
+        intent.putExtra(EXTRA_RX_BYTES, j3 != -1 ? j3 : -1L);
+        intent.putExtra(EXTRA_TX_RATE, 0L);
+        intent.putExtra(EXTRA_RX_RATE, 0L);
+        intent.putExtra(EXTRA_HOSTS, sb.toString().trim());
+        intent.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
+        sendBroadcast(intent);
     }
 
-    private void sendStatsBroadcast(long tx, long rx, long txRate, long rxRate, String hosts) {
-        Intent ev = new Intent(EVENT_ACTION);
-        ev.setPackage(getPackageName());
-        ev.putExtra(EXTRA_TX_BYTES,  tx == TrafficStats.UNSUPPORTED ? -1L : tx);
-        ev.putExtra(EXTRA_RX_BYTES,  rx == TrafficStats.UNSUPPORTED ? -1L : rx);
-        ev.putExtra(EXTRA_TX_RATE,   txRate);
-        ev.putExtra(EXTRA_RX_RATE,   rxRate);
-        ev.putExtra(EXTRA_HOSTS,     hosts != null ? hosts : "");
-        ev.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
-        sendBroadcast(ev);
-    }
-
-    // ── /proc/net/tcp ─────────────────────────────────────────────────────────
-
-    private List<String> readAllEstablishedIps() {
-        List<String> ips = new ArrayList<>();
-        parseProcNetFile("/proc/net/tcp",  false, ips);
-        parseProcNetFile("/proc/net/tcp6", true,  ips);
-        return new ArrayList<>(new LinkedHashSet<>(ips));
-    }
-
-    private void parseProcNetFile(String path, boolean isIpv6, List<String> out) {
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line; boolean first = true;
-            while ((line = br.readLine()) != null) {
-                if (first) { first = false; continue; }
-                String[] parts = line.trim().split("\\s+");
-                if (parts.length < 4) continue;
-                String state = parts[3];
-                if (!"01".equals(state) && !"06".equals(state) && !"08".equals(state)) continue;
-                if (targetUid != -1 && parts.length >= 8) {
-                    try { int uid = Integer.parseInt(parts[7]); if (uid != targetUid) continue; }
-                    catch (Exception ignored) {}
-                }
-                String remAddr = parts[2];
-                String ip = hexToIp(remAddr, isIpv6);
-                if (ip == null || ip.isEmpty()) continue;
-                if (ip.startsWith("0.0.0.0") || ip.startsWith("127.") || ip.equals("::1")) continue;
-                String portHex = remAddr.contains(":") ? remAddr.substring(remAddr.indexOf(':') + 1) : "0";
-                try { if (Integer.parseInt(portHex, 16) == 0) continue; } catch (Exception ignored) {}
-                out.add(ip);
-            }
-        } catch (Exception e) { Log.w(TAG, "parseProcNet " + path + ": " + e.getMessage()); }
-    }
-
-    private static String hexToIp(String hexAddr, boolean isIpv6) {
-        try {
-            int colon = hexAddr.indexOf(':');
-            if (colon < 0) return null;
-            String hexIp = hexAddr.substring(0, colon);
-            if (!isIpv6) {
-                long val = Long.parseLong(hexIp, 16);
-                return ((val)&0xFF)+"."+((val>>8)&0xFF)+"."+((val>>16)&0xFF)+"."+((val>>24)&0xFF);
-            } else {
-                if (hexIp.length() < 32) return null;
-                byte[] b = new byte[16];
-                for (int w = 0; w < 4; w++) {
-                    long word = Long.parseLong(hexIp.substring(w*8, w*8+8), 16);
-                    b[w*4]=(byte)(word&0xFF); b[w*4+1]=(byte)((word>>8)&0xFF);
-                    b[w*4+2]=(byte)((word>>16)&0xFF); b[w*4+3]=(byte)((word>>24)&0xFF);
-                }
-                return InetAddress.getByAddress(b).getHostAddress();
-            }
-        } catch (Exception e) { return null; }
-    }
-
-    // ── HTTP helper ───────────────────────────────────────────────────────────
-
-    private static String postJson(String urlStr, String body) {
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true); conn.setConnectTimeout(10000); conn.setReadTimeout(20000);
-            try (OutputStream os = conn.getOutputStream()) { os.write(body.getBytes("UTF-8")); }
-            int code = conn.getResponseCode();
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    code>=200&&code<300 ? conn.getInputStream() : conn.getErrorStream()));
-            StringBuilder sb = new StringBuilder(); String line;
-            while ((line=br.readLine())!=null) sb.append(line);
-            br.close(); return sb.toString();
-        } catch (Exception e) { return null; }
-    }
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-    @Override public void onDestroy() {
-        running = false; handler.removeCallbacks(pollRunnable); ioExec.shutdownNow(); super.onDestroy();
-    }
-    @Override public IBinder onBind(Intent intent) { return null; }
-
-    private void createChannel() {
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "NetWatch Monitor", NotificationManager.IMPORTANCE_LOW);
-        nm.createNotificationChannel(ch);
+    private static String buildHostLine(String str, String str2) {
+        if (str2 == null || str2.isEmpty()) {
+            return str;
+        }
+        return str2 + "  " + str;
     }
 
     private Notification buildNotification() {
-        String text = targetName.isEmpty() ? "Monitoring device traffic" : "Monitoring: " + targetName;
-        return new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("🔍 NetWatch Active").setContentText(text)
-                .setSmallIcon(android.R.drawable.ic_menu_compass).build();
+        String str;
+        if (this.targetName.isEmpty()) {
+            str = "Monitoring device traffic";
+        } else {
+            str = "Monitoring: " + this.targetName;
+        }
+        return new Notification.Builder(this, CHANNEL_ID).setContentTitle("🔍 NetWatch Active").setContentText(str).setSmallIcon(android.R.drawable.ic_menu_compass).build();
+    }
+
+    private List<String> companionDomainsForOrg(String str) {
+        ArrayList arrayList = new ArrayList();
+        if (str != null && !str.isEmpty()) {
+            String lowerCase = str.toLowerCase(Locale.US);
+            for (Map.Entry<String, String[]> entry : COMPANION_DOMAINS.entrySet()) {
+                if (lowerCase.contains(entry.getKey())) {
+                    for (String str2 : entry.getValue()) {
+                        if (!this.submittedDomains.contains(str2)) {
+                            arrayList.add(str2);
+                        }
+                    }
+                }
+            }
+        }
+        return arrayList;
+    }
+
+    private static List<String> companionDomainsForPackage(String str) {
+        ArrayList arrayList = new ArrayList();
+        if (str == null) {
+            return arrayList;
+        }
+        String lowerCase = str.toLowerCase(Locale.US);
+        for (Map.Entry<String, String[]> entry : COMPANION_DOMAINS.entrySet()) {
+            if (lowerCase.contains(entry.getKey())) {
+                for (String str2 : entry.getValue()) {
+                    arrayList.add(str2);
+                }
+            }
+        }
+        return arrayList;
+    }
+
+    private void createChannel() {
+        ((NotificationManager) getSystemService("notification")).createNotificationChannel(new NotificationChannel(CHANNEL_ID, "NetWatch Monitor", 2));
+    }
+
+    private void fetchGeoInBackground(List<String> list) {
+        this.ioExec.submit(new androidx.constraintlayout.motion.widget.a(6, this, list));
+    }
+
+    private static String hexToIp(String str, boolean z) {
+        try {
+            int indexOf = str.indexOf(58);
+            if (indexOf < 0) {
+                return null;
+            }
+            String substring = str.substring(0, indexOf);
+            if (!z) {
+                long parseLong = Long.parseLong(substring, 16);
+                return (parseLong & 255) + "." + ((parseLong >> 8) & 255) + "." + ((parseLong >> 16) & 255) + "." + ((parseLong >> 24) & 255);
+            }
+            if (substring.length() < 32) {
+                return null;
+            }
+            byte[] bArr = new byte[16];
+            for (int i2 = 0; i2 < 4; i2++) {
+                int i3 = i2 * 8;
+                long parseLong2 = Long.parseLong(substring.substring(i3, i3 + 8), 16);
+                int i4 = i2 * 4;
+                bArr[i4] = (byte) (parseLong2 & 255);
+                bArr[i4 + 1] = (byte) ((parseLong2 >> 8) & 255);
+                bArr[i4 + 2] = (byte) ((parseLong2 >> 16) & 255);
+                bArr[i4 + 3] = (byte) ((parseLong2 >> 24) & 255);
+            }
+            return InetAddress.getByAddress(bArr).getHostAddress();
+        } catch (Exception unused) {
+            return null;
+        }
+    }
+
+    public /* synthetic */ void lambda$fetchGeoInBackground$3(String str) {
+        try {
+            for (InetAddress inetAddress : InetAddress.getAllByName(str)) {
+                String hostAddress = inetAddress.getHostAddress();
+                this.dnsCache.put(hostAddress, str);
+                this.submittedIps.add(hostAddress);
+            }
+        } catch (Exception unused) {
+        }
+    }
+
+    public /* synthetic */ void lambda$fetchGeoInBackground$4(List list) {
+        JSONObject optJSONObject;
+        try {
+            StringBuilder sb = new StringBuilder("{\"ips\":[");
+            for (int i2 = 0; i2 < list.size(); i2++) {
+                if (i2 > 0) {
+                    sb.append(",");
+                }
+                sb.append("\"");
+                sb.append((String) list.get(i2));
+                sb.append("\"");
+            }
+            sb.append("]}");
+            String postJson = postJson(GEO_IP_URL, sb.toString());
+            if (postJson == null || (optJSONObject = new JSONObject(postJson).optJSONObject("results")) == null) {
+                return;
+            }
+            Iterator it = list.iterator();
+            while (it.hasNext()) {
+                String str = (String) it.next();
+                JSONObject optJSONObject2 = optJSONObject.optJSONObject(str);
+                if (optJSONObject2 != null) {
+                    String optString = optJSONObject2.optString("flag", "🌐");
+                    String optString2 = optJSONObject2.optString("city", "");
+                    String optString3 = optJSONObject2.optString("countryCode", "");
+                    String replaceAll = optJSONObject2.optString("org", "").replaceAll("^AS\\d+\\s+", "");
+                    StringBuilder sb2 = new StringBuilder(optString);
+                    sb2.append(" ");
+                    if (!optString2.isEmpty()) {
+                        sb2.append(optString2);
+                        sb2.append(", ");
+                    }
+                    sb2.append(optString3);
+                    if (!replaceAll.isEmpty()) {
+                        sb2.append(" · ");
+                        sb2.append(replaceAll);
+                    }
+                    this.geoCache.put(str, sb2.toString());
+                    broadcastIpAsHost(str);
+                    if (!replaceAll.isEmpty()) {
+                        List<String> companionDomainsForOrg = companionDomainsForOrg(replaceAll);
+                        if (!companionDomainsForOrg.isEmpty()) {
+                            for (String str2 : companionDomainsForOrg) {
+                                this.submittedDomains.add(str2);
+                                this.ioExec.submit(new z(this, str2, 2));
+                            }
+                            broadcastNewHosts(companionDomainsForOrg);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e2) {
+            Log.w(TAG, "fetchGeo: " + e2.getMessage());
+        }
+    }
+
+    public /* synthetic */ void lambda$poll$2(String str) {
+        try {
+            String hostName = InetAddress.getByName(str).getHostName();
+            if (hostName.equals(str)) {
+                hostName = str;
+            }
+            this.dnsCache.put(str, hostName);
+            broadcastIpAsHost(str);
+        } catch (Exception unused) {
+            this.dnsCache.put(str, str);
+            broadcastIpAsHost(str);
+        }
+    }
+
+    public /* synthetic */ void lambda$seedDomainsFromBackend$0(String str, List list) {
+        try {
+            for (InetAddress inetAddress : InetAddress.getAllByName(str)) {
+                String hostAddress = inetAddress.getHostAddress();
+                this.dnsCache.put(hostAddress, str);
+                this.submittedIps.add(hostAddress);
+                synchronized (list) {
+                    list.add(hostAddress);
+                }
+            }
+        } catch (Exception unused) {
+        }
+    }
+
+    public /* synthetic */ void lambda$seedDomainsFromBackend$1(String str) {
+        String packageToRootDomain = packageToRootDomain(str);
+        if (packageToRootDomain == null) {
+            return;
+        }
+        try {
+            String postJson = postJson(DOMAIN_INTEL_URL, "{\"domain\":\"" + packageToRootDomain + "\"}");
+            if (postJson == null) {
+                return;
+            }
+            JSONObject jSONObject = new JSONObject(postJson);
+            ArrayList arrayList = new ArrayList();
+            arrayList.add(packageToRootDomain);
+            JSONArray optJSONArray = jSONObject.optJSONArray("subdomains");
+            if (optJSONArray != null) {
+                for (int i2 = 0; i2 < optJSONArray.length(); i2++) {
+                    JSONObject optJSONObject = optJSONArray.optJSONObject(i2);
+                    if (optJSONObject != null) {
+                        String optString = optJSONObject.optString("name", "");
+                        if (!optString.isEmpty()) {
+                            arrayList.add(optString);
+                        }
+                    }
+                }
+            }
+            ArrayList arrayList2 = new ArrayList();
+            Iterator it = arrayList.iterator();
+            while (it.hasNext()) {
+                this.ioExec.submit(new g(this, (String) it.next(), arrayList2, 2));
+            }
+            broadcastNewHosts(arrayList);
+        } catch (Exception e2) {
+            Log.w(TAG, "seedDomains: " + e2.getMessage());
+        }
+    }
+
+    private static String packageToRootDomain(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        String[] split = str.split("\\.");
+        if (split.length < 2) {
+            return null;
+        }
+        String str2 = split[0];
+        String str3 = split[1];
+        if ("com".equals(str2) || "org".equals(str2) || "io".equals(str2)) {
+            return androidx.activity.result.a.e(str3, ".com");
+        }
+        return str3 + "." + str2;
+    }
+
+    private void parseProcNetFile(String str, boolean z, List<String> list) {
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(str));
+            boolean z2 = true;
+            while (true) {
+                try {
+                    String readLine = bufferedReader.readLine();
+                    if (readLine == null) {
+                        bufferedReader.close();
+                        return;
+                    }
+                    if (z2) {
+                        z2 = false;
+                    } else {
+                        String[] split = readLine.trim().split("\\s+");
+                        if (split.length >= 4) {
+                            String str2 = split[3];
+                            if ("01".equals(str2) || "06".equals(str2) || "08".equals(str2)) {
+                                if (this.targetUid != -1 && split.length >= 8) {
+                                    try {
+                                        if (Integer.parseInt(split[7]) != this.targetUid) {
+                                        }
+                                    } catch (Exception unused) {
+                                    }
+                                }
+                                String str3 = split[2];
+                                String hexToIp = hexToIp(str3, z);
+                                if (hexToIp != null && !hexToIp.isEmpty() && !hexToIp.startsWith("0.0.0.0") && !hexToIp.startsWith("127.") && !hexToIp.equals("::1")) {
+                                    if (Integer.parseInt(str3.contains(":") ? str3.substring(str3.indexOf(58) + 1) : "0", 16) != 0) {
+                                        list.add(hexToIp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                }
+            }
+        } catch (Exception e2) {
+            StringBuilder j2 = androidx.activity.result.a.j("parseProcNet ", str, ": ");
+            j2.append(e2.getMessage());
+            Log.w(TAG, j2.toString());
+        }
+    }
+
+    public void poll() {
+        long uidTxBytes;
+        long uidRxBytes;
+        long j2;
+        int i2 = this.targetUid;
+        long j3 = 0;
+        if (i2 == -1) {
+            uidTxBytes = TrafficStats.getTotalTxBytes();
+            uidRxBytes = TrafficStats.getTotalRxBytes();
+        } else {
+            uidTxBytes = TrafficStats.getUidTxBytes(i2);
+            uidRxBytes = TrafficStats.getUidRxBytes(this.targetUid);
+            if (uidTxBytes == -1 || uidTxBytes < 0) {
+                uidTxBytes = TrafficStats.getTotalTxBytes();
+                uidRxBytes = TrafficStats.getTotalRxBytes();
+            }
+        }
+        if (uidTxBytes < 0) {
+            uidTxBytes = -1;
+        }
+        if (uidRxBytes < 0) {
+            uidRxBytes = -1;
+        }
+        long j4 = this.lastTx;
+        if (j4 == -1 || uidTxBytes == -1 || j4 < 0 || uidTxBytes < 0) {
+            j2 = 0;
+        } else {
+            long max = Math.max(0L, uidTxBytes - j4);
+            j2 = Math.max(0L, uidRxBytes - this.lastRx);
+            j3 = max;
+        }
+        this.lastTx = uidTxBytes;
+        this.lastRx = uidRxBytes;
+        List<String> readAllEstablishedIps = readAllEstablishedIps();
+        ArrayList arrayList = new ArrayList();
+        for (String str : readAllEstablishedIps) {
+            if (!this.geoSubmitted.contains(str)) {
+                arrayList.add(str);
+                this.geoSubmitted.add(str);
+            }
+        }
+        if (!arrayList.isEmpty()) {
+            fetchGeoInBackground(new ArrayList(arrayList));
+        }
+        for (String str2 : readAllEstablishedIps) {
+            if (!this.submittedIps.contains(str2)) {
+                this.submittedIps.add(str2);
+                this.ioExec.submit(new z(this, str2, 1));
+            }
+        }
+        for (String str3 : readAllEstablishedIps) {
+            if (this.dnsCache.containsKey(str3)) {
+                broadcastIpAsHost(str3);
+            }
+        }
+        sendStatsBroadcast(uidTxBytes, uidRxBytes, j3, j2, "");
+    }
+
+    private static String postJson(String str, String str2) {
+        try {
+            HttpURLConnection httpURLConnection = (HttpURLConnection) new URL(str).openConnection();
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setConnectTimeout(10000);
+            httpURLConnection.setReadTimeout(AccessibilityNodeInfoCompat.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH);
+            OutputStream outputStream = httpURLConnection.getOutputStream();
+            try {
+                outputStream.write(str2.getBytes("UTF-8"));
+                outputStream.close();
+                int responseCode = httpURLConnection.getResponseCode();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader((responseCode < 200 || responseCode >= 300) ? httpURLConnection.getErrorStream() : httpURLConnection.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                while (true) {
+                    String readLine = bufferedReader.readLine();
+                    if (readLine == null) {
+                        bufferedReader.close();
+                        return sb.toString();
+                    }
+                    sb.append(readLine);
+                }
+            } finally {
+            }
+        } catch (Exception unused) {
+            return null;
+        }
+    }
+
+    private List<String> readAllEstablishedIps() {
+        ArrayList arrayList = new ArrayList();
+        parseProcNetFile("/proc/net/tcp", false, arrayList);
+        parseProcNetFile("/proc/net/tcp6", true, arrayList);
+        return new ArrayList(new LinkedHashSet(arrayList));
+    }
+
+    private void seedDomainsFromBackend(String str) {
+        this.ioExec.submit(new z(this, str, 0));
+    }
+
+    private void sendStatsBroadcast(long j2, long j3, long j4, long j5, String str) {
+        Intent intent = new Intent(EVENT_ACTION);
+        intent.setPackage(getPackageName());
+        if (j2 == -1) {
+            j2 = -1;
+        }
+        intent.putExtra(EXTRA_TX_BYTES, j2);
+        if (j3 == -1) {
+            j3 = -1;
+        }
+        intent.putExtra(EXTRA_RX_BYTES, j3);
+        intent.putExtra(EXTRA_TX_RATE, j4);
+        intent.putExtra(EXTRA_RX_RATE, j5);
+        if (str == null) {
+            str = "";
+        }
+        intent.putExtra(EXTRA_HOSTS, str);
+        intent.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
+        sendBroadcast(intent);
+    }
+
+    @Override // android.app.Service
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override // android.app.Service
+    public void onDestroy() {
+        this.running = false;
+        this.handler.removeCallbacks(this.pollRunnable);
+        this.ioExec.shutdownNow();
+        super.onDestroy();
+    }
+
+    @Override // android.app.Service
+    public int onStartCommand(Intent intent, int i2, int i3) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopSelf();
+            return 2;
+        }
+        if (intent != null) {
+            this.targetUid = intent.getIntExtra("target_uid", -1);
+            String stringExtra = intent.getStringExtra("target_pkg");
+            this.targetPkg = stringExtra;
+            if (stringExtra == null) {
+                this.targetPkg = "";
+            }
+            String stringExtra2 = intent.getStringExtra("target_name");
+            this.targetName = stringExtra2;
+            if (stringExtra2 == null) {
+                this.targetName = "";
+            }
+        }
+        createChannel();
+        Notification buildNotification = buildNotification();
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(43, buildNotification, 1);
+        } else {
+            startForeground(43, buildNotification);
+        }
+        this.dnsCache.clear();
+        this.geoCache.clear();
+        this.submittedIps.clear();
+        this.geoSubmitted.clear();
+        this.broadcastHosts.clear();
+        this.submittedDomains.clear();
+        this.lastTx = -1L;
+        this.lastRx = -1L;
+        this.running = true;
+        if (!this.targetPkg.isEmpty()) {
+            seedDomainsFromBackend(this.targetPkg);
+        }
+        this.handler.post(this.pollRunnable);
+        return 1;
     }
 }

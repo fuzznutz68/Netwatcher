@@ -2,6 +2,7 @@ R_DEF: Internal format may change without notice
 local
 drawable btn_danger
 drawable btn_primary
+drawable btn_speed
 drawable card_background
 drawable ic_launcher
 drawable input_background
@@ -15,14 +16,15 @@ id checkStatusText
 id clearMonBtn
 id connectionCountText
 id customDomainInput
-id deviceDescText
+id deviceClearBtn
+id deviceCountText
 id deviceExportBtn
+id deviceHeaderRow
 id deviceLogContainer
 id deviceScrollView
-id deviceStartBtn
 id deviceStatusText
-id deviceStopBtn
 id deviceTitleText
+id deviceToggleBtn
 id domainInput
 id exportDomainBtn
 id exportTrafficBtn
@@ -49,15 +51,14 @@ id rxRateText
 id rxTotalText
 id selectAppLabel
 id speedDescText
-id speedDownloadVal
-id speedLatencyVal
-id speedRegionLabel
-id speedRegionSpinner
+id speedDownText
+id speedPingText
 id speedResultsContainer
 id speedRunBtn
+id speedServerSpinner
 id speedStatusText
 id speedTitleText
-id speedUploadVal
+id speedUpText
 id startMonBtn
 id statusText
 id stopCheckBtn
