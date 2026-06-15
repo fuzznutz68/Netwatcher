@@ -259,7 +259,7 @@ public class MainActivity extends Activity {
                     appSpinner.setTag(null);
                     return;
                 }
-                // Launch the selected app (skip "Whole Device") and auto-start monitoring
+                // Launch the selected app and auto-start monitoring
                 if (selectedApp != null && !selectedApp.packageName.isEmpty()) {
                     // If already monitoring another app, stop it first
                     if (monitoring) stopMonitoring();
@@ -269,10 +269,6 @@ public class MainActivity extends Activity {
                     startMonitoring();
                     // Small delay so monitoring is running before the app comes to foreground
                     mainHandler.postDelayed(() -> launchApp(selectedApp.packageName), 400);
-                } else if (selectedApp != null && selectedApp.uid == -1) {
-                    // "Whole Device" — just start monitoring, no app to launch
-                    trustedDomains.clear(); monitoredRootDomain = "";
-                    if (!monitoring) startMonitoring();
                 }
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
@@ -379,9 +375,9 @@ public class MainActivity extends Activity {
                         "  • Экспорт лога соединений в формате RFC 4180 CSV");
                 } else {
                     showInfoDialog("📡 Traffic Monitor — Help",
-                        "Monitor live network connections for any installed app or the whole device.\n\n" +
+                        "Monitor live network connections for any installed app.\n\n" +
                         "How to use:\n" +
-                        "  1. Select an app from the dropdown (or \'Whole Device\')\n" +
+                        "  1. Select an app from the dropdown\n" +
                         "  2. Tap Start — the selected app launches automatically\n" +
                         "  3. NetWatch captures all outbound connections in real-time\n\n" +
                         "Features:\n" +
@@ -557,9 +553,6 @@ public class MainActivity extends Activity {
             List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
             List<AppEntry> entries = new ArrayList<>();
 
-            // Add "Whole Device" as first option
-            entries.add(new AppEntry("📱  Whole Device", "", -1));
-
             for (ApplicationInfo ai : apps) {
                 // Must have a launcher intent (visible in app drawer)
                 Intent launchIntent = pm.getLaunchIntentForPackage(ai.packageName);
@@ -572,26 +565,29 @@ public class MainActivity extends Activity {
                 boolean isUpdatedSystemApp = (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
                 if (isSystemApp && !isUpdatedSystemApp) continue;
 
-                // Extra guard: skip known Android framework packages
+                // Extra guard: skip known Android framework / chipset packages
+                // NOTE: we do NOT block com.google.android.* broadly — that would hide
+                // YouTube, Maps, Gmail etc. We only skip true system framework prefixes.
                 String pkg = ai.packageName;
                 if (pkg.startsWith("com.android.") ||
                     pkg.startsWith("android.") ||
                     pkg.equals("android") ||
-                    pkg.startsWith("com.google.android.") ||
-                    pkg.startsWith("com.samsung.android.") ||
-                    pkg.startsWith("com.sec.android.") ||
                     pkg.startsWith("com.qualcomm.") ||
-                    pkg.startsWith("com.mediatek.")) continue;
+                    pkg.startsWith("com.mediatek.") ||
+                    pkg.startsWith("com.sec.android.") ||
+                    pkg.equals("com.google.android.gms") ||
+                    pkg.equals("com.google.android.gsf") ||
+                    pkg.equals("com.google.android.providers.media.module") ||
+                    pkg.startsWith("com.google.android.permissioncontroller") ||
+                    pkg.startsWith("com.google.android.ext.") ||
+                    pkg.startsWith("com.google.android.trichromelibrary")) continue;
 
                 String label = pm.getApplicationLabel(ai).toString();
                 entries.add(new AppEntry(label, ai.packageName, ai.uid));
             }
 
-            // Sort alphabetically (keep "Whole Device" first)
-            if (entries.size() > 1) {
-                List<AppEntry> rest = entries.subList(1, entries.size());
-                Collections.sort(rest, (a, b) -> a.label.compareToIgnoreCase(b.label));
-            }
+            // Sort alphabetically
+            Collections.sort(entries, (a, b) -> a.label.compareToIgnoreCase(b.label));
 
             appList = entries;
             mainHandler.post(() -> {
