@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class NetWatchVpnService extends VpnService {
 
@@ -208,7 +209,7 @@ public class NetWatchVpnService extends VpnService {
         intent.putExtra("ipPort",    ip + ":" + port);
         intent.putExtra("bytes",     bytes);
         intent.putExtra("timestamp", ts);
-        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private static String ipBytes(byte[] pkt, int offset) {
