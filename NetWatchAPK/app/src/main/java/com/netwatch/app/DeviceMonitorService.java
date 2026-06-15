@@ -53,14 +53,14 @@ public class DeviceMonitorService extends Service {
         intent.putExtra("app", str4);
         intent.putExtra(TrafficMonitorService.EXTRA_TIMESTAMP, format);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        StringBuilder j2 = androidx.activity.result.a.j("EMIT ", str3, " ");
+        StringBuilder j2 = new StringBuilder("EMIT ").append(str3).append(" ");
         if (str.isEmpty()) {
             str = str2;
         }
         j2.append(str);
         j2.append(":");
         j2.append(i2);
-        j2.append(str4.isEmpty() ? "" : androidx.activity.result.a.f(" [", str4, "]"));
+        j2.append(str4.isEmpty() ? "" : (" [" + str4 + "]"));
         Log.d(TAG, j2.toString());
     }
 
@@ -271,7 +271,7 @@ public class DeviceMonitorService extends Service {
         this.dnsExecutor = Executors.newScheduledThreadPool(3);
         ScheduledExecutorService newSingleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         this.scheduler = newSingleThreadScheduledExecutor;
-        newSingleThreadScheduledExecutor.scheduleWithFixedDelay(new v(1, this), 0L, 750L, TimeUnit.MILLISECONDS);
+        newSingleThreadScheduledExecutor.scheduleWithFixedDelay(this::poll, 0L, 750L, TimeUnit.MILLISECONDS);
         return 1;
     }
 }
