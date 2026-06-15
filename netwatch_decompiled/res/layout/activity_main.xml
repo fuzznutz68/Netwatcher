@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="#ff0a0e17" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:background="#ff0d1117" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <TextView android:textSize="20.0sp" android:textStyle="bold" android:textColor="#ff00e5ff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◈ NETWATCH" android:fontFamily="monospace" android:letterSpacing="0.15" />
+            <TextView android:textSize="11.0sp" android:textColor="#ff2a4a5a" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="// domain intelligence &amp; traffic monitor" android:fontFamily="monospace" />
+        </LinearLayout>
+        <TextView android:textSize="24.0sp" android:textColor="#ff00e5ff" android:gravity="center" android:id="@id/menuBtn" android:background="@android:color/transparent" android:focusable="true" android:clickable="true" android:layout_width="40.0dip" android:layout_height="40.0dip" android:text="⋮" android:fontFamily="monospace" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@id/tabBar" android:background="#ff0d1117" android:layout_width="fill_parent" android:layout_height="48.0dip">
+        <Button android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabDomainBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="🔍 Domain Intel" android:layout_weight="1.0" />
+        <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabTrafficBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="📡 Traffic" android:layout_weight="1.0" />
+        <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabCheckerBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="✅ Checker" android:layout_weight="1.0" />
+        <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabMyInfoBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="🌐 My Info" android:layout_weight="1.0" />
+        <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabSpeedBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="⚡ Speed" android:layout_weight="1.0" />
+        <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/tabDeviceBtn" android:background="@drawable/tab_selector" android:layout_width="0.0dip" android:layout_height="48.0dip" android:text="📶 Device" android:layout_weight="1.0" />
+    </LinearLayout>
+    <ScrollView android:id="@id/tab1" android:visibility="visible" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:padding="12.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dip">
+                <EditText android:textSize="14.0sp" android:textColor="#ff00e5ff" android:textColorHint="#ff546e7a" android:id="@id/domainInput" android:background="@drawable/input_background" android:paddingLeft="12.0dip" android:paddingRight="12.0dip" android:layout_width="0.0dip" android:layout_height="48.0dip" android:hint="Enter domain (e.g. paypal.com)" android:singleLine="true" android:layout_weight="1.0" android:inputType="text" android:imeOptions="actionSearch" />
+                <Button android:textColor="#ffe0e8f0" android:id="@id/lookupBtn" android:background="@drawable/btn_primary" android:paddingLeft="20.0dip" android:paddingRight="20.0dip" android:layout_width="wrap_content" android:layout_height="48.0dip" android:layout_marginLeft="8.0dip" android:text="SCAN" />
+            </LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                <TextView android:textSize="13.0sp" android:textColor="#ff78909c" android:id="@id/statusText" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="Enter a domain and tap SCAN" android:layout_weight="1.0" />
+                <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/exportDomainBtn" android:background="@drawable/btn_primary" android:paddingLeft="14.0dip" android:paddingRight="14.0dip" android:layout_width="wrap_content" android:layout_height="36.0dip" android:text="⬆ Export" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/resultsContainer" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:orientation="vertical" android:id="@id/tab2" android:padding="12.0dip" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:background="@drawable/card_background" android:padding="12.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+            <TextView android:textSize="11.0sp" android:textColor="#ff00e5ff" android:id="@id/selectAppLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="SELECT APP TO MONITOR" android:textAllCaps="true" />
+            <Spinner android:id="@id/appSpinner" android:background="@drawable/input_background" android:paddingLeft="8.0dip" android:paddingRight="8.0dip" android:layout_width="fill_parent" android:layout_height="48.0dip" android:layout_marginBottom="10.0dip" />
+            <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:paddingLeft="4.0dip" android:paddingRight="4.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                <TextView android:textSize="13.0sp" android:textColor="#ff6a7a8a" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="🔔  Alert on unknown hosts" android:layout_weight="1.0" />
+                <androidx.appcompat.widget.SwitchCompat android:id="@id/alertSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+            </LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <Button android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/startMonBtn" android:background="@drawable/btn_primary" android:layout_width="0.0dip" android:layout_height="44.0dip" android:text="▶  START" android:layout_weight="1.0" />
+                <Button android:enabled="false" android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/stopMonBtn" android:background="@drawable/btn_danger" android:layout_width="0.0dip" android:layout_height="44.0dip" android:layout_marginLeft="8.0dip" android:text="■  STOP" android:layout_weight="1.0" />
+                <Button android:textSize="16.0sp" android:textColor="#ffe0e8f0" android:id="@id/clearMonBtn" android:background="@drawable/btn_danger" android:layout_width="48.0dip" android:layout_height="44.0dip" android:layout_marginLeft="8.0dip" android:text="🗑" />
+                <Button android:textSize="12.0sp" android:textColor="#ffe0e8f0" android:id="@id/exportTrafficBtn" android:background="@drawable/btn_primary" android:paddingLeft="14.0dip" android:paddingRight="14.0dip" android:layout_width="wrap_content" android:layout_height="44.0dip" android:layout_marginLeft="8.0dip" android:text="⬆ Export" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip">
+            <TextView android:textSize="13.0sp" android:textColor="#ff78909c" android:id="@id/monStatusText" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="⚫  Monitoring inactive" android:layout_weight="1.0" />
+            <TextView android:textSize="12.0sp" android:textColor="#ff00e5ff" android:id="@id/connectionCountText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:background="@drawable/card_background" android:padding="12.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+            <LinearLayout android:gravity="center_horizontal" android:orientation="vertical" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0">
+                <TextView android:textSize="15.0sp" android:typeface="monospace" android:textStyle="bold" android:textColor="#ffef9a9a" android:id="@id/txTotalText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TX  —" />
+                <TextView android:textSize="12.0sp" android:typeface="monospace" android:textColor="#ff546e7a" android:id="@id/txRateText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↑ 0 B/s" />
+            </LinearLayout>
+            <View android:background="#ff1a3a5c" android:layout_width="1.0dip" android:layout_height="fill_parent" android:layout_marginLeft="8.0dip" android:layout_marginRight="8.0dip" />
+            <LinearLayout android:gravity="center_horizontal" android:orientation="vertical" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0">
+                <TextView android:textSize="15.0sp" android:typeface="monospace" android:textStyle="bold" android:textColor="#ffa5d6a7" android:id="@id/rxTotalText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RX  —" />
+                <TextView android:textSize="12.0sp" android:typeface="monospace" android:textColor="#ff546e7a" android:id="@id/rxRateText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↓ 0 B/s" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip">
+            <TextView android:textSize="11.0sp" android:textColor="#ff00e5ff" android:id="@id/liveHostsLabel" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="LIVE CONNECTION HOSTS" android:layout_weight="1.0" android:textAllCaps="true" />
+        </LinearLayout>
+        <ScrollView android:id="@id/hostLogScroll" android:background="@drawable/card_background" android:layout_width="fill_parent" android:layout_height="fill_parent">
+            <LinearLayout android:orientation="vertical" android:id="@id/hostLogContainer" android:padding="8.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </ScrollView>
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical" android:id="@id/tab3" android:padding="12.0dip" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip">
+            <EditText android:textSize="13.0sp" android:textColor="#ff00e5ff" android:textColorHint="#ff546e7a" android:id="@id/customDomainInput" android:background="@drawable/input_background" android:layout_width="0.0dip" android:layout_height="42.0dip" android:hint="Enter domain or IP…" android:singleLine="true" android:layout_weight="1.0" android:inputType="textUri" android:imeOptions="actionSearch" android:paddingStart="10.0dip" android:paddingEnd="10.0dip" android:layout_marginEnd="6.0dip" />
+            <Button android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/checkCustomBtn" android:background="@drawable/btn_primary" android:layout_width="wrap_content" android:layout_height="42.0dip" android:text="Check" android:paddingStart="16.0dip" android:paddingEnd="16.0dip" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+            <Button android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/checkAllBtn" android:background="@drawable/btn_primary" android:layout_width="0.0dip" android:layout_height="42.0dip" android:text="▶  Check All" android:layout_weight="1.0" android:layout_marginEnd="6.0dip" />
+            <Button android:enabled="false" android:textSize="13.0sp" android:textColor="#ffe0e8f0" android:id="@id/stopCheckBtn" android:background="@drawable/btn_danger" android:layout_width="0.0dip" android:layout_height="42.0dip" android:text="■  Stop" android:layout_weight="1.0" />
+        </LinearLayout>
+        <TextView android:textSize="12.0sp" android:textColor="#ff4a5a6a" android:id="@id/checkStatusText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip" android:text="Tap ▶ Check All to test reachability" />
+        <ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent">
+            <LinearLayout android:orientation="vertical" android:id="@id/checkResultsContainer" android:padding="4.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </ScrollView>
+    </LinearLayout>
+    <ScrollView android:id="@id/tab4" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="20.0sp" android:textStyle="bold" android:textColor="#ffe0f7fa" android:id="@id/myInfoTitleText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="🌐 My Network Info" />
+            <TextView android:textSize="12.0sp" android:textColor="#ff4a5a6a" android:id="@id/myInfoDescText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dip" android:text="Your public IP address, ISP, and location as seen from the internet." />
+            <Button android:textColor="#ffe0e8f0" android:id="@id/myInfoRefreshBtn" android:background="@drawable/btn_primary" android:layout_width="fill_parent" android:layout_height="48.0dip" android:layout_marginBottom="16.0dip" android:text="▶  Lookup My Info" />
+            <LinearLayout android:orientation="vertical" android:id="@id/myInfoContainer" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </LinearLayout>
+    </ScrollView>
+    <ScrollView android:id="@id/tab5" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="20.0sp" android:textStyle="bold" android:textColor="#ffffd740" android:id="@id/speedTitleText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="⚡ Internet Speed Test" />
+            <TextView android:textSize="12.0sp" android:textColor="#ff4a5a6a" android:id="@id/speedDescText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dip" android:text="Measure your download speed, upload speed, and latency to a selected server." />
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="SELECT SERVER" android:letterSpacing="0.15" />
+            <Spinner android:id="@id/speedServerSpinner" android:background="#ff0d1117" android:layout_width="fill_parent" android:layout_height="48.0dip" android:layout_marginBottom="16.0dip" />
+            <Button android:textStyle="bold" android:textColor="#ff0a0e17" android:id="@id/speedRunBtn" android:background="@drawable/btn_speed" android:layout_width="fill_parent" android:layout_height="52.0dip" android:layout_marginBottom="16.0dip" android:text="▶  Run Speed Test" />
+            <TextView android:textSize="13.0sp" android:textColor="#ff90a4ae" android:id="@id/speedStatusText" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dip" android:text="" />
+            <LinearLayout android:orientation="vertical" android:id="@id/speedResultsContainer" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <LinearLayout android:orientation="vertical" android:background="#ff0a1220" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                    <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="⏱  LATENCY (PING)" android:letterSpacing="0.15" />
+                    <TextView android:textSize="32.0sp" android:textStyle="bold" android:textColor="#ff00e5ff" android:id="@id/speedPingText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="—" />
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:background="#ff0a1220" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                    <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="⬇  DOWNLOAD" android:letterSpacing="0.15" />
+                    <TextView android:textSize="32.0sp" android:textStyle="bold" android:textColor="#ff00ff88" android:id="@id/speedDownText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="—" />
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:background="#ff0a1220" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                    <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dip" android:text="⬆  UPLOAD" android:letterSpacing="0.15" />
+                    <TextView android:textSize="32.0sp" android:textStyle="bold" android:textColor="#ffffd740" android:id="@id/speedUpText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="—" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:orientation="vertical" android:id="@id/tab6" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:padding="12.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0">
+                <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="#ffffd740" android:id="@id/deviceTitleText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📶 Device Monitor" />
+                <TextView android:textSize="12.0sp" android:textColor="#ff546e7a" android:id="@id/deviceStatusText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stopped" />
+            </LinearLayout>
+            <Button android:textSize="13.0sp" android:textStyle="bold" android:textColor="#ff0a0e17" android:id="@id/deviceToggleBtn" android:background="@drawable/btn_primary" android:layout_width="100.0dip" android:layout_height="40.0dip" android:text="▶  Start" />
+        </LinearLayout>
+        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:paddingLeft="12.0dip" android:paddingRight="12.0dip" android:paddingBottom="8.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="12.0sp" android:textColor="#ff546e7a" android:id="@id/deviceCountText" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="0 connections" android:layout_weight="1.0" />
+            <Button android:textSize="11.0sp" android:textColor="#ff00e5ff" android:id="@id/deviceExportBtn" android:background="#ff0d1117" android:paddingLeft="10.0dip" android:paddingRight="10.0dip" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="32.0dip" android:text="⬇ Export CSV" />
+            <Button android:textSize="11.0sp" android:textColor="#ffef9a9a" android:id="@id/deviceClearBtn" android:background="#ff0d1117" android:paddingLeft="10.0dip" android:paddingRight="10.0dip" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="32.0dip" android:text="🗑 Clear" />
+        </LinearLayout>
+        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:id="@id/deviceHeaderRow" android:background="#ff0a1220" android:paddingLeft="10.0dip" android:paddingRight="10.0dip" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="28.0dip">
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="30.0dip" android:layout_height="wrap_content" android:text="Dir" android:letterSpacing="0.1" />
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="0.0dip" android:layout_height="wrap_content" android:text="DOMAIN / IP" android:layout_weight="2.0" android:letterSpacing="0.1" />
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="50.0dip" android:layout_height="wrap_content" android:text="PORT" android:letterSpacing="0.1" />
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="40.0dip" android:layout_height="wrap_content" android:text="PROTO" android:letterSpacing="0.1" />
+            <TextView android:textSize="10.0sp" android:textColor="#ff546e7a" android:layout_width="50.0dip" android:layout_height="wrap_content" android:text="TIME" android:letterSpacing="0.1" />
+        </LinearLayout>
+        <ScrollView android:id="@id/deviceScrollView" android:layout_width="fill_parent" android:layout_height="0.0dip" android:fillViewport="true" android:layout_weight="1.0">
+            <LinearLayout android:orientation="vertical" android:id="@id/deviceLogContainer" android:paddingBottom="8.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>
