@@ -151,20 +151,14 @@ public class MainActivity extends Activity {
         tabTrafficBtn = findViewById(R.id.tabTrafficBtn);
         tabCheckerBtn = findViewById(R.id.tabCheckerBtn);
         tabMyInfoBtn  = findViewById(R.id.tabMyInfoBtn);
-        tabSpeedBtn   = findViewById(R.id.tabSpeedBtn);
-        tabDeviceBtn  = findViewById(R.id.tabDeviceBtn);
         tab1          = findViewById(R.id.tab1);
         tab2          = findViewById(R.id.tab2);
-        tab5          = findViewById(R.id.tab5);
-        tab6          = findViewById(R.id.tab6);
         tabDomainBtn.setSelected(true);
         refreshTabLabels();
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
         tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
-        tabSpeedBtn.setOnClickListener(v   -> switchTab(4));
-        tabDeviceBtn.setOnClickListener(v  -> switchTab(5));
 
         // ── Top-right menu button ────────────────────────────────────────────
         TextView menuBtn = findViewById(R.id.menuBtn);
@@ -560,8 +554,8 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setText(isRussian ? "📡 Трафик"    : "📡 Traffic");
         tabCheckerBtn.setText(isRussian ? "✅ Проверка"  : "✅ Checker");
         tabMyInfoBtn.setText(isRussian  ? "🌐 Мой IP"   : "🌐 My Info");
-        tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
-        tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
+        if (tabSpeedBtn != null) tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
+        if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
     }
 
     // ── Refresh All UI Strings on Language Change ────────────────────────────
@@ -1398,17 +1392,16 @@ public class MainActivity extends Activity {
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         tab3.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         tab4.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
-        tab5.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
-        tab6.setVisibility(index == 5 ? View.VISIBLE : View.GONE);
+        if (tab5 != null) tab5.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
+        if (tab6 != null) tab6.setVisibility(index == 5 ? View.VISIBLE : View.GONE);
         if (index == 3 && myInfoContainer.getChildCount() == 0) lookupMyInfo();
         if (index == 4) initSpeedTab();
         if (index == 5) initDeviceTab();
         tabDomainBtn.setSelected(index == 0);
         tabTrafficBtn.setSelected(index == 1);
         tabCheckerBtn.setSelected(index == 2);
-        tabMyInfoBtn.setSelected(index == 3);
-        tabSpeedBtn.setSelected(index == 4);
-        tabDeviceBtn.setSelected(index == 5);
+        if (tabSpeedBtn != null)  tabSpeedBtn.setSelected(index == 4);
+        if (tabDeviceBtn != null) tabDeviceBtn.setSelected(index == 5);
         // Re-apply last known stats so TX/RX panels are never blank on tab entry
         if (index == 1 && lastKnownTx >= 0) {
             txTotalText.setText("TX  " + formatBytes(lastKnownTx));
@@ -1848,140 +1841,127 @@ public class MainActivity extends Activity {
         if (speedTabInitialized) return;
         speedTabInitialized = true;
 
-        Spinner  spinner   = findViewById(R.id.speedRegionSpinner);
-        TextView statusTv  = findViewById(R.id.speedStatusText);
-        TextView dlTv      = findViewById(R.id.speedDownloadVal);
-        TextView ulTv      = findViewById(R.id.speedUploadVal);
-        TextView latTv     = findViewById(R.id.speedLatencyVal);
-        Button   runBtn    = findViewById(R.id.speedRunBtn);
+        Spinner spinner = findViewById(R.id.speedRegionSpinner);
+        TextView statusText   = findViewById(R.id.speedStatusText);
+        TextView downloadVal  = findViewById(R.id.speedDownloadVal);
+        TextView uploadVal    = findViewById(R.id.speedUploadVal);
+        TextView latencyVal   = findViewById(R.id.speedLatencyVal);
+        Button   runBtn       = findViewById(R.id.speedRunBtn);
 
-        // ── Servers — same 4 Linode endpoints as v2.0.3 ─────────────────
-        final String[] regions = {
-            "US East  — Newark, NJ",
-            "US West  — Fremont, CA",
-            "Europe  — Frankfurt, DE",
-            "Asia  — Tokyo, JP"
+        String[] regions = {
+            "US East (Linode)",
+            "US West (Linode)",
+            "EU (Linode)",
+            "Asia / Tokyo (Linode)"
         };
-        final String[] dlUrls = {
+        String[] downloadUrls = {
             "https://speedtest.newark.linode.com/100MB-newark.bin",
             "https://speedtest.fremont.linode.com/100MB-fremont.bin",
             "https://speedtest.frankfurt.linode.com/100MB-frankfurt.bin",
             "https://speedtest.tokyo2.linode.com/100MB-tokyo2.bin"
         };
-        final String[] pingUrls = {
+        String[] uploadUrls = {
             "https://speedtest.newark.linode.com/",
             "https://speedtest.fremont.linode.com/",
             "https://speedtest.frankfurt.linode.com/",
             "https://speedtest.tokyo2.linode.com/"
         };
 
-        android.widget.ArrayAdapter<String> adp = new android.widget.ArrayAdapter<>(
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
             this, android.R.layout.simple_spinner_item, regions);
-        adp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adp);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
 
         runBtn.setOnClickListener(v -> {
-            int    idx     = spinner.getSelectedItemPosition();
-            String dlUrl   = dlUrls[idx];
-            String pingUrl = pingUrls[idx];
-
+            int idx = spinner.getSelectedItemPosition();
+            String dlUrl = downloadUrls[idx];
+            String ulUrl = uploadUrls[idx];
             runBtn.setEnabled(false);
-            statusTv.setText(isRussian ? "Измерение задержки…" : "Testing latency…");
-            dlTv.setText("—");
-            ulTv.setText("—");
-            latTv.setText("—");
+            statusText.setText("Testing latency...");
+            downloadVal.setText("—");
+            uploadVal.setText("—");
+            latencyVal.setText("—");
 
             executor.execute(() -> {
-                long   latMs  = -1;
+                // --- Latency ---
+                long latMs = -1;
+                try {
+                    java.net.URL u = new java.net.URL(dlUrl);
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) u.openConnection();
+                    c.setConnectTimeout(5000);
+                    c.setReadTimeout(5000);
+                    c.setRequestMethod("HEAD");
+                    long t0 = System.currentTimeMillis();
+                    c.getResponseCode();
+                    latMs = System.currentTimeMillis() - t0;
+                    c.disconnect();
+                } catch (Exception e) { /* ignored */ }
+                final long finalLat = latMs;
+
+                // --- Download ---
+                mainHandler.post(() -> statusText.setText("Measuring download speed..."));
                 double dlMbps = -1;
+                try {
+                    java.net.URL u = new java.net.URL(dlUrl);
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) u.openConnection();
+                    c.setConnectTimeout(8000);
+                    c.setReadTimeout(15000);
+                    long t0 = System.currentTimeMillis();
+                    java.io.InputStream is = c.getInputStream();
+                    byte[] buf = new byte[65536];
+                    long total = 0;
+                    int n;
+                    long limit = System.currentTimeMillis() + 8000;
+                    while ((n = is.read(buf)) != -1 && System.currentTimeMillis() < limit) total += n;
+                    is.close();
+                    c.disconnect();
+                    double secs = (System.currentTimeMillis() - t0) / 1000.0;
+                    dlMbps = (total * 8.0 / 1_000_000.0) / secs;
+                } catch (Exception e) { /* ignored */ }
+                final double finalDl = dlMbps;
+
+                // --- Upload ---
+                mainHandler.post(() -> statusText.setText("Measuring upload speed..."));
                 double ulMbps = -1;
                 try {
-                    // ── Latency ──────────────────────────────────────────
-                    try {
-                        java.net.HttpURLConnection c =
-                            (java.net.HttpURLConnection) new java.net.URL(pingUrl).openConnection();
-                        c.setConnectTimeout(6000);
-                        c.setReadTimeout(6000);
-                        c.setRequestMethod("HEAD");
-                        c.setInstanceFollowRedirects(true);
-                        long t0 = System.currentTimeMillis();
-                        c.getResponseCode();
-                        latMs = System.currentTimeMillis() - t0;
-                        c.disconnect();
-                    } catch (Exception ignored) {}
-                    final long fLat = latMs;
-                    mainHandler.post(() -> {
-                        latTv.setText(fLat >= 0 ? fLat + " ms" : "Error");
-                        statusTv.setText(isRussian ? "Измерение скорости загрузки…" : "Measuring download speed…");
-                    });
+                    byte[] payload = new byte[1024 * 1024]; // 1 MB chunk
+                    new java.util.Random().nextBytes(payload);
+                    java.net.URL u = new java.net.URL(ulUrl);
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) u.openConnection();
+                    c.setConnectTimeout(8000);
+                    c.setReadTimeout(15000);
+                    c.setDoOutput(true);
+                    c.setRequestMethod("POST");
+                    c.setRequestProperty("Content-Type", "application/octet-stream");
+                    long t0 = System.currentTimeMillis();
+                    long totalSent = 0;
+                    long limit = System.currentTimeMillis() + 8000;
+                    java.io.OutputStream os = c.getOutputStream();
+                    while (System.currentTimeMillis() < limit) {
+                        os.write(payload);
+                        totalSent += payload.length;
+                    }
+                    os.flush();
+                    os.close();
+                    try { c.getResponseCode(); } catch (Exception ignored) {}
+                    c.disconnect();
+                    double secs = (System.currentTimeMillis() - t0) / 1000.0;
+                    ulMbps = (totalSent * 8.0 / 1_000_000.0) / secs;
+                } catch (Exception e) { /* ignored */ }
+                final double finalUl = ulMbps;
 
-                    // ── Download ─────────────────────────────────────────
-                    try {
-                        java.net.HttpURLConnection c =
-                            (java.net.HttpURLConnection) new java.net.URL(dlUrl).openConnection();
-                        c.setConnectTimeout(8000);
-                        c.setReadTimeout(30000);
-                        c.setInstanceFollowRedirects(true);
-                        long t0    = System.currentTimeMillis();
-                        long limit = t0 + 10000;
-                        java.io.InputStream is = c.getInputStream();
-                        byte[] buf = new byte[65536];
-                        long total = 0; int n;
-                        while ((n = is.read(buf)) != -1 && System.currentTimeMillis() < limit) total += n;
-                        is.close();
-                        c.disconnect();
-                        double secs = (System.currentTimeMillis() - t0) / 1000.0;
-                        if (total > 10000 && secs > 0.1) dlMbps = (total * 8.0 / 1_000_000.0) / secs;
-                    } catch (Exception ignored) {}
-                    final double fDl = dlMbps;
-                    mainHandler.post(() -> {
-                        dlTv.setText(fDl >= 0 ? String.format(Locale.US, "%.1f Mbps", fDl) : "Error");
-                        statusTv.setText(isRussian ? "Измерение скорости отдачи…" : "Measuring upload speed…");
-                    });
-
-                    // ── Upload ────────────────────────────────────────────
-                    try {
-                        byte[] chunk = new byte[512 * 1024];
-                        new java.util.Random().nextBytes(chunk);
-                        java.net.HttpURLConnection c =
-                            (java.net.HttpURLConnection) new java.net.URL(dlUrl).openConnection();
-                        c.setConnectTimeout(8000);
-                        c.setReadTimeout(30000);
-                        c.setDoOutput(true);
-                        c.setChunkedStreamingMode(0);
-                        c.setRequestMethod("POST");
-                        c.setRequestProperty("Content-Type", "application/octet-stream");
-                        c.setInstanceFollowRedirects(true);
-                        long t0    = System.currentTimeMillis();
-                        long limit = t0 + 8000;
-                        long sent  = 0;
-                        java.io.OutputStream os = c.getOutputStream();
-                        while (System.currentTimeMillis() < limit) {
-                            os.write(chunk);
-                            sent += chunk.length;
-                        }
-                        os.flush();
-                        os.close();
-                        try { c.getResponseCode(); } catch (Exception ignored2) {}
-                        c.disconnect();
-                        double secs = (System.currentTimeMillis() - t0) / 1000.0;
-                        if (sent > 0 && secs > 0.1) ulMbps = (sent * 8.0 / 1_000_000.0) / secs;
-                    } catch (Exception ignored) {}
-                    final double fUl = ulMbps;
-                    mainHandler.post(() ->
-                        ulTv.setText(fUl >= 0 ? String.format(Locale.US, "%.1f Mbps", fUl) : "Error"));
-
-                } finally {
-                    mainHandler.post(() -> {
-                        statusTv.setText(isRussian ? "Тест завершён  ✓" : "Test complete  ✓");
-                        runBtn.setEnabled(true);
-                    });
-                }
+                mainHandler.post(() -> {
+                    latencyVal.setText(finalLat >= 0 ? finalLat + " ms" : "Error");
+                    downloadVal.setText(finalDl >= 0 ? String.format("%.1f Mbps", finalDl) : "Error");
+                    uploadVal.setText(finalUl >= 0 ? String.format("%.1f Mbps", finalUl) : "Error");
+                    statusText.setText("Test complete  ✓");
+                    runBtn.setEnabled(true);
+                });
             });
         });
     }
 
-        // ─────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
     // TAB 6 — Device Monitor (VPN-based whole-device traffic)
     // ─────────────────────────────────────────────────────────────────────────
     private boolean deviceTabInitialized = false;
@@ -2030,31 +2010,32 @@ public class MainActivity extends Activity {
             @Override
             public void onReceive(android.content.Context ctx, android.content.Intent intent) {
                 String protocol  = intent.getStringExtra("protocol");
-                String direction = intent.getStringExtra("direction");
                 String host      = intent.getStringExtra("host");
                 String ipPort    = intent.getStringExtra("ipPort");
+                String appLabel  = intent.getStringExtra("app");
                 String timestamp = intent.getStringExtra("timestamp");
                 if (ipPort == null) return;
                 protocol  = protocol  != null ? protocol  : "?";
-                direction = direction != null ? direction : "⬆";
+                appLabel  = appLabel  != null ? appLabel  : "";
                 timestamp = timestamp != null ? timestamp : "";
 
-                String rawIp   = ipPort.split(":")[0];
+                String rawIp  = ipPort.split(":")[0];
                 String display = (host != null && !host.isEmpty()) ? host : rawIp;
 
                 synchronized (deviceLog) {
-                    // If DNS just resolved for an existing raw-IP row, update it
+                    // Update existing row if DNS just resolved
                     if (host != null && !host.isEmpty()) {
                         for (String[] e : deviceLog) {
-                            if (e[2].equals(ipPort) && e[0].equals(rawIp)) {
-                                e[0] = host; // update display to resolved hostname
+                            if (e[2].equals(ipPort)) {
+                                e[0] = host;
+                                e[1] = host;
                                 runOnUiThread(() -> refreshDeviceLog());
                                 return;
                             }
                         }
                     }
-                    // [display, direction, ipPort, proto, timestamp, (unused)]
-                    deviceLog.add(new String[]{display, direction, ipPort, protocol, timestamp, ""});
+                    // [displayName, hostname, ipPort, proto, timestamp, appLabel]
+                    deviceLog.add(new String[]{display, display, ipPort, protocol, timestamp, appLabel});
                 }
                 runOnUiThread(() -> refreshDeviceLog());
             }
@@ -2062,7 +2043,7 @@ public class MainActivity extends Activity {
 
         androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
             .registerReceiver(deviceReceiver,
-                new android.content.IntentFilter(NetWatchVpnService.TRAFFIC_ACTION));
+                new android.content.IntentFilter("com.netwatch.TRAFFIC_EVENT"));
 
         // Start VPN service
         android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
@@ -2107,67 +2088,56 @@ public class MainActivity extends Activity {
         container.removeAllViews();
         synchronized (deviceLog) {
             for (String[] e : deviceLog) {
-                container.addView(buildDeviceRow(e[0], e[1], e[2], e[3], e[4], e[5]));
+                container.addView(buildDeviceRow(e[0], e[2], e[3], e[4], e[5]));
             }
         }
         android.widget.ScrollView sv = findViewById(R.id.deviceScrollView);
         if (sv != null) sv.post(() -> sv.fullScroll(android.view.View.FOCUS_DOWN));
     }
 
-    private android.view.View buildDeviceRow(String display, String direction, String ipPort, String proto, String ts, String unused) {
+    private android.view.View buildDeviceRow(String display, String ipPort, String proto, String ts, String appLabel) {
         android.widget.LinearLayout row = new android.widget.LinearLayout(this);
         row.setOrientation(android.widget.LinearLayout.VERTICAL);
         row.setPadding(8, 6, 8, 6);
         row.setBackground(new android.graphics.drawable.ColorDrawable(
-            android.graphics.Color.parseColor("#0D1117")));
+            android.graphics.Color.parseColor("#111827")));
 
-        String rawIp   = ipPort.contains(":") ? ipPort.substring(0, ipPort.lastIndexOf(':')) : ipPort;
-        String port    = ipPort.contains(":") ? ipPort.substring(ipPort.lastIndexOf(':') + 1) : "";
+        // Line 1: app + protocol + timestamp
+        android.widget.TextView header = new android.widget.TextView(this);
+        String headerStr = (appLabel.isEmpty() ? "" : "[" + appLabel + "]  ") + proto + "  " + ts;
+        header.setText(headerStr);
+        header.setTextColor(android.graphics.Color.parseColor("#8899AA"));
+        header.setTextSize(10);
+        header.setTypeface(android.graphics.Typeface.MONOSPACE);
+
+        // Line 2: resolved hostname (cyan)
+        android.widget.TextView hostView = new android.widget.TextView(this);
+        String rawIp = ipPort.split(":")[0];
         boolean resolved = !display.equals(rawIp);
+        hostView.setText(resolved ? display : ipPort);
+        hostView.setTextColor(android.graphics.Color.parseColor(resolved ? "#00E5FF" : "#FFFFFF"));
+        hostView.setTextSize(13);
+        hostView.setTypeface(android.graphics.Typeface.MONOSPACE);
 
-        // Line 1: direction + hostname/IP (cyan if resolved, white if raw)
-        android.widget.TextView line1 = new android.widget.TextView(this);
-        String dir = (direction != null && !direction.isEmpty()) ? direction + "  " : "";
-        line1.setText(dir + display);
-        line1.setTextColor(android.graphics.Color.parseColor(resolved ? "#00E5FF" : "#E0E8F0"));
-        line1.setTextSize(13);
-        line1.setTypeface(android.graphics.Typeface.MONOSPACE);
-
-        // Line 2: IP:port  protocol  timestamp  (yellow / grey)
-        android.widget.LinearLayout line2row = new android.widget.LinearLayout(this);
-        line2row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-
-        android.widget.TextView ipView = new android.widget.TextView(this);
-        ipView.setText(ipPort + "  ");
-        ipView.setTextColor(android.graphics.Color.parseColor("#FFD600"));
-        ipView.setTextSize(11);
-        ipView.setTypeface(android.graphics.Typeface.MONOSPACE);
-
-        android.widget.TextView protoView = new android.widget.TextView(this);
-        protoView.setText(proto + "  ");
-        protoView.setTextColor(android.graphics.Color.parseColor("#44CC88"));
-        protoView.setTextSize(11);
-        protoView.setTypeface(android.graphics.Typeface.MONOSPACE);
-
-        android.widget.TextView tsView = new android.widget.TextView(this);
-        tsView.setText(ts);
-        tsView.setTextColor(android.graphics.Color.parseColor("#4A5A6A"));
-        tsView.setTextSize(11);
-        tsView.setTypeface(android.graphics.Typeface.MONOSPACE);
-
-        line2row.addView(ipView);
-        line2row.addView(protoView);
-        line2row.addView(tsView);
+        // Line 3: raw IP:port (yellow) — only if hostname was resolved
+        row.addView(header);
+        row.addView(hostView);
+        if (resolved) {
+            android.widget.TextView ipView = new android.widget.TextView(this);
+            ipView.setText(ipPort);
+            ipView.setTextColor(android.graphics.Color.parseColor("#FFD600"));
+            ipView.setTextSize(11);
+            ipView.setTypeface(android.graphics.Typeface.MONOSPACE);
+            row.addView(ipView);
+        }
 
         // Divider
         android.view.View div = new android.view.View(this);
         div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
             android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1));
         div.setBackgroundColor(android.graphics.Color.parseColor("#1C2333"));
-
-        row.addView(line1);
-        row.addView(line2row);
         row.addView(div);
+
         return row;
     }
 

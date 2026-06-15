@@ -761,6 +761,7 @@ java.lang.Boolean
 selector
 android.textLines
 %d
+com.netwatch.TRAFFIC_EVENT
 classSimpleName
 TYPE_INPUT_METHOD
 pathData
@@ -1563,6 +1564,7 @@ emojiCompat
 android.intent.extra.shortcut.NAME
 deriveConstraintsFrom
 ERROR
+app
 curveFit
 androidx.core.view.ViewGroupKt$descen...
 androidx.appcompat.app.ActionBar$Tab
@@ -3240,6 +3242,13 @@ Marking attr:layout_constraintWidth_min:2130903711 used because it matches strin
 Marking attr:layout_constraintWidth_percent:2130903712 used because it matches string pool constant layout_constraint
 Marking attr:emojiCompatEnabled:2130903456 used because it matches string pool constant emojiCompat
 Marking attr:deriveConstraintsFrom:2130903415 used because it matches string pool constant deriveConstraintsFrom
+Marking attr:appBarLayoutStyle:2130903094 used because it matches string pool constant app
+Marking attr:applyMotionScene:2130903095 used because it matches string pool constant app
+Marking dimen:appcompat_dialog_background_inset:2131099729 used because it matches string pool constant app
+Marking id:appSpinner:2131230801 used because it matches string pool constant app
+Marking integer:app_bar_elevation_anim_duration:2131296258 used because it matches string pool constant app
+Marking string:app_name:2131689500 used because it matches string pool constant app
+Marking string:appbar_scrolling_view_behavior:2131689501 used because it matches string pool constant app
 Marking attr:curveFit:2130903393 used because it matches string pool constant curveFit
 Marking id:neverCompleteToEnd:2131231065 used because it matches string pool constant neverCompleteToEnd
 Marking attr:pathMotionArc:2130903919 used because it matches string pool constant pathMotionArc
@@ -4114,7 +4123,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @attr/animateRelativeTo : reachable=true
 @attr/animationMode : reachable=true
 @attr/appBarLayoutStyle : reachable=true
-@attr/applyMotionScene : reachable=false
+@attr/applyMotionScene : reachable=true
 @attr/arcMode : reachable=true
 @attr/arrowHeadLength : reachable=true
 @attr/arrowShaftLength : reachable=true
@@ -6928,7 +6937,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @dimen/abc_text_size_subtitle_material_toolbar : reachable=false
 @dimen/abc_text_size_title_material : reachable=false
 @dimen/abc_text_size_title_material_toolbar : reachable=false
-@dimen/appcompat_dialog_background_inset : reachable=false
+@dimen/appcompat_dialog_background_inset : reachable=true
 @dimen/cardview_compat_inset_shadow : reachable=true
 @dimen/cardview_default_elevation : reachable=false
 @dimen/cardview_default_radius : reachable=false
@@ -8877,15 +8886,15 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @id/tab2 : reachable=true
 @id/tab3 : reachable=true
 @id/tab4 : reachable=true
-@id/tab5 : reachable=true
-@id/tab6 : reachable=true
+@id/tab5 : reachable=false
+@id/tab6 : reachable=false
 @id/tabBar : reachable=false
 @id/tabCheckerBtn : reachable=true
-@id/tabDeviceBtn : reachable=true
+@id/tabDeviceBtn : reachable=false
 @id/tabDomainBtn : reachable=true
 @id/tabMode : reachable=false
 @id/tabMyInfoBtn : reachable=true
-@id/tabSpeedBtn : reachable=true
+@id/tabSpeedBtn : reachable=false
 @id/tabTrafficBtn : reachable=true
 @id/tag_accessibility_actions : reachable=true
 @id/tag_accessibility_clickable_spans : reachable=true
@@ -9581,7 +9590,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @string/abc_toolbar_collapse_description : reachable=false
 @string/androidx_startup : reachable=true
 @string/app_name : reachable=true
-@string/appbar_scrolling_view_behavior : reachable=false
+@string/appbar_scrolling_view_behavior : reachable=true
 @string/bottom_sheet_behavior : reachable=true
 @string/bottomsheet_action_collapse : reachable=true
 @string/bottomsheet_action_expand : reachable=true
@@ -18488,6 +18497,7 @@ The root reachable resources are:
  attr:animateRelativeTo:2130903092
  attr:animationMode:2130903093
  attr:appBarLayoutStyle:2130903094
+ attr:applyMotionScene:2130903095
  attr:arcMode:2130903096
  attr:arrowHeadLength:2130903097
  attr:arrowShaftLength:2130903098
@@ -19296,6 +19306,7 @@ The root reachable resources are:
  dimen:abc_star_big:2131099707
  dimen:abc_star_medium:2131099708
  dimen:abc_star_small:2131099709
+ dimen:appcompat_dialog_background_inset:2131099729
  dimen:cardview_compat_inset_shadow:2131099730
  dimen:compat_button_inset_horizontal_material:2131099734
  dimen:compat_button_inset_vertical_material:2131099735
@@ -19850,13 +19861,9 @@ The root reachable resources are:
  id:tab2:2131231204
  id:tab3:2131231205
  id:tab4:2131231206
- id:tab5:2131231207
- id:tab6:2131231208
  id:tabCheckerBtn:2131231210
- id:tabDeviceBtn:2131231211
  id:tabDomainBtn:2131231212
  id:tabMyInfoBtn:2131231214
- id:tabSpeedBtn:2131231215
  id:tabTrafficBtn:2131231216
  id:tag_accessibility_actions:2131231217
  id:tag_accessibility_clickable_spans:2131231218
@@ -20013,6 +20020,7 @@ The root reachable resources are:
  string:abc_shareactionprovider_share_with_application:2131689497
  string:androidx_startup:2131689499
  string:app_name:2131689500
+ string:appbar_scrolling_view_behavior:2131689501
  string:bottom_sheet_behavior:2131689502
  string:bottomsheet_action_collapse:2131689503
  string:bottomsheet_action_expand:2131689504
@@ -20875,8 +20883,12 @@ Unused resources are:
  id:src_atop:2131231184
  id:src_in:2131231185
  id:src_over:2131231186
+ id:tab5:2131231207
+ id:tab6:2131231208
  id:tabBar:2131231209
+ id:tabDeviceBtn:2131231211
  id:tabMode:2131231213
+ id:tabSpeedBtn:2131231215
  id:tag_transition_group:2131231226
  id:triangle:2131231261
  id:uniform:2131231265
@@ -20903,7 +20915,6 @@ Unused resources are:
  string:abc_action_bar_home_description:2131689472
  string:abc_action_menu_overflow_description:2131689474
  string:abc_searchview_description_query:2131689492
- string:appbar_scrolling_view_behavior:2131689501
  string:fab_transformation_scrim_behavior:2131689515
  string:fab_transformation_sheet_behavior:2131689516
  string:hide_bottom_view_on_scroll_behavior:2131689517
