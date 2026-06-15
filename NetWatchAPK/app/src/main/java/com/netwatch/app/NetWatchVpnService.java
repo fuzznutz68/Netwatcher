@@ -4,374 +4,246 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import androidx.constraintlayout.core.widgets.analyzer.BasicMeasure;
-import androidx.core.internal.view.SupportMenu;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/* loaded from: classes.dex */
 public class NetWatchVpnService extends VpnService {
-    public static final String ACTION_STOP = "com.netwatch.app.STOP_VPN";
-    private static final String CHANNEL_ID = "netwatch_vpn";
-    private static final int MTU = 1500;
-    private static final int NOTIF_ID = 42;
-    private static final String TAG = "NetWatchVPN";
-    public static final String TRAFFIC_ACTION = "com.netwatch.app.DEVICE_TRAFFIC";
-    private ExecutorService dnsExecutor;
-    private ExecutorService ioPool;
+
+    public static final String TRAFFIC_ACTION = "com.netwatch.app.TRAFFIC";
+    public static final String ACTION_STOP    = "com.netwatch.app.STOP_VPN";
+    private static final String TAG           = "NetWatch";
+    private static final String CHANNEL_ID    = "netwatch_vpn";
+    private static final int    NOTIF_ID      = 42;
+
     private ParcelFileDescriptor vpnInterface;
-    private volatile boolean running = false;
+    private volatile boolean     running = false;
+    private String               targetDomain = "";
+
+    // Cache: IP → hostname (reverse DNS, non-blocking)
     private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Long> seenKeys = new ConcurrentHashMap<>();
+    // Deduplicate: only broadcast each unique dst IP+port once per second
+    private final LinkedHashMap<String, Long> recentKeys = new LinkedHashMap<String, Long>() {
+        protected boolean removeEldestEntry(Map.Entry<String, Long> e) {
+            return size() > 500;
+        }
+    };
 
-    private Notification buildNotification() {
-        return new Notification.Builder(this, CHANNEL_ID).setContentTitle("📶 NetWatch Device Monitor").setContentText("Monitoring all device connections").setSmallIcon(android.R.drawable.ic_menu_compass).build();
-    }
+    private ExecutorService executor;
+    private ExecutorService dnsExecutor;
 
-    private static byte[] buildUdpReply(String str, int i2, String str2, int i3, byte[] bArr, int i4) {
-        int i5 = i4 + 28;
-        try {
-            byte[] bArr2 = new byte[i5];
-            bArr2[0] = 69;
-            bArr2[1] = 0;
-            bArr2[2] = (byte) (i5 >> 8);
-            bArr2[3] = (byte) i5;
-            bArr2[4] = 0;
-            bArr2[5] = 0;
-            bArr2[6] = 64;
-            bArr2[7] = 0;
-            bArr2[8] = 64;
-            bArr2[9] = 17;
-            byte[] address = InetAddress.getByName(str).getAddress();
-            byte[] address2 = InetAddress.getByName(str2).getAddress();
-            System.arraycopy(address, 0, bArr2, 12, 4);
-            System.arraycopy(address2, 0, bArr2, 16, 4);
-            int ipChecksum = ipChecksum(bArr2, 0, 20);
-            bArr2[10] = (byte) (ipChecksum >> 8);
-            bArr2[11] = (byte) ipChecksum;
-            bArr2[20] = (byte) (i2 >> 8);
-            bArr2[21] = (byte) i2;
-            bArr2[22] = (byte) (i3 >> 8);
-            bArr2[23] = (byte) i3;
-            int i6 = i4 + 8;
-            bArr2[24] = (byte) (i6 >> 8);
-            bArr2[25] = (byte) i6;
-            bArr2[26] = 0;
-            bArr2[27] = 0;
-            System.arraycopy(bArr, 0, bArr2, 28, i4);
-            return bArr2;
-        } catch (Exception unused) {
-            return null;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopSelf();
+            return START_NOT_STICKY;
         }
-    }
+        if (intent != null) {
+            targetDomain = intent.getStringExtra("target_domain");
+            if (targetDomain == null) targetDomain = "";
+            targetDomain = targetDomain.toLowerCase().trim();
+        }
 
-    private void createNotificationChannel() {
-        ((NotificationManager) getSystemService("notification")).createNotificationChannel(new NotificationChannel(CHANNEL_ID, "NetWatch VPN", 2));
-    }
-
-    private void emit(String str, String str2, String str3, int i2) {
-        String format = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
-        Intent intent = new Intent("com.netwatch.app.DEVICE_TRAFFIC");
-        intent.putExtra("protocol", str);
-        intent.putExtra("host", str2);
-        intent.putExtra("ipPort", str3 + ":" + i2);
-        intent.putExtra(TrafficMonitorService.EXTRA_TIMESTAMP, format);
-        intent.putExtra("app", "");
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        StringBuilder j2 = androidx.activity.result.a.j("EMIT ", str, " ");
-        if (str2.isEmpty()) {
-            str2 = str3;
-        }
-        j2.append(str2);
-        j2.append(":");
-        j2.append(i2);
-        Log.d(TAG, j2.toString());
-    }
-
-    private static byte[] extractUdpPayload(byte[] bArr, int i2, int i3) {
-        int i4 = i2 + 8;
-        if (i3 <= i4) {
-            return null;
-        }
-        int i5 = i3 - i4;
-        byte[] bArr2 = new byte[i5];
-        System.arraycopy(bArr, i4, bArr2, 0, i5);
-        return bArr2;
-    }
-
-    /* renamed from: forwardTcp */
-    public void lambda$handleIPv4$0(byte[] bArr, int i2, String str, int i3, String str2, int i4, FileOutputStream fileOutputStream) {
-        int i5 = (bArr[0] & 15) * 4;
-        int i6 = (((bArr[i5 + 12] >> 4) & 15) * 4) + i5;
-        int i7 = i2 - i6;
-        byte b2 = bArr[i5 + 13];
-        if (i7 <= 0) {
-            try {
-                fileOutputStream.write(bArr, 0, i2);
-                return;
-            } catch (Exception unused) {
-                return;
-            }
-        }
-        try {
-            SocketChannel open = SocketChannel.open();
-            protect(open.socket());
-            open.socket().setSoTimeout(5000);
-            open.connect(new InetSocketAddress(InetAddress.getByName(str2), i4));
-            open.write(ByteBuffer.wrap(bArr, i6, i7));
-            open.close();
-        } catch (Exception e2) {
-            Log.d(TAG, "TCP fwd error: " + e2.getMessage());
-        }
-    }
-
-    /* renamed from: forwardUdp */
-    public void lambda$handleIPv4$1(byte[] bArr, String str, int i2, String str2, int i3, FileOutputStream fileOutputStream, byte[] bArr2, int i4) {
-        try {
-            DatagramChannel open = DatagramChannel.open();
-            protect(open.socket());
-            open.socket().setSoTimeout(2000);
-            open.send(ByteBuffer.wrap(bArr), new InetSocketAddress(InetAddress.getByName(str2), i3));
-            ByteBuffer allocate = ByteBuffer.allocate(MTU);
-            try {
-                open.socket().setSoTimeout(2000);
-                DatagramPacket datagramPacket = new DatagramPacket(allocate.array(), allocate.capacity());
-                open.socket().receive(datagramPacket);
-                byte[] buildUdpReply = buildUdpReply(str2, i3, str, i2, datagramPacket.getData(), datagramPacket.getLength());
-                if (buildUdpReply != null) {
-                    synchronized (fileOutputStream) {
-                        fileOutputStream.write(buildUdpReply);
-                    }
-                }
-            } catch (Exception unused) {
-            }
-            open.close();
-        } catch (Exception e2) {
-            Log.d(TAG, "UDP fwd error: " + e2.getMessage());
-        }
-    }
-
-    private void handleIPv4(final byte[] bArr, final int i2, final FileOutputStream fileOutputStream) {
-        final int i3 = (bArr[0] & 15) * 4;
-        int i4 = bArr[9] & 255;
-        if (i2 < i3 + 4) {
-            fileOutputStream.write(bArr, 0, i2);
-            return;
-        }
-        final String ipv4 = ipv4(bArr, 12);
-        final String ipv42 = ipv4(bArr, 16);
-        final int u16 = u16(bArr, i3);
-        final int u162 = u16(bArr, i3 + 2);
-        if (i4 != 6 && i4 != 17) {
-            fileOutputStream.write(bArr, 0, i2);
-            return;
-        }
-        if (ipv42.startsWith("127.") || ipv42.startsWith("224.") || ipv42.startsWith("239.") || ipv42.startsWith("255.") || ipv42.equals("0.0.0.0") || u162 == 0) {
-            fileOutputStream.write(bArr, 0, i2);
-            return;
-        }
-        String str = i4 == 6 ? "TCP" : "UDP";
-        String str2 = str + ipv42 + ":" + u162;
-        long currentTimeMillis = System.currentTimeMillis();
-        Long l2 = this.seenKeys.get(str2);
-        if (l2 == null || currentTimeMillis - l2.longValue() > 30000) {
-            this.seenKeys.put(str2, Long.valueOf(currentTimeMillis));
-            reportConnection(str, ipv42, u162);
-        }
-        if (i4 == 6) {
-            this.ioPool.execute(new Runnable() { // from class: com.netwatch.app.x
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NetWatchVpnService.this.lambda$handleIPv4$0(bArr, i2, ipv4, u16, ipv42, u162, fileOutputStream);
-                }
-            });
-            return;
-        }
-        final byte[] extractUdpPayload = extractUdpPayload(bArr, i3, i2);
-        if (extractUdpPayload != null) {
-            this.ioPool.execute(new Runnable() { // from class: com.netwatch.app.y
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NetWatchVpnService.this.lambda$handleIPv4$1(extractUdpPayload, ipv4, u16, ipv42, u162, fileOutputStream, bArr, i3);
-                }
-            });
+        createNotificationChannel();
+        Notification notif = buildNotification();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         } else {
-            fileOutputStream.write(bArr, 0, i2);
+            startForeground(NOTIF_ID, notif);
         }
+
+        dnsExecutor = Executors.newFixedThreadPool(4);
+        executor    = Executors.newSingleThreadExecutor();
+        executor.execute(this::runVpnLoop);
+        return START_STICKY;
     }
 
-    private static int ipChecksum(byte[] bArr, int i2, int i3) {
-        int i4 = 0;
-        for (int i5 = i2; i5 < i2 + i3; i5 += 2) {
-            i4 += ((bArr[i5] & 255) << 8) | (bArr[i5 + 1] & 255);
-        }
-        while (true) {
-            int i6 = i4 >> 16;
-            if (i6 == 0) {
-                return (~i4) & SupportMenu.USER_MASK;
-            }
-            i4 = (65535 & i4) + i6;
-        }
-    }
-
-    private static String ipv4(byte[] bArr, int i2) {
-        return (bArr[i2] & 255) + "." + (bArr[i2 + 1] & 255) + "." + (bArr[i2 + 2] & 255) + "." + (bArr[i2 + 3] & 255);
-    }
-
-    public /* synthetic */ void lambda$reportConnection$2(String str, String str2, int i2) {
+    private void runVpnLoop() {
         try {
-            String hostName = InetAddress.getByName(str).getHostName();
-            this.dnsCache.put(str, hostName);
-            if (hostName.equals(str)) {
+            // Build VPN interface — route ALL traffic through us
+            Builder builder = new Builder();
+            builder.setMtu(1500);
+            builder.addAddress("10.99.0.1", 24);
+            builder.addRoute("0.0.0.0", 0);          // capture all IPv4
+            builder.addDnsServer("8.8.8.8");
+            builder.addDnsServer("1.1.1.1");
+            builder.setSession("NetWatch");
+            // Exclude ourselves so we don't loop our own network calls
+            builder.addDisallowedApplication(getPackageName());
+
+            vpnInterface = builder.establish();
+            if (vpnInterface == null) {
+                Log.e(TAG, "VPN establish() returned null — permission not granted?");
                 return;
             }
-            emit(str2, hostName, str, i2);
-        } catch (Exception unused) {
-            this.dnsCache.put(str, str);
-        }
-    }
+            Log.d(TAG, "VPN tunnel established, monitoring: " + targetDomain);
 
-    private void reportConnection(String str, String str2, int i2) {
-        String str3 = this.dnsCache.get(str2);
-        emit(str, (str3 == null || str3.equals(str2)) ? "" : str3, str2, i2);
-        if (str3 == null) {
-            this.dnsExecutor.submit(new c(this, str2, str, i2));
-        }
-    }
+            running = true;
+            FileInputStream in  = new FileInputStream(vpnInterface.getFileDescriptor());
+            FileOutputStream out = new FileOutputStream(vpnInterface.getFileDescriptor());
+            byte[] buf = new byte[32767];
 
-    public void runVpn() {
-        ParcelFileDescriptor parcelFileDescriptor;
-        ParcelFileDescriptor establish;
-        int read;
-        try {
-            try {
-                try {
-                    VpnService.Builder builder = new VpnService.Builder(this);
-                    builder.setMtu(MTU);
-                    builder.addAddress("10.99.0.1", 24);
-                    builder.addRoute("0.0.0.0", 0);
-                    builder.addDnsServer("8.8.8.8");
-                    builder.addDnsServer("1.1.1.1");
-                    builder.setSession("NetWatch");
-                    builder.addDisallowedApplication(getPackageName());
-                    establish = builder.establish();
-                    this.vpnInterface = establish;
-                } catch (Exception unused) {
-                    return;
+            while (running) {
+                int len = in.read(buf);
+                if (len <= 0) {
+                    Thread.sleep(5);
+                    continue;
                 }
-            } catch (Exception e2) {
-                if (this.running) {
-                    Log.e(TAG, "VPN loop error", e2);
-                }
-                parcelFileDescriptor = this.vpnInterface;
-                if (parcelFileDescriptor == null) {
-                    return;
-                }
+                // Forward packet back through VPN so real internet still works
+                out.write(buf, 0, len);
+                // Parse asynchronously so we don't slow down forwarding
+                final byte[] pkt = new byte[len];
+                System.arraycopy(buf, 0, pkt, 0, len);
+                parseAndReport(pkt, len);
             }
-            if (establish == null) {
-                Log.e(TAG, "establish() returned null — permission denied?");
-                try {
-                    ParcelFileDescriptor parcelFileDescriptor2 = this.vpnInterface;
-                    if (parcelFileDescriptor2 != null) {
-                        parcelFileDescriptor2.close();
-                        return;
-                    }
-                    return;
-                } catch (Exception unused2) {
-                    return;
-                }
-            }
-            Log.i(TAG, "VPN established");
-            this.running = true;
-            FileInputStream fileInputStream = new FileInputStream(this.vpnInterface.getFileDescriptor());
-            FileOutputStream fileOutputStream = new FileOutputStream(this.vpnInterface.getFileDescriptor());
-            byte[] bArr = new byte[1600];
-            while (this.running && (read = fileInputStream.read(bArr)) >= 0) {
-                if (read >= 20) {
-                    byte[] bArr2 = new byte[read];
-                    System.arraycopy(bArr, 0, bArr2, 0, read);
-                    if (((bArr2[0] >> 4) & 15) == 4) {
-                        handleIPv4(bArr2, read, fileOutputStream);
-                    } else {
-                        fileOutputStream.write(bArr2, 0, read);
-                    }
-                }
-            }
-            parcelFileDescriptor = this.vpnInterface;
-            if (parcelFileDescriptor == null) {
-                return;
-            }
-            parcelFileDescriptor.close();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            Log.e(TAG, "VPN loop error: " + e.getMessage(), e);
         } finally {
-            this.running = false;
-            try {
-                ParcelFileDescriptor parcelFileDescriptor3 = this.vpnInterface;
-                if (parcelFileDescriptor3 != null) {
-                    parcelFileDescriptor3.close();
+            closeVpn();
+        }
+    }
+
+    private void parseAndReport(byte[] pkt, int len) {
+        if (len < 20) return;
+
+        int versionIHL = pkt[0] & 0xFF;
+        int version    = (versionIHL >> 4) & 0xF;
+        if (version != 4) return;   // skip IPv6 for now
+
+        int ihl      = (versionIHL & 0xF) * 4;
+        int protocol = pkt[9] & 0xFF;
+
+        // Only care about TCP (6) and UDP (17)
+        if (protocol != 6 && protocol != 17) return;
+
+        String srcAddr = ipBytes(pkt, 12);
+        String dstAddr = ipBytes(pkt, 16);
+
+        if (len < ihl + 4) return;
+        int srcPort = ((pkt[ihl]     & 0xFF) << 8) | (pkt[ihl + 1] & 0xFF);
+        int dstPort = ((pkt[ihl + 2] & 0xFF) << 8) | (pkt[ihl + 3] & 0xFF);
+
+        // Outbound: source is our VPN address (10.99.x.x)
+        boolean isOutbound = srcAddr.startsWith("10.99.");
+        String remoteIp   = isOutbound ? dstAddr : srcAddr;
+        int    remotePort = isOutbound ? dstPort  : srcPort;
+        String direction  = isOutbound ? "⬆" : "⬇";
+        String protoName  = protocol == 6 ? "TCP" : "UDP";
+
+        // Skip uninteresting ports (local/broadcast/multicast)
+        if (remoteIp.startsWith("224.") || remoteIp.startsWith("239.")
+                || remoteIp.startsWith("255.") || remoteIp.equals("0.0.0.0")) return;
+        if (remotePort == 0) return;
+
+        // Dedup — don't spam the same connection every millisecond
+        String key = direction + remoteIp + ":" + remotePort;
+        long now = System.currentTimeMillis();
+        synchronized (recentKeys) {
+            Long last = recentKeys.get(key);
+            if (last != null && (now - last) < 2000) return;  // suppress same key within 2s
+            recentKeys.put(key, now);
+        }
+
+        // Resolve hostname (non-blocking — use cache, dispatch DNS in background)
+        String cachedHost = dnsCache.get(remoteIp);
+        if (cachedHost != null) {
+            emit(direction, protoName, cachedHost, remoteIp, remotePort, len);
+        } else {
+            // Emit immediately with raw IP, then update when DNS resolves
+            emit(direction, protoName, remoteIp, remoteIp, remotePort, len);
+            final String ipToResolve = remoteIp;
+            dnsExecutor.submit(() -> {
+                try {
+                    String host = InetAddress.getByName(ipToResolve).getHostName();
+                    if (!host.equals(ipToResolve)) {
+                        dnsCache.put(ipToResolve, host);
+                        // Re-emit with resolved name if it matches target
+                        if (targetDomain.isEmpty() || host.toLowerCase().contains(targetDomain)
+                                || ipToResolve.equals(dnsCache.get(targetDomain))) {
+                            emit(direction, protoName, host, ipToResolve, remotePort, len);
+                        }
+                    } else {
+                        dnsCache.put(ipToResolve, ipToResolve);
+                    }
+                } catch (Exception ignored) {
+                    dnsCache.put(ipToResolve, ipToResolve);
                 }
-            } catch (Exception unused3) {
-            }
+            });
         }
     }
 
-    private static int u16(byte[] bArr, int i2) {
-        return (bArr[i2 + 1] & 255) | ((bArr[i2] & 255) << 8);
+    private void emit(String direction, String protocol, String host,
+                      String ip, int port, int bytes) {
+        // If a target domain is set, filter — show only matching entries
+        if (!targetDomain.isEmpty()) {
+            boolean matches = host.toLowerCase().contains(targetDomain)
+                    || ip.toLowerCase().contains(targetDomain);
+            if (!matches) return;
+        }
+
+        String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
+        Intent intent = new Intent(TRAFFIC_ACTION);
+        intent.putExtra("direction", direction);
+        intent.putExtra("protocol",  protocol);
+        intent.putExtra("host",      host.equals(ip) ? "" : host);
+        intent.putExtra("ipPort",    ip + ":" + port);
+        intent.putExtra("bytes",     bytes);
+        intent.putExtra("timestamp", ts);
+        sendBroadcast(intent);
     }
 
-    @Override // android.app.Service
+    private static String ipBytes(byte[] pkt, int offset) {
+        return (pkt[offset] & 0xFF) + "." + (pkt[offset+1] & 0xFF) + "."
+             + (pkt[offset+2] & 0xFF) + "." + (pkt[offset+3] & 0xFF);
+    }
+
+    private void closeVpn() {
+        running = false;
+        try { if (vpnInterface != null) vpnInterface.close(); } catch (Exception ignored) {}
+        vpnInterface = null;
+    }
+
+    @Override
     public void onDestroy() {
-        this.running = false;
-        ExecutorService executorService = this.ioPool;
-        if (executorService != null) {
-            executorService.shutdownNow();
-        }
-        ExecutorService executorService2 = this.dnsExecutor;
-        if (executorService2 != null) {
-            executorService2.shutdownNow();
-        }
-        try {
-            ParcelFileDescriptor parcelFileDescriptor = this.vpnInterface;
-            if (parcelFileDescriptor != null) {
-                parcelFileDescriptor.close();
-            }
-        } catch (Exception unused) {
-        }
+        running = false;
+        if (executor    != null) executor.shutdownNow();
+        if (dnsExecutor != null) dnsExecutor.shutdownNow();
+        closeVpn();
         super.onDestroy();
     }
 
-    @Override // android.app.Service
-    public int onStartCommand(Intent intent, int i2, int i3) {
-        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
-            stopSelf();
-            return 2;
-        }
-        createNotificationChannel();
-        Notification buildNotification = buildNotification();
-        if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(42, buildNotification, BasicMeasure.EXACTLY);
-        } else {
-            startForeground(42, buildNotification);
-        }
-        this.ioPool = Executors.newCachedThreadPool();
-        this.dnsExecutor = Executors.newFixedThreadPool(4);
-        this.ioPool.execute(new v(2, this));
-        return 1;
+    private void createNotificationChannel() {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationChannel ch = new NotificationChannel(
+                CHANNEL_ID, "NetWatch VPN", NotificationManager.IMPORTANCE_LOW);
+        nm.createNotificationChannel(ch);
+    }
+
+    private Notification buildNotification() {
+        String text = targetDomain.isEmpty() ? "Monitoring all traffic" : "Filtering: " + targetDomain;
+        return new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("🔍 NetWatch Active")
+                .setContentText(text)
+                .setSmallIcon(android.R.drawable.ic_menu_compass)
+                .build();
     }
 }

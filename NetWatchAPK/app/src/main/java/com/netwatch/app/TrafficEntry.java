@@ -1,44 +1,30 @@
 package com.netwatch.app;
 
-/* loaded from: classes.dex */
+/**
+ * Represents a single captured traffic event from the VPN tunnel.
+ */
 public class TrafficEntry {
-    public final int bytes;
-    public final String direction;
-    public final String host;
-    public final String ipPort;
-    public final String protocol;
-    public final String timestamp;
+    public final String direction;  // "⬆" outbound | "⬇" inbound
+    public final String protocol;   // TCP / UDP / IP
+    public final String host;       // resolved hostname (may be empty)
+    public final String ipPort;     // IP:port
+    public final int    bytes;      // packet size in bytes
+    public final String timestamp;  // HH:mm:ss
 
-    public TrafficEntry(String str, String str2, String str3, String str4, int i2, String str5) {
-        this.direction = str;
-        this.protocol = str2;
-        this.host = str3;
-        this.ipPort = str4;
-        this.bytes = i2;
-        this.timestamp = str5;
+    public TrafficEntry(String direction, String protocol, String host,
+                        String ipPort, int bytes, String timestamp) {
+        this.direction = direction;
+        this.protocol  = protocol;
+        this.host      = host;
+        this.ipPort    = ipPort;
+        this.bytes     = bytes;
+        this.timestamp = timestamp;
     }
 
+    @Override
     public String toString() {
-        String g2;
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.timestamp);
-        sb.append("  ");
-        sb.append(this.direction);
-        sb.append("  ");
-        sb.append(this.protocol);
-        sb.append("  ");
-        if (this.host.isEmpty()) {
-            g2 = this.ipPort;
-        } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(this.host);
-            sb2.append(" (");
-            g2 = androidx.activity.result.a.g(sb2, this.ipPort, ")");
-        }
-        sb.append(g2);
-        sb.append("  ");
-        sb.append(this.bytes);
-        sb.append("B");
-        return sb.toString();
+        return timestamp + "  " + direction + "  " + protocol + "  " +
+               (host.isEmpty() ? ipPort : host + " (" + ipPort + ")")
+               + "  " + bytes + "B";
     }
 }
