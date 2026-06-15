@@ -151,14 +151,20 @@ public class MainActivity extends Activity {
         tabTrafficBtn = findViewById(R.id.tabTrafficBtn);
         tabCheckerBtn = findViewById(R.id.tabCheckerBtn);
         tabMyInfoBtn  = findViewById(R.id.tabMyInfoBtn);
+        tabSpeedBtn   = findViewById(R.id.tabSpeedBtn);
+        tabDeviceBtn  = findViewById(R.id.tabDeviceBtn);
         tab1          = findViewById(R.id.tab1);
         tab2          = findViewById(R.id.tab2);
+        tab5          = findViewById(R.id.tab5);
+        tab6          = findViewById(R.id.tab6);
         tabDomainBtn.setSelected(true);
         refreshTabLabels();
         tabDomainBtn.setOnClickListener(v  -> switchTab(0));
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
         tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
+        tabSpeedBtn.setOnClickListener(v   -> switchTab(4));
+        tabDeviceBtn.setOnClickListener(v  -> switchTab(5));
 
         // ── Top-right menu button ────────────────────────────────────────────
         TextView menuBtn = findViewById(R.id.menuBtn);
@@ -554,8 +560,8 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setText(isRussian ? "📡 Трафик"    : "📡 Traffic");
         tabCheckerBtn.setText(isRussian ? "✅ Проверка"  : "✅ Checker");
         tabMyInfoBtn.setText(isRussian  ? "🌐 Мой IP"   : "🌐 My Info");
-        if (tabSpeedBtn != null) tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
-        if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
+        tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
+        tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
     }
 
     // ── Refresh All UI Strings on Language Change ────────────────────────────
@@ -1392,16 +1398,17 @@ public class MainActivity extends Activity {
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         tab3.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         tab4.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
-        if (tab5 != null) tab5.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
-        if (tab6 != null) tab6.setVisibility(index == 5 ? View.VISIBLE : View.GONE);
+        tab5.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
+        tab6.setVisibility(index == 5 ? View.VISIBLE : View.GONE);
         if (index == 3 && myInfoContainer.getChildCount() == 0) lookupMyInfo();
         if (index == 4) initSpeedTab();
         if (index == 5) initDeviceTab();
         tabDomainBtn.setSelected(index == 0);
         tabTrafficBtn.setSelected(index == 1);
         tabCheckerBtn.setSelected(index == 2);
-        if (tabSpeedBtn != null)  tabSpeedBtn.setSelected(index == 4);
-        if (tabDeviceBtn != null) tabDeviceBtn.setSelected(index == 5);
+        tabMyInfoBtn.setSelected(index == 3);
+        tabSpeedBtn.setSelected(index == 4);
+        tabDeviceBtn.setSelected(index == 5);
         // Re-apply last known stats so TX/RX panels are never blank on tab entry
         if (index == 1 && lastKnownTx >= 0) {
             txTotalText.setText("TX  " + formatBytes(lastKnownTx));

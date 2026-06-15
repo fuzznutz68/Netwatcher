@@ -8886,15 +8886,15 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @id/tab2 : reachable=true
 @id/tab3 : reachable=true
 @id/tab4 : reachable=true
-@id/tab5 : reachable=false
-@id/tab6 : reachable=false
+@id/tab5 : reachable=true
+@id/tab6 : reachable=true
 @id/tabBar : reachable=false
 @id/tabCheckerBtn : reachable=true
-@id/tabDeviceBtn : reachable=false
+@id/tabDeviceBtn : reachable=true
 @id/tabDomainBtn : reachable=true
 @id/tabMode : reachable=false
 @id/tabMyInfoBtn : reachable=true
-@id/tabSpeedBtn : reachable=false
+@id/tabSpeedBtn : reachable=true
 @id/tabTrafficBtn : reachable=true
 @id/tag_accessibility_actions : reachable=true
 @id/tag_accessibility_clickable_spans : reachable=true
@@ -19861,9 +19861,13 @@ The root reachable resources are:
  id:tab2:2131231204
  id:tab3:2131231205
  id:tab4:2131231206
+ id:tab5:2131231207
+ id:tab6:2131231208
  id:tabCheckerBtn:2131231210
+ id:tabDeviceBtn:2131231211
  id:tabDomainBtn:2131231212
  id:tabMyInfoBtn:2131231214
+ id:tabSpeedBtn:2131231215
  id:tabTrafficBtn:2131231216
  id:tag_accessibility_actions:2131231217
  id:tag_accessibility_clickable_spans:2131231218
@@ -20883,12 +20887,8 @@ Unused resources are:
  id:src_atop:2131231184
  id:src_in:2131231185
  id:src_over:2131231186
- id:tab5:2131231207
- id:tab6:2131231208
  id:tabBar:2131231209
- id:tabDeviceBtn:2131231211
  id:tabMode:2131231213
- id:tabSpeedBtn:2131231215
  id:tag_transition_group:2131231226
  id:triangle:2131231261
  id:uniform:2131231265
