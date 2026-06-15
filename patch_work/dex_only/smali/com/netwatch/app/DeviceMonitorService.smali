@@ -637,7 +637,7 @@
 .end method
 
 .method private synthetic lambda$resolveAndEmit$1(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
-    .locals 7
+    .locals 11
 
     :try_start_0
     invoke-static {p1}, Ljava/net/InetAddress;->getByName(Ljava/lang/String;)Ljava/net/InetAddress;
@@ -652,7 +652,7 @@
 
     move-result v0
 
-    if-nez v0, :cond_0
+    if-nez v0, :cond_ptr_failed
 
     iget-object v0, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
 
@@ -670,47 +670,147 @@
 
     invoke-direct/range {v1 .. v6}, Lcom/netwatch/app/DeviceMonitorService;->emit(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
 
-    goto :goto_0
+    goto :goto_done
 
-    :cond_0
-    move v0, p2
+    :cond_ptr_failed
+    const-string v2, ""
 
-    iget-object p2, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
+    :try_start_1
+    new-instance v7, Ljava/lang/StringBuilder;
 
-    invoke-virtual {p2, p1, p1}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-direct {v7}, Ljava/lang/StringBuilder;-><init>()V
 
-    move-object v1, p0
+    const-string v0, "https://ipinfo.io/"
+
+    invoke-virtual {v7, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v7, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v0, "/hostname"
+
+    invoke-virtual {v7, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v7}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    new-instance v7, Ljava/net/URL;
+
+    invoke-direct {v7, v0}, Ljava/net/URL;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v7}, Ljava/net/URL;->openConnection()Ljava/net/URLConnection;
+
+    move-result-object v8
+
+    check-cast v8, Ljava/net/HttpURLConnection;
+
+    const/16 v0, 0xBB8
+
+    invoke-virtual {v8, v0}, Ljava/net/URLConnection;->setConnectTimeout(I)V
+
+    invoke-virtual {v8, v0}, Ljava/net/URLConnection;->setReadTimeout(I)V
+
+    invoke-virtual {v8}, Ljava/net/HttpURLConnection;->getResponseCode()I
+
+    move-result v0
+
+    const/16 v7, 0xC8
+
+    if-ne v0, v7, :cond_ipinfo_fail
+
+    invoke-virtual {v8}, Ljava/net/URLConnection;->getInputStream()Ljava/io/InputStream;
+
+    move-result-object v9
+
+    new-instance v10, Ljava/io/InputStreamReader;
+
+    invoke-direct {v10, v9}, Ljava/io/InputStreamReader;-><init>(Ljava/io/InputStream;)V
+
+    new-instance v9, Ljava/io/BufferedReader;
+
+    invoke-direct {v9, v10}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
+
+    invoke-virtual {v9}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
+
+    move-result-object v2
+
+    invoke-virtual {v9}, Ljava/io/BufferedReader;->close()V
+
+    if-eqz v2, :cond_ipinfo_fail
+
+    invoke-virtual {v2}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v2
+
+    invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-nez v0, :cond_ipinfo_fail
+
+    invoke-virtual {v2, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_ipinfo_fail
+
+    invoke-virtual {v8}, Ljava/net/HttpURLConnection;->disconnect()V
+
+    iget-object v7, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
+
+    invoke-virtual {v7, p1, v2}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    goto :goto_emit
+
+    :cond_ipinfo_fail
+    invoke-virtual {v8}, Ljava/net/HttpURLConnection;->disconnect()V
 
     const-string v2, ""
 
+    iget-object v7, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
+
+    invoke-virtual {v7, p1, p1}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    goto :goto_emit
+    :try_end_1
+    .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_ipinfo
+
+    :catch_ipinfo
+    const-string v2, ""
+
+    iget-object v7, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
+
+    invoke-virtual {v7, p1, p1}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    :goto_emit
+    move-object v1, p0
+
     move-object v3, p1
 
-    move v4, v0
+    move v4, p2
 
     move-object v5, p3
 
     move-object v6, p4
 
     invoke-direct/range {v1 .. v6}, Lcom/netwatch/app/DeviceMonitorService;->emit(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
+
+    goto :goto_done
     :try_end_0
-    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_outer
 
-    goto :goto_0
+    :catch_outer
+    const-string v2, ""
 
-    :catch_0
-    move v0, p2
+    iget-object v7, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
 
-    iget-object p0, p0, Lcom/netwatch/app/DeviceMonitorService;->dnsCache:Ljava/util/concurrent/ConcurrentHashMap;
-
-    invoke-virtual {p0, p1, p1}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v7, p1, p1}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
     move-object v1, p0
 
-    const-string v2, ""
-
     move-object v3, p1
 
-    move v4, v0
+    move v4, p2
 
     move-object v5, p3
 
@@ -718,7 +818,7 @@
 
     invoke-direct/range {v1 .. v6}, Lcom/netwatch/app/DeviceMonitorService;->emit(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
 
-    :goto_0
+    :goto_done
     return-void
 .end method
 
