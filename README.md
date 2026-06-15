@@ -1,2 +1,3 @@
 # Netwatcher
-Domain Intelligence App
+Domain Intelligence App that allows you to find domain information for specific URL's, track the domains an app uses, test for any blocked domains (using a predefined list or custom option), and shows your IP info
+
