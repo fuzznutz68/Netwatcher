@@ -97,6 +97,24 @@
             android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
             android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabSpeedBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="⚡ Speed"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
+        <Button
+            android:id="@+id/tabDeviceBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="📶 Device"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/tab_selector"
+            android:textSize="12sp"/>
     </LinearLayout>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -565,5 +583,247 @@
 
         </LinearLayout>
     </ScrollView>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 5 — Speed Test                            -->
+    <!-- ══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tab5"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#0A0E17"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/speedTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚡ Speed Test"
+            android:textColor="#00E5FF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:id="@+id/speedDescText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Measure download speed, upload speed, and latency to public test servers."
+            android:textColor="#4A5A6A"
+            android:textSize="12sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Region selector -->
+        <TextView
+            android:id="@+id/speedRegionLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Server Region:"
+            android:textColor="#8899AA"
+            android:textSize="12sp"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/speedRegionSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/input_background"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Run button -->
+        <Button
+            android:id="@+id/speedRunBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="▶  Run Speed Test"
+            android:textColor="#E0E8F0"
+            android:background="@drawable/btn_primary"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Results -->
+        <LinearLayout
+            android:id="@+id/speedResultsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#111827"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/speedStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select a region and tap Run."
+                android:textColor="#4A5A6A"
+                android:fontFamily="monospace"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="6dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="⬇ Download"
+                    android:textColor="#8899AA"
+                    android:textSize="12sp"/>
+                <TextView
+                    android:id="@+id/speedDownloadVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textColor="#00E5FF"
+                    android:fontFamily="monospace"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="6dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="⬆ Upload"
+                    android:textColor="#8899AA"
+                    android:textSize="12sp"/>
+                <TextView
+                    android:id="@+id/speedUploadVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textColor="#00FF88"
+                    android:fontFamily="monospace"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="📶 Latency"
+                    android:textColor="#8899AA"
+                    android:textSize="12sp"/>
+                <TextView
+                    android:id="@+id/speedLatencyVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textColor="#FFD600"
+                    android:fontFamily="monospace"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TAB 6 — Device Monitor                        -->
+    <!-- ══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tab6"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#0A0E17"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/deviceTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📶 Device Monitor"
+            android:textColor="#00E5FF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:id="@+id/deviceDescText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Monitor all network traffic across your device using a local VPN tunnel."
+            android:textColor="#4A5A6A"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Controls row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+            <Button
+                android:id="@+id/deviceStartBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="▶  Start"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/deviceStopBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="■  Stop"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_danger"
+                android:textSize="13sp"
+                android:enabled="false"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/deviceExportBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="42dp"
+                android:text="⬆ Export"
+                android:textColor="#E0E8F0"
+                android:background="@drawable/btn_primary"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/deviceStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tap Start to begin monitoring all device traffic."
+            android:textColor="#4A5A6A"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Log scroll -->
+        <ScrollView
+            android:id="@+id/deviceScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/deviceLogContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="4dp"/>
+        </ScrollView>
+
+    </LinearLayout>
 
 </LinearLayout>
