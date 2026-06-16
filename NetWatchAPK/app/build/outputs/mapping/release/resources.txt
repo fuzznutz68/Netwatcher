@@ -324,7 +324,6 @@ kotlin.Annotation
 KeyCycle
 dragthreshold
 transitionManager
-direction
 elevation
 android.support.v4.app.EXTRA_CALLING_...
 androidx.core.app.NotificationCompat$...
@@ -493,7 +492,6 @@ app:layout_constraintStart_toStartOf
 EXTRA_SKIP_FILE_OPERATION
 springboundary
 start
-10.99.
 createFromDeprecatedProvider
 GREEN
 layout_marginTop
@@ -553,7 +551,6 @@ PrivateApi
 androidx.viewpager.widget.ViewPager
 GhostViewApi21
 MotionPlaceholder
-target_domain
 MissingGetterMatchingBuilder
 MissingSuperCall
 unknown
@@ -945,7 +942,6 @@ com.mediatek.
 Trace
 wrap_content
 ACTVAutoSizeHelper
-bytes
 Completed
 mOnKeyListener
 ACTION_PASTE
@@ -1303,6 +1299,7 @@ reddituploads.com
 android.support.dataRemoteInputs
 /proc/net/udp
 secondary_fixed
+NetWatchVPN
 androidx.drawerlayout.widget.DrawerLa...
 SHOWN
 kotlin.internal.JRE7PlatformImplement...
