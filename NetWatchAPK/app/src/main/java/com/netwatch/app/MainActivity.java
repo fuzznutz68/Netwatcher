@@ -100,6 +100,7 @@ public class MainActivity extends Activity {
     };
 
     private Button tabDomainBtn, tabTrafficBtn, tabCheckerBtn, tabMyInfoBtn, tabSpeedBtn, tabDeviceBtn;
+    private android.widget.TextView speedDescText;
 
     // ── Tab 1 – Domain Intel ────────────────────────────────────────────────
     private EditText     domainInput;
@@ -182,6 +183,7 @@ public class MainActivity extends Activity {
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
         tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
         tabSpeedBtn   = findViewById(R.id.tabSpeedBtn);
+        speedDescText = findViewById(R.id.speedDescText);
         tabDeviceBtn  = findViewById(R.id.tabDeviceBtn);
         tab5          = findViewById(R.id.tab5);
         tab6          = findViewById(R.id.tab6);
@@ -582,7 +584,10 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setText(isRussian ? "📡 Трафик"    : "📡 Traffic");
         tabCheckerBtn.setText(isRussian ? "✅ Проверка"  : "✅ Checker");
         tabMyInfoBtn.setText(isRussian  ? "🌐 Мой IP"   : "🌐 My Info");
-        if (tabSpeedBtn != null) tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
+        if (tabSpeedBtn  != null) tabSpeedBtn.setText(isRussian ? "⚡ Скорость" : "⚡ Speed");
+        if (speedDescText != null) speedDescText.setText(isRussian
+            ? "Измерьте скорость загрузки, выгрузки и задержку до выбранного сервера."
+            : "Measure your download speed, upload speed, and latency to a selected server.");
         if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
     }
 

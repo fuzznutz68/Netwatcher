@@ -8883,7 +8883,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @id/south : reachable=false
 @id/spacer : reachable=true
 @id/special_effects_controller_view_tag : reachable=true
-@id/speedDescText : reachable=false
+@id/speedDescText : reachable=true
 @id/speedDownText : reachable=true
 @id/speedPingText : reachable=true
 @id/speedResultsContainer : reachable=true
@@ -19869,6 +19869,7 @@ The root reachable resources are:
  id:snackbar_text:2131231163
  id:spacer:2131231167
  id:special_effects_controller_view_tag:2131231168
+ id:speedDescText:2131231169
  id:speedDownText:2131231170
  id:speedPingText:2131231171
  id:speedResultsContainer:2131231172
@@ -20918,7 +20919,6 @@ Unused resources are:
  id:snap:2131231164
  id:snapMargins:2131231165
  id:south:2131231166
- id:speedDescText:2131231169
  id:speedTitleText:2131231176
  id:square:2131231183
  id:src_atop:2131231184
