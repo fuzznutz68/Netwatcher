@@ -2063,6 +2063,11 @@ public class MainActivity extends Activity {
     }
 
     private void startDeviceMonitor() {
+        android.content.Intent vpnIntent = android.net.VpnService.prepare(this);
+        if (vpnIntent != null) {
+            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+            return;
+        }
         launchDeviceVpn();
     }
 
@@ -2114,8 +2119,9 @@ public class MainActivity extends Activity {
             .registerReceiver(deviceReceiver,
                 new android.content.IntentFilter("com.netwatch.app.DEVICE_TRAFFIC"));
 
-        // Start /proc/net-based device monitor service (no VPN needed)
-        android.content.Intent svc = new android.content.Intent(this, DeviceMonitorService.class);
+        // Start VPN-based device monitor service
+        android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
+        svc.setAction("START");
         startForegroundService(svc);
 
         deviceMonRunning = true;
@@ -2140,8 +2146,8 @@ public class MainActivity extends Activity {
             deviceReceiver = null;
         }
 
-        android.content.Intent svc = new android.content.Intent(this, DeviceMonitorService.class);
-        svc.setAction(DeviceMonitorService.ACTION_STOP);
+        android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
+        svc.setAction(NetWatchVpnService.ACTION_STOP);
         startService(svc);
 
         deviceMonRunning = false;
