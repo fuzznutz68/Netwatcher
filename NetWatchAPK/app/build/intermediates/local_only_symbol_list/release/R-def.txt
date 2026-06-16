@@ -1,6 +1,8 @@
 R_DEF: Internal format may change without notice
 local
 drawable btn_danger
+drawable btn_device_start
+drawable btn_device_stop
 drawable btn_primary
 drawable btn_speed
 drawable card_background

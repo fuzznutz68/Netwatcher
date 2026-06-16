@@ -2650,7 +2650,7 @@ Marking id:accessibility_custom_action_7:2131230765 used because it matches stri
 Marking id:accessibility_custom_action_8:2131230766 used because it matches string pool constant accessibility
 Marking id:accessibility_custom_action_9:2131230767 used because it matches string pool constant accessibility
 Marking attr:singleLine:2130904013 used because it matches string pool constant singleLine
-Marking drawable:input_background:2131165335 used because it matches string pool constant input
+Marking drawable:input_background:2131165337 used because it matches string pool constant input
 Marking attr:circleRadius:2130903250 used because it matches string pool constant circle
 Marking id:circle_center:2131230840 used because it matches string pool constant circle
 Marking attr:animateCircleAngleTo:2130903089 used because it matches string pool constant anim
@@ -2814,7 +2814,7 @@ Marking attr:navigationIconTint:2130903883 used because it matches string pool c
 Marking attr:navigationMode:2130903884 used because it matches string pool constant navigation
 Marking attr:navigationRailStyle:2130903885 used because it matches string pool constant navigation
 Marking attr:navigationViewStyle:2130903886 used because it matches string pool constant navigation
-Marking drawable:navigation_empty_icon:2131165394 used because it matches string pool constant navigation
+Marking drawable:navigation_empty_icon:2131165396 used because it matches string pool constant navigation
 Marking id:navigation_bar_item_active_indicator_view:2131231058 used because it matches string pool constant navigation
 Marking id:navigation_bar_item_icon_container:2131231059 used because it matches string pool constant navigation
 Marking id:navigation_bar_item_icon_view:2131231060 used because it matches string pool constant navigation
@@ -3459,17 +3459,17 @@ Marking dimen:notification_small_icon_size_as_large:2131100432 used because it m
 Marking dimen:notification_subtext_size:2131100433 used because it matches string pool constant notification
 Marking dimen:notification_top_pad:2131100434 used because it matches string pool constant notification
 Marking dimen:notification_top_pad_large_text:2131100435 used because it matches string pool constant notification
-Marking drawable:notification_action_background:2131165395 used because it matches string pool constant notification
-Marking drawable:notification_bg:2131165396 used because it matches string pool constant notification
-Marking drawable:notification_bg_low:2131165397 used because it matches string pool constant notification
-Marking drawable:notification_bg_low_normal:2131165398 used because it matches string pool constant notification
-Marking drawable:notification_bg_low_pressed:2131165399 used because it matches string pool constant notification
-Marking drawable:notification_bg_normal:2131165400 used because it matches string pool constant notification
-Marking drawable:notification_bg_normal_pressed:2131165401 used because it matches string pool constant notification
-Marking drawable:notification_icon_background:2131165402 used because it matches string pool constant notification
-Marking drawable:notification_template_icon_bg:2131165403 used because it matches string pool constant notification
-Marking drawable:notification_template_icon_low_bg:2131165404 used because it matches string pool constant notification
-Marking drawable:notification_tile_bg:2131165405 used because it matches string pool constant notification
+Marking drawable:notification_action_background:2131165397 used because it matches string pool constant notification
+Marking drawable:notification_bg:2131165398 used because it matches string pool constant notification
+Marking drawable:notification_bg_low:2131165399 used because it matches string pool constant notification
+Marking drawable:notification_bg_low_normal:2131165400 used because it matches string pool constant notification
+Marking drawable:notification_bg_low_pressed:2131165401 used because it matches string pool constant notification
+Marking drawable:notification_bg_normal:2131165402 used because it matches string pool constant notification
+Marking drawable:notification_bg_normal_pressed:2131165403 used because it matches string pool constant notification
+Marking drawable:notification_icon_background:2131165404 used because it matches string pool constant notification
+Marking drawable:notification_template_icon_bg:2131165405 used because it matches string pool constant notification
+Marking drawable:notification_template_icon_low_bg:2131165406 used because it matches string pool constant notification
+Marking drawable:notification_tile_bg:2131165407 used because it matches string pool constant notification
 Marking id:notification_background:2131231073 used because it matches string pool constant notification
 Marking id:notification_main_column:2131231074 used because it matches string pool constant notification
 Marking id:notification_main_column_container:2131231075 used because it matches string pool constant notification
@@ -3715,8 +3715,8 @@ Marking dimen:tooltip_precise_anchor_threshold:2131100440 used because it matche
 Marking dimen:tooltip_vertical_padding:2131100441 used because it matches string pool constant to
 Marking dimen:tooltip_y_offset_non_touch:2131100442 used because it matches string pool constant to
 Marking dimen:tooltip_y_offset_touch:2131100443 used because it matches string pool constant to
-Marking drawable:tooltip_frame_dark:2131165409 used because it matches string pool constant to
-Marking drawable:tooltip_frame_light:2131165410 used because it matches string pool constant to
+Marking drawable:tooltip_frame_dark:2131165411 used because it matches string pool constant to
+Marking drawable:tooltip_frame_light:2131165412 used because it matches string pool constant to
 Marking id:toggle:2131231250 used because it matches string pool constant to
 Marking id:top:2131231251 used because it matches string pool constant to
 Marking id:topPanel:2131231252 used because it matches string pool constant to
@@ -8131,7 +8131,9 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
     @anim/btn_checkbox_to_checked_icon_null_animation
     @anim/btn_checkbox_to_checked_box_outer_merged_animation
     @anim/btn_checkbox_to_checked_box_inner_merged_animation
-@drawable/btn_danger : reachable=true
+@drawable/btn_danger : reachable=false
+@drawable/btn_device_start : reachable=true
+@drawable/btn_device_stop : reachable=true
 @drawable/btn_primary : reachable=true
 @drawable/btn_radio_off_mtrl : reachable=false
 @drawable/btn_radio_off_to_on_mtrl_animation : reachable=false
@@ -9244,6 +9246,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
     @drawable/card_background
     @drawable/btn_danger
     @drawable/btn_speed
+    @drawable/btn_device_start
 @layout/custom_dialog : reachable=true
 @layout/design_bottom_navigation_item : reachable=true
     @dimen/design_bottom_navigation_margin
@@ -19539,37 +19542,38 @@ The root reachable resources are:
  drawable:abc_textfield_search_default_mtrl_alpha:2131165300
  drawable:abc_textfield_search_material:2131165301
  drawable:abc_vector_test:2131165302
- drawable:btn_danger:2131165309
- drawable:btn_primary:2131165310
- drawable:card_background:2131165316
- drawable:design_password_eye:2131165320
- drawable:ic_arrow_back_black_24:2131165322
- drawable:ic_launcher:2131165326
- drawable:ic_search_black_24:2131165334
- drawable:input_background:2131165335
- drawable:material_ic_calendar_black_24dp:2131165348
- drawable:material_ic_edit_black_24dp:2131165350
- drawable:mtrl_checkbox_button:2131165358
- drawable:mtrl_checkbox_button_checked_unchecked:2131165359
- drawable:mtrl_checkbox_button_icon:2131165360
- drawable:mtrl_dropdown_arrow:2131165369
- drawable:mtrl_ic_arrow_drop_down:2131165370
- drawable:mtrl_ic_cancel:2131165372
- drawable:mtrl_navigation_bar_item_background:2131165378
- drawable:navigation_empty_icon:2131165394
- drawable:notification_action_background:2131165395
- drawable:notification_bg:2131165396
- drawable:notification_bg_low:2131165397
- drawable:notification_bg_low_normal:2131165398
- drawable:notification_bg_low_pressed:2131165399
- drawable:notification_bg_normal:2131165400
- drawable:notification_bg_normal_pressed:2131165401
- drawable:notification_icon_background:2131165402
- drawable:notification_template_icon_bg:2131165403
- drawable:notification_template_icon_low_bg:2131165404
- drawable:notification_tile_bg:2131165405
- drawable:tooltip_frame_dark:2131165409
- drawable:tooltip_frame_light:2131165410
+ drawable:btn_device_start:2131165310
+ drawable:btn_device_stop:2131165311
+ drawable:btn_primary:2131165312
+ drawable:card_background:2131165318
+ drawable:design_password_eye:2131165322
+ drawable:ic_arrow_back_black_24:2131165324
+ drawable:ic_launcher:2131165328
+ drawable:ic_search_black_24:2131165336
+ drawable:input_background:2131165337
+ drawable:material_ic_calendar_black_24dp:2131165350
+ drawable:material_ic_edit_black_24dp:2131165352
+ drawable:mtrl_checkbox_button:2131165360
+ drawable:mtrl_checkbox_button_checked_unchecked:2131165361
+ drawable:mtrl_checkbox_button_icon:2131165362
+ drawable:mtrl_dropdown_arrow:2131165371
+ drawable:mtrl_ic_arrow_drop_down:2131165372
+ drawable:mtrl_ic_cancel:2131165374
+ drawable:mtrl_navigation_bar_item_background:2131165380
+ drawable:navigation_empty_icon:2131165396
+ drawable:notification_action_background:2131165397
+ drawable:notification_bg:2131165398
+ drawable:notification_bg_low:2131165399
+ drawable:notification_bg_low_normal:2131165400
+ drawable:notification_bg_low_pressed:2131165401
+ drawable:notification_bg_normal:2131165402
+ drawable:notification_bg_normal_pressed:2131165403
+ drawable:notification_icon_background:2131165404
+ drawable:notification_template_icon_bg:2131165405
+ drawable:notification_template_icon_low_bg:2131165406
+ drawable:notification_tile_bg:2131165407
+ drawable:tooltip_frame_dark:2131165411
+ drawable:tooltip_frame_light:2131165412
  id:BOTTOM_END:2131230721
  id:BOTTOM_START:2131230722
  id:SHOW_ALL:2131230728
@@ -20763,12 +20767,12 @@ Unused resources are:
  dimen:mtrl_textinput_outline_box_expanded_padding:2131100412
  dimen:mtrl_tooltip_cornerSize:2131100416
  drawable:abc_ic_menu_overflow_material:2131165252
- drawable:ic_m3_chip_check:2131165327
- drawable:m3_tabs_transparent_background:2131165346
- drawable:material_ic_menu_arrow_up_black_24dp:2131165356
- drawable:mtrl_bottomsheet_drag_handle:2131165357
- drawable:mtrl_popupmenu_background_overlay:2131165380
- drawable:test_level_drawable:2131165408
+ drawable:ic_m3_chip_check:2131165329
+ drawable:m3_tabs_transparent_background:2131165348
+ drawable:material_ic_menu_arrow_up_black_24dp:2131165358
+ drawable:mtrl_bottomsheet_drag_handle:2131165359
+ drawable:mtrl_popupmenu_background_overlay:2131165382
+ drawable:test_level_drawable:2131165410
  id:ALT:2131230720
  id:CTRL:2131230723
  id:FUNCTION:2131230724
