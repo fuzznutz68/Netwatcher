@@ -2,7 +2,9 @@
 -keep class androidx.core.content.FileProvider { <init>(); }
 -keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }
 -keep class androidx.startup.InitializationProvider { <init>(); }
+-keep class com.netwatch.app.DeviceMonitorService { <init>(); }
 -keep class com.netwatch.app.MainActivity { <init>(); }
+-keep class com.netwatch.app.NetWatchVpnService { <init>(); }
 -keep class com.netwatch.app.TrafficMonitorService { <init>(); }
 -keep class android.widget.Space { <init>(android.content.Context, android.util.AttributeSet); }
 

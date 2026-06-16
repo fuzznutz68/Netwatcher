@@ -11,9 +11,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,17 +32,15 @@ public class NetWatchVpnService extends VpnService {
     private ExecutorService      ioPool;
     private ExecutorService      dnsExecutor;
 
-    // key = "TCP<ip>:<port>", value = timestamp millis – 30s dedup window
-    private final ConcurrentHashMap<String, Long> seenKeys = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long>   seenKeys = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
 
-    // ──────────────────────────────────────────────────────────────
-    // Lifecycle
-    // ──────────────────────────────────────────────────────────────
+    // ── Lifecycle ────────────────────────────────────────────────
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            running = false;
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -65,14 +62,11 @@ public class NetWatchVpnService extends VpnService {
     }
 
     private void closeVpn() {
-        try {
-            if (vpnInterface != null) { vpnInterface.close(); vpnInterface = null; }
-        } catch (Exception ignored) {}
+        try { if (vpnInterface != null) { vpnInterface.close(); vpnInterface = null; } }
+        catch (Exception ignored) {}
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // VPN tunnel
-    // ──────────────────────────────────────────────────────────────
+    // ── VPN tunnel ───────────────────────────────────────────────
 
     private void runVpn() {
         try {
@@ -87,7 +81,7 @@ public class NetWatchVpnService extends VpnService {
                 .establish();
 
             if (vpnInterface == null) {
-                Log.e(TAG, "establish() returned null – permission denied?");
+                Log.e(TAG, "establish() returned null – VPN permission denied?");
                 return;
             }
 
@@ -99,7 +93,7 @@ public class NetWatchVpnService extends VpnService {
             while (running) {
                 int len = in.read(buf);
                 if (len <= 0) continue;
-                byte[] pkt = java.util.Arrays.copyOf(buf, len);
+                byte[] pkt = Arrays.copyOf(buf, len);
                 handleIPv4(pkt, len, out);
             }
         } catch (Exception e) {
@@ -110,28 +104,27 @@ public class NetWatchVpnService extends VpnService {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Packet parsing  (mirrors v2.0.6 handleIPv4 logic exactly)
-    // ──────────────────────────────────────────────────────────────
+    // ── Packet inspection (same logic as v2.0.6) ─────────────────
 
     private void handleIPv4(byte[] pkt, int len, FileOutputStream out) {
         try {
             if (len < 20) { out.write(pkt, 0, len); return; }
 
-            int ipHeaderLen = (pkt[0] & 0x0f) * 4;
-            int proto       = pkt[9] & 0xff;
+            int ipHdrLen = (pkt[0] & 0x0f) * 4;
+            int proto    = pkt[9] & 0xff;
 
-            if (len < ipHeaderLen + 4) { out.write(pkt, 0, len); return; }
+            if (len < ipHdrLen + 4) { out.write(pkt, 0, len); return; }
 
-            String srcIp  = ipv4(pkt, 12);
             String dstIp  = ipv4(pkt, 16);
-            int    srcPort = u16(pkt, ipHeaderLen);
-            int    dstPort = u16(pkt, ipHeaderLen + 2);
+            int    dstPort = u16(pkt, ipHdrLen + 2);
 
-            // skip loopback / multicast / broadcast
-            if (dstIp.startsWith("127.") || dstIp.startsWith("224.")
-                    || dstIp.startsWith("239.") || dstIp.startsWith("255.")
-                    || dstIp.equals("0.0.0.0") || dstPort == 0) {
+            // Skip loopback / multicast / broadcast / zero-port
+            if (dstPort == 0
+                    || dstIp.equals("0.0.0.0")
+                    || dstIp.startsWith("127.")
+                    || dstIp.startsWith("224.")
+                    || dstIp.startsWith("239.")
+                    || dstIp.startsWith("255.")) {
                 out.write(pkt, 0, len);
                 return;
             }
@@ -144,7 +137,7 @@ public class NetWatchVpnService extends VpnService {
             String protoStr = isTcp ? "TCP" : "UDP";
             String key      = protoStr + dstIp + ":" + dstPort;
 
-            long now = System.currentTimeMillis();
+            long now  = System.currentTimeMillis();
             Long last = seenKeys.get(key);
             if (last == null || now - last > 30_000L) {
                 seenKeys.put(key, now);
@@ -153,27 +146,31 @@ public class NetWatchVpnService extends VpnService {
                 seenKeys.put(key, now);
             }
 
-            // Write packet back so the app's TCP stack stays happy
+            // Echo packet back so device's TCP/IP stack stays happy
             out.write(pkt, 0, len);
 
         } catch (Exception e) {
-            Log.d(TAG, "handleIPv4 error: " + e.getMessage());
+            try { out.write(pkt, 0, len); } catch (Exception ignored) {}
+            Log.d(TAG, "handleIPv4: " + e.getMessage());
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Reporting + DNS
-    // ──────────────────────────────────────────────────────────────
+    // ── Reporting + async DNS ─────────────────────────────────────
 
     private void reportConnection(String proto, String ip, int port) {
         String cached = dnsCache.get(ip);
         if (cached == null) {
+            // Emit immediately with raw IP, then update with hostname when resolved
             emit(proto, "", ip, port);
             dnsExecutor.submit(() -> {
                 try {
                     String host = InetAddress.getByName(ip).getHostName();
-                    dnsCache.put(ip, host.equals(ip) ? ip : host);
-                    if (!host.equals(ip)) emit(proto, host, ip, port);
+                    if (!host.equals(ip)) {
+                        dnsCache.put(ip, host);
+                        emit(proto, host, ip, port);
+                    } else {
+                        dnsCache.put(ip, ip);
+                    }
                 } catch (Exception ex) {
                     dnsCache.put(ip, ip);
                 }
@@ -195,22 +192,18 @@ public class NetWatchVpnService extends VpnService {
         Log.d(TAG, "EMIT " + proto + " " + (host.isEmpty() ? ip : host) + ":" + port);
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Helpers
-    // ──────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────
 
     private static String ipv4(byte[] b, int off) {
-        return (b[off] & 0xff) + "." + (b[off+1] & 0xff) + "."
-             + (b[off+2] & 0xff) + "." + (b[off+3] & 0xff);
+        return (b[off] & 0xff) + "." + (b[off+1] & 0xff)
+             + "." + (b[off+2] & 0xff) + "." + (b[off+3] & 0xff);
     }
 
     private static int u16(byte[] b, int off) {
         return ((b[off] & 0xff) << 8) | (b[off+1] & 0xff);
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Notification
-    // ──────────────────────────────────────────────────────────────
+    // ── Notification ─────────────────────────────────────────────
 
     private void createNotificationChannel() {
         NotificationChannel ch = new NotificationChannel(
