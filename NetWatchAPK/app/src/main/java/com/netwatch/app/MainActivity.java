@@ -181,6 +181,12 @@ public class MainActivity extends Activity {
         tabTrafficBtn.setOnClickListener(v -> switchTab(1));
         tabCheckerBtn.setOnClickListener(v -> switchTab(2));
         tabMyInfoBtn.setOnClickListener(v  -> switchTab(3));
+        tabSpeedBtn   = findViewById(R.id.tabSpeedBtn);
+        tabDeviceBtn  = findViewById(R.id.tabDeviceBtn);
+        tab5          = findViewById(R.id.tab5);
+        tab6          = findViewById(R.id.tab6);
+        if (tabSpeedBtn  != null) tabSpeedBtn.setOnClickListener(v  -> switchTab(4));
+        if (tabDeviceBtn != null) tabDeviceBtn.setOnClickListener(v -> switchTab(5));
 
         // ── Top-right menu button ────────────────────────────────────────────
         TextView menuBtn = findViewById(R.id.menuBtn);
