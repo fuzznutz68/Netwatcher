@@ -1828,7 +1828,6 @@ AppCompatViewInflater
 notification
 ontouchup
 protocol
-com.netwatch.app.TRAFFIC
 twitchsvc.net
 _reusableCancellableContinuation
 android.view.View

@@ -22,11 +22,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.util.concurrent.Executors;
 
 public class NetWatchVpnService extends VpnService {
 
-    public static final String TRAFFIC_ACTION = "com.netwatch.app.TRAFFIC";
+    public static final String TRAFFIC_ACTION = "com.netwatch.app.DEVICE_TRAFFIC";
     public static final String ACTION_STOP    = "com.netwatch.app.STOP_VPN";
     private static final String TAG           = "NetWatch";
     private static final String CHANNEL_ID    = "netwatch_vpn";
@@ -208,7 +209,7 @@ public class NetWatchVpnService extends VpnService {
         intent.putExtra("ipPort",    ip + ":" + port);
         intent.putExtra("bytes",     bytes);
         intent.putExtra("timestamp", ts);
-        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private static String ipBytes(byte[] pkt, int offset) {
