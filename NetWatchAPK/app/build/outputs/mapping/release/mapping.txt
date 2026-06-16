@@ -3,8 +3,8 @@
 # min_api: 30
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 3e13e59
-# pg_map_hash: SHA-256 3e13e59676f77cad22ed3a3c4b3f3e617a5938aec8408642990be04208557904
+# pg_map_id: 2d06779
+# pg_map_hash: SHA-256 2d06779973253c50ea373e05746782ac3b74b30c141a4baeacaf7cc78b584865
 android.app.UiModeManager$ContrastChangeListener -> android.app.UiModeManager$ContrastChangeListener:
 # {"id":"com.android.tools.r8.synthesized"}
 android.os.OutcomeReceiver -> android.os.OutcomeReceiver:
@@ -104008,102 +104008,130 @@ com.netwatch.app.MainActivity$3$$ExternalSyntheticLambda0 -> com.netwatch.app.w:
       # {"id":"com.android.tools.r8.synthesized"}
 com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
 # {"id":"sourceFile","fileName":"NetWatchVpnService.java"}
-    0:5:void <init>():22:22 -> <init>
-    6:12:void <init>():35:35 -> <init>
-    13:20:void <init>():36:36 -> <init>
+    0:5:void <init>():23:23 -> <init>
+    6:12:void <init>():39:39 -> <init>
+    13:20:void <init>():40:40 -> <init>
     0:3:void $r8$lambda$cHvkso0SIs-xsA9YiEOWLC3oPG4(com.netwatch.app.NetWatchVpnService):0:0 -> a
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$wMhSwKnpWeiQhsr_VwDNsmE4OAo(com.netwatch.app.NetWatchVpnService,java.lang.String,java.lang.String,int):0:0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    0:8:android.app.Notification buildNotification():215:215 -> buildNotification
-    9:14:android.app.Notification buildNotification():216:216 -> buildNotification
-    15:21:android.app.Notification buildNotification():217:217 -> buildNotification
-    22:25:android.app.Notification buildNotification():218:218 -> buildNotification
-    26:30:android.app.Notification buildNotification():219:219 -> buildNotification
-    4:10:void closeVpn():65:65 -> closeVpn
-    0:11:void createNotificationChannel():209:209 -> createNotificationChannel
-    12:21:void createNotificationChannel():211:211 -> createNotificationChannel
-    0:17:void emit(java.lang.String,java.lang.String,java.lang.String,int):184:184 -> emit
-    18:26:void emit(java.lang.String,java.lang.String,java.lang.String,int):185:185 -> emit
-    27:31:void emit(java.lang.String,java.lang.String,java.lang.String,int):186:186 -> emit
-    32:34:void emit(java.lang.String,java.lang.String,java.lang.String,int):187:187 -> emit
-    35:63:void emit(java.lang.String,java.lang.String,java.lang.String,int):188:188 -> emit
-    64:68:void emit(java.lang.String,java.lang.String,java.lang.String,int):189:189 -> emit
-    69:71:void emit(java.lang.String,java.lang.String,java.lang.String,int):190:190 -> emit
-    72:82:void emit(java.lang.String,java.lang.String,java.lang.String,int):191:191 -> emit
+    0:8:android.app.Notification buildNotification():291:291 -> buildNotification
+    9:14:android.app.Notification buildNotification():292:292 -> buildNotification
+    15:21:android.app.Notification buildNotification():293:293 -> buildNotification
+    22:25:android.app.Notification buildNotification():294:294 -> buildNotification
+    26:30:android.app.Notification buildNotification():295:295 -> buildNotification
+    4:10:void closeVpn():69:69 -> closeVpn
+    0:11:void createNotificationChannel():285:285 -> createNotificationChannel
+    12:21:void createNotificationChannel():287:287 -> createNotificationChannel
+    0:17:void emit(java.lang.String,java.lang.String,java.lang.String,int):251:251 -> emit
+    18:26:void emit(java.lang.String,java.lang.String,java.lang.String,int):252:252 -> emit
+    27:31:void emit(java.lang.String,java.lang.String,java.lang.String,int):253:253 -> emit
+    32:34:void emit(java.lang.String,java.lang.String,java.lang.String,int):254:254 -> emit
+    35:63:void emit(java.lang.String,java.lang.String,java.lang.String,int):255:255 -> emit
+    64:68:void emit(java.lang.String,java.lang.String,java.lang.String,int):256:256 -> emit
+    69:71:void emit(java.lang.String,java.lang.String,java.lang.String,int):257:257 -> emit
+    72:82:void emit(java.lang.String,java.lang.String,java.lang.String,int):258:258 -> emit
     83:86:void emit(java.lang.String,java.lang.String,java.lang.String,int):0:0 -> emit
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"0":113,"2":115,"5":118,"8":122},"outline":"Landroidx/activity/result/a;j(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/StringBuilder;"}
-    87:112:void emit(java.lang.String,java.lang.String,java.lang.String,int):192:192 -> emit
-    113:113:void emit(java.lang.String,java.lang.String,java.lang.String,int):192:192 -> emit
-    115:115:void emit(java.lang.String,java.lang.String,java.lang.String,int):192:192 -> emit
-    118:118:void emit(java.lang.String,java.lang.String,java.lang.String,int):192:192 -> emit
-    122:122:void emit(java.lang.String,java.lang.String,java.lang.String,int):192:192 -> emit
-    5:11:void handleIPv4(byte[],int,java.io.FileOutputStream):111:111 -> handleIPv4
-    12:19:void handleIPv4(byte[],int,java.io.FileOutputStream):113:113 -> handleIPv4
-    20:27:void handleIPv4(byte[],int,java.io.FileOutputStream):114:114 -> handleIPv4
-    28:33:void handleIPv4(byte[],int,java.io.FileOutputStream):116:116 -> handleIPv4
-    34:39:void handleIPv4(byte[],int,java.io.FileOutputStream):118:118 -> handleIPv4
-    40:47:void handleIPv4(byte[],int,java.io.FileOutputStream):119:119 -> handleIPv4
-    48:55:void handleIPv4(byte[],int,java.io.FileOutputStream):123:123 -> handleIPv4
-    56:63:void handleIPv4(byte[],int,java.io.FileOutputStream):124:124 -> handleIPv4
-    64:71:void handleIPv4(byte[],int,java.io.FileOutputStream):125:125 -> handleIPv4
-    72:79:void handleIPv4(byte[],int,java.io.FileOutputStream):126:126 -> handleIPv4
-    80:104:void handleIPv4(byte[],int,java.io.FileOutputStream):127:127 -> handleIPv4
-    105:115:void handleIPv4(byte[],int,java.io.FileOutputStream):135:135 -> handleIPv4
-    116:138:void handleIPv4(byte[],int,java.io.FileOutputStream):138:138 -> handleIPv4
-    139:144:void handleIPv4(byte[],int,java.io.FileOutputStream):140:140 -> handleIPv4
-    145:152:void handleIPv4(byte[],int,java.io.FileOutputStream):141:141 -> handleIPv4
-    153:167:void handleIPv4(byte[],int,java.io.FileOutputStream):142:142 -> handleIPv4
-    168:177:void handleIPv4(byte[],int,java.io.FileOutputStream):146:146 -> handleIPv4
-    178:184:void handleIPv4(byte[],int,java.io.FileOutputStream):143:143 -> handleIPv4
-    185:187:void handleIPv4(byte[],int,java.io.FileOutputStream):144:144 -> handleIPv4
-    188:191:void handleIPv4(byte[],int,java.io.FileOutputStream):150:150 -> handleIPv4
-    192:195:void handleIPv4(byte[],int,java.io.FileOutputStream):128:128 -> handleIPv4
-    196:198:void handleIPv4(byte[],int,java.io.FileOutputStream):153:153 -> handleIPv4
-    199:222:void handleIPv4(byte[],int,java.io.FileOutputStream):154:154 -> handleIPv4
-    0:54:java.lang.String ipv4(byte[],int):198:198 -> ipv4
-    0:7:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):167:167 -> lambda$reportConnection$0
-    8:15:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):168:168 -> lambda$reportConnection$0
-    16:18:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):169:169 -> lambda$reportConnection$0
-    19:24:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):170:170 -> lambda$reportConnection$0
-    25:30:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):172:172 -> lambda$reportConnection$0
-    31:34:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):175:175 -> lambda$reportConnection$0
-    7:13:void onDestroy():58:58 -> onDestroy
-    14:16:void onDestroy():59:59 -> onDestroy
-    17:19:void onDestroy():60:60 -> onDestroy
-    20:23:void onDestroy():61:61 -> onDestroy
-    5:17:int onStartCommand(android.content.Intent,int,int):42:42 -> onStartCommand
-    18:21:int onStartCommand(android.content.Intent,int,int):44:44 -> onStartCommand
-    22:26:int onStartCommand(android.content.Intent,int,int):47:47 -> onStartCommand
-    27:33:int onStartCommand(android.content.Intent,int,int):48:48 -> onStartCommand
-    34:40:int onStartCommand(android.content.Intent,int,int):49:49 -> onStartCommand
-    41:48:int onStartCommand(android.content.Intent,int,int):50:50 -> onStartCommand
-    49:58:int onStartCommand(android.content.Intent,int,int):51:51 -> onStartCommand
-    2:11:void reportConnection(java.lang.String,java.lang.String,int):161:161 -> reportConnection
-    12:16:void reportConnection(java.lang.String,java.lang.String,int):164:164 -> reportConnection
-    17:25:void reportConnection(java.lang.String,java.lang.String,int):165:165 -> reportConnection
-    26:36:void reportConnection(java.lang.String,java.lang.String,int):179:179 -> reportConnection
-    3:9:void runVpn():73:73 -> runVpn
-    10:17:void runVpn():74:74 -> runVpn
-    18:23:void runVpn():75:75 -> runVpn
-    24:29:void runVpn():76:76 -> runVpn
-    30:35:void runVpn():77:77 -> runVpn
-    36:41:void runVpn():78:78 -> runVpn
-    42:45:void runVpn():79:79 -> runVpn
-    46:53:void runVpn():80:80 -> runVpn
-    54:63:void runVpn():81:81 -> runVpn
-    64:68:void runVpn():84:84 -> runVpn
-    69:76:void runVpn():103:103 -> runVpn
-    77:87:void runVpn():88:88 -> runVpn
-    88:107:void runVpn():89:89 -> runVpn
-    108:114:void runVpn():94:94 -> runVpn
-    115:118:void runVpn():96:96 -> runVpn
-    119:124:void runVpn():97:97 -> runVpn
-    125:134:void runVpn():103:103 -> runVpn
-    135:141:void runVpn():100:100 -> runVpn
-    142:144:void runVpn():103:103 -> runVpn
-    145:145:void runVpn():104:104 -> runVpn
-    0:13:int u16(byte[],int):203:203 -> u16
+    87:112:void emit(java.lang.String,java.lang.String,java.lang.String,int):259:259 -> emit
+    113:113:void emit(java.lang.String,java.lang.String,java.lang.String,int):259:259 -> emit
+    115:115:void emit(java.lang.String,java.lang.String,java.lang.String,int):259:259 -> emit
+    118:118:void emit(java.lang.String,java.lang.String,java.lang.String,int):259:259 -> emit
+    122:122:void emit(java.lang.String,java.lang.String,java.lang.String,int):259:259 -> emit
+    1:17:void handleIPv4(byte[],int,java.io.FileOutputStream):129:129 -> handleIPv4
+    18:23:void handleIPv4(byte[],int,java.io.FileOutputStream):132:132 -> handleIPv4
+    24:29:void handleIPv4(byte[],int,java.io.FileOutputStream):133:133 -> handleIPv4
+    30:33:void handleIPv4(byte[],int,java.io.FileOutputStream):134:134 -> handleIPv4
+    34:60:void handleIPv4(byte[],int,java.io.FileOutputStream):136:136 -> handleIPv4
+    61:71:void handleIPv4(byte[],int,java.io.FileOutputStream):140:140 -> handleIPv4
+    72:74:void handleIPv4(byte[],int,java.io.FileOutputStream):142:142 -> handleIPv4
+    75:78:void handleIPv4(byte[],int,java.io.FileOutputStream):143:143 -> handleIPv4
+    79:82:void handleIPv4(byte[],int,java.io.FileOutputStream):130:130 -> handleIPv4
+    83:86:void handleIPv4(byte[],int,java.io.FileOutputStream):146:146 -> handleIPv4
+    5:9:void handleIPv6(byte[],int,java.io.FileOutputStream):156:156 -> handleIPv6
+    10:15:void handleIPv6(byte[],int,java.io.FileOutputStream):158:158 -> handleIPv6
+    16:21:void handleIPv6(byte[],int,java.io.FileOutputStream):159:159 -> handleIPv6
+    22:41:void handleIPv6(byte[],int,java.io.FileOutputStream):160:160 -> handleIPv6
+    42:66:void handleIPv6(byte[],int,java.io.FileOutputStream):179:179 -> handleIPv6
+    67:77:void handleIPv6(byte[],int,java.io.FileOutputStream):183:183 -> handleIPv6
+    78:80:void handleIPv6(byte[],int,java.io.FileOutputStream):185:185 -> handleIPv6
+    81:88:void handleIPv6(byte[],int,java.io.FileOutputStream):186:186 -> handleIPv6
+    89:92:void handleIPv6(byte[],int,java.io.FileOutputStream):170:170 -> handleIPv6
+    93:98:void handleIPv6(byte[],int,java.io.FileOutputStream):171:171 -> handleIPv6
+    99:110:void handleIPv6(byte[],int,java.io.FileOutputStream):172:172 -> handleIPv6
+    111:116:void handleIPv6(byte[],int,java.io.FileOutputStream):175:175 -> handleIPv6
+    117:121:void handleIPv6(byte[],int,java.io.FileOutputStream):176:176 -> handleIPv6
+    122:125:void handleIPv6(byte[],int,java.io.FileOutputStream):189:189 -> handleIPv6
+    0:54:java.lang.String ipv4(byte[],int):265:265 -> ipv4
+    0:13:java.lang.String ipv6(byte[],int):270:270 -> ipv6
+    14:18:java.lang.String ipv6(byte[],int):272:272 -> ipv6
+    19:51:java.lang.String ipv6(byte[],int):273:273 -> ipv6
+    52:56:java.lang.String ipv6(byte[],int):275:275 -> ipv6
+    0:3:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):233:233 -> lambda$reportConnection$0
+    4:7:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):234:234 -> lambda$reportConnection$0
+    8:15:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):235:235 -> lambda$reportConnection$0
+    16:18:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):236:236 -> lambda$reportConnection$0
+    19:24:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):237:237 -> lambda$reportConnection$0
+    25:30:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):239:239 -> lambda$reportConnection$0
+    31:34:void lambda$reportConnection$0(java.lang.String,java.lang.String,int):242:242 -> lambda$reportConnection$0
+    0:22:void maybeReport(java.lang.String,java.lang.String,int):215:215 -> maybeReport
+    23:28:void maybeReport(java.lang.String,java.lang.String,int):216:216 -> maybeReport
+    29:36:void maybeReport(java.lang.String,java.lang.String,int):217:217 -> maybeReport
+    37:50:void maybeReport(java.lang.String,java.lang.String,int):218:218 -> maybeReport
+    51:57:void maybeReport(java.lang.String,java.lang.String,int):219:219 -> maybeReport
+    58:61:void maybeReport(java.lang.String,java.lang.String,int):220:220 -> maybeReport
+    7:13:void onDestroy():62:62 -> onDestroy
+    14:16:void onDestroy():63:63 -> onDestroy
+    17:19:void onDestroy():64:64 -> onDestroy
+    20:23:void onDestroy():65:65 -> onDestroy
+    5:17:int onStartCommand(android.content.Intent,int,int):46:46 -> onStartCommand
+    18:21:int onStartCommand(android.content.Intent,int,int):48:48 -> onStartCommand
+    22:26:int onStartCommand(android.content.Intent,int,int):51:51 -> onStartCommand
+    27:33:int onStartCommand(android.content.Intent,int,int):52:52 -> onStartCommand
+    34:40:int onStartCommand(android.content.Intent,int,int):53:53 -> onStartCommand
+    41:48:int onStartCommand(android.content.Intent,int,int):54:54 -> onStartCommand
+    49:58:int onStartCommand(android.content.Intent,int,int):55:55 -> onStartCommand
+    2:11:void reportConnection(java.lang.String,java.lang.String,int):227:227 -> reportConnection
+    12:16:void reportConnection(java.lang.String,java.lang.String,int):229:229 -> reportConnection
+    17:25:void reportConnection(java.lang.String,java.lang.String,int):231:231 -> reportConnection
+    26:36:void reportConnection(java.lang.String,java.lang.String,int):246:246 -> reportConnection
+    3:9:void runVpn():77:77 -> runVpn
+    10:17:void runVpn():78:78 -> runVpn
+    18:23:void runVpn():80:80 -> runVpn
+    24:31:void runVpn():81:81 -> runVpn
+    32:37:void runVpn():83:83 -> runVpn
+    38:43:void runVpn():84:84 -> runVpn
+    44:49:void runVpn():85:85 -> runVpn
+    50:55:void runVpn():86:86 -> runVpn
+    56:61:void runVpn():87:87 -> runVpn
+    62:65:void runVpn():88:88 -> runVpn
+    66:73:void runVpn():89:89 -> runVpn
+    74:83:void runVpn():90:90 -> runVpn
+    84:88:void runVpn():93:93 -> runVpn
+    89:96:void runVpn():121:121 -> runVpn
+    97:107:void runVpn():97:97 -> runVpn
+    108:125:void runVpn():98:98 -> runVpn
+    126:132:void runVpn():101:101 -> runVpn
+    133:141:void runVpn():104:104 -> runVpn
+    142:145:void runVpn():106:106 -> runVpn
+    146:153:void runVpn():108:108 -> runVpn
+    154:160:void runVpn():110:110 -> runVpn
+    161:164:void runVpn():112:112 -> runVpn
+    165:170:void runVpn():114:114 -> runVpn
+    171:180:void runVpn():121:121 -> runVpn
+    181:187:void runVpn():118:118 -> runVpn
+    188:190:void runVpn():121:121 -> runVpn
+    191:191:void runVpn():122:122 -> runVpn
+    4:11:boolean shouldSkip4(java.lang.String,int):197:197 -> shouldSkip4
+    12:19:boolean shouldSkip4(java.lang.String,int):198:198 -> shouldSkip4
+    20:27:boolean shouldSkip4(java.lang.String,int):199:199 -> shouldSkip4
+    28:35:boolean shouldSkip4(java.lang.String,int):200:200 -> shouldSkip4
+    36:43:boolean shouldSkip4(java.lang.String,int):201:201 -> shouldSkip4
+    44:54:boolean shouldSkip4(java.lang.String,int):202:202 -> shouldSkip4
+    4:11:boolean shouldSkip6(java.lang.String,int):207:207 -> shouldSkip6
+    12:19:boolean shouldSkip6(java.lang.String,int):208:208 -> shouldSkip6
+    20:30:boolean shouldSkip6(java.lang.String,int):209:209 -> shouldSkip6
+    0:13:int u16(byte[],int):279:279 -> u16
 com.netwatch.app.TrafficEntry -> com.netwatch.app.TrafficEntry:
 # {"id":"sourceFile","fileName":"TrafficEntry.java"}
     0:15:void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String):15:15 -> <init>
