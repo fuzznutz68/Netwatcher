@@ -1,11 +1,11 @@
 // NetWatch - IP WHOIS / Intelligence lookup (public, no auth required)
-// Accepts: { "ip": "1.2.3.4" }
+// Accepts: POST { "ip": "1.2.3.4" }  OR  GET ?ip=1.2.3.4
 // Returns: org, asn, country, city, cidr, rdap registrar, abuse contact, hostname
 
 Deno.serve(async (req) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 
@@ -14,8 +14,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const { ip } = body as { ip: string };
+    // ── Accept GET ?ip=... or POST { ip } ───────────────────────────────────
+    let ip: string | undefined;
+
+    if (req.method === 'GET') {
+      const url = new URL(req.url);
+      ip = url.searchParams.get('ip') ?? undefined;
+    } else {
+      const body = await req.json().catch(() => ({}));
+      ip = (body as any).ip;
+    }
 
     if (!ip || typeof ip !== 'string') {
       return Response.json({ error: 'ip is required' }, { status: 400, headers: corsHeaders });
@@ -59,15 +67,10 @@ Deno.serve(async (req) => {
         result.country = d.country || null;
         result.country_code = d.countryCode || null;
         result.city = d.city || null;
-        // AS field: "AS16509 Amazon.com, Inc."
         if (d.as) {
           const asParts = d.as.match(/^(AS\d+)\s+(.+)$/);
-          if (asParts) {
-            result.asn = asParts[1];
-            result.asn_name = asParts[2];
-          } else {
-            result.asn = d.as;
-          }
+          if (asParts) { result.asn = asParts[1]; result.asn_name = asParts[2]; }
+          else { result.asn = d.as; }
         }
       }
     } catch (e: any) { result.errors.push('ip-api: ' + e.message); }
@@ -87,7 +90,6 @@ Deno.serve(async (req) => {
     } catch (e: any) { result.errors.push('ipinfo hostname: ' + e.message); }
 
     // ── 3. RDAP lookup — CIDR, network name, abuse contact ──────────────────
-    // Try ARIN first, fall back to RIPE, APNIC, LACNIC, AFRINIC
     const rdapBootstrap = ipv4 ? [
       `https://rdap.arin.net/registry/ip/${clean}`,
       `https://rdap.db.ripe.net/ip/${clean}`,
@@ -110,7 +112,6 @@ Deno.serve(async (req) => {
 
         result.rdap_name = d.name || null;
 
-        // CIDR prefix
         if (d.cidr0_cidrs && d.cidr0_cidrs.length > 0) {
           const c = d.cidr0_cidrs[0];
           result.cidr = `${c.v4prefix || c.v6prefix}/${c.length}`;
@@ -118,27 +119,23 @@ Deno.serve(async (req) => {
           result.cidr = `${d.startAddress} – ${d.endAddress}`;
         }
 
-        // Entities: find abuse contact and registrar
         const extractEntities = (entities: any[]) => {
           for (const e of (entities || [])) {
             const roles = e.roles || [];
             const vcardArr = e.vcardArray ? e.vcardArray[1] : [];
             const name = vcardArr.find((v: any) => v[0] === 'fn')?.[3] || '';
             const email = vcardArr.find((v: any) => v[0] === 'email')?.[3] || '';
-
             if (roles.includes('abuse') && (name || email)) {
               result.abuse_contact = email || name;
             }
             if ((roles.includes('registrant') || roles.includes('administrative')) && name && !result.rdap_registrar) {
               result.rdap_registrar = name;
             }
-            // Recurse into nested entities
             if (e.entities) extractEntities(e.entities);
           }
         };
         extractEntities(d.entities || []);
-
-        break; // got a valid RDAP response
+        break;
       } catch (_) {}
     }
 
