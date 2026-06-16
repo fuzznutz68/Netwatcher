@@ -2131,8 +2131,8 @@ public class MainActivity extends Activity {
 
         deviceMonRunning = true;
         if (deviceToggleBtn != null) {
-            deviceToggleBtn.setText(isRussian ? "⏹ Стоп" : "⏹ Stop");
-            deviceToggleBtn.setBackgroundResource(R.drawable.btn_danger);
+            deviceToggleBtn.setText(isRussian ? "⏹  СТОП" : "⏹  STOP");
+            deviceToggleBtn.setBackgroundResource(R.drawable.btn_device_stop);
         }
         if (deviceStatusText != null) {
             deviceStatusText.setText(isRussian ? "● Активен" : "● Active");
@@ -2157,8 +2157,8 @@ public class MainActivity extends Activity {
 
         deviceMonRunning = false;
         if (deviceToggleBtn != null) {
-            deviceToggleBtn.setText(isRussian ? "▶  Старт" : "▶  Start");
-            deviceToggleBtn.setBackgroundResource(R.drawable.btn_primary);
+            deviceToggleBtn.setText(isRussian ? "▶  СТАРТ" : "▶  START");
+            deviceToggleBtn.setBackgroundResource(R.drawable.btn_device_start);
         }
         if (deviceStatusText != null) {
             deviceStatusText.setText(isRussian ? "Остановлен" : "Stopped");
