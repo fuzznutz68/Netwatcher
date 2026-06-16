@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="/app/NetWatchAPK/app"
+    name=":app"
+    type="APP"
+    maven="NetWatch:app:"
+    agpVersion="8.2.2"
+    buildFolder="build"
+    bootClassPath="/usr/lib/android-sdk/platforms/android-34/android.jar:/usr/lib/android-sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="11"
+    compileTarget="android-34">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

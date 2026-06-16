@@ -156,6 +156,7 @@ public class MainActivity extends Activity {
     private boolean isRussian = false;
     private BroadcastReceiver trafficReceiver;
     private final ExecutorService executor    = Executors.newCachedThreadPool();
+    private static final String IP_WHOIS_URL = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -2213,7 +2214,76 @@ public class MainActivity extends Activity {
             android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1));
         div.setBackgroundColor(android.graphics.Color.parseColor("#1C2333"));
         row.addView(div);
+
+        // Long-press: Copy IP / Copy Hostname / WHOIS
+        final String bareIp = rawIp;
+        final String hostName = display;
+        row.setOnLongClickListener(v -> {
+            android.widget.PopupMenu pm2 = new android.widget.PopupMenu(this, v);
+            pm2.getMenu().add(0, 0, 0, "📋 Copy IP");
+            if (!hostName.equals(bareIp)) pm2.getMenu().add(0, 1, 1, "📋 Copy Hostname");
+            pm2.getMenu().add(0, 2, 2, "🔍 IP WHOIS Lookup");
+            pm2.setOnMenuItemClickListener(item -> {
+                android.content.ClipboardManager cm =
+                    (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                switch (item.getItemId()) {
+                    case 0:
+                        cm.setPrimaryClip(android.content.ClipData.newPlainText("IP", bareIp));
+                        android.widget.Toast.makeText(this, "IP copied", android.widget.Toast.LENGTH_SHORT).show();
+                        return true;
+                    case 1:
+                        cm.setPrimaryClip(android.content.ClipData.newPlainText("Hostname", hostName));
+                        android.widget.Toast.makeText(this, "Hostname copied", android.widget.Toast.LENGTH_SHORT).show();
+                        return true;
+                    case 2:
+                        showIpWhois(bareIp, hostName);
+                        return true;
+                }
+                return false;
+            });
+            pm2.show();
+            return true;
+        });
+
         return row;
+    }
+
+    private void showIpWhois(String ip, String hostname) {
+        String title = hostname != null && !hostname.isEmpty() && !hostname.equals(ip)
+            ? "WHOIS: " + hostname : "WHOIS: " + ip;
+        android.widget.Toast.makeText(this, "Looking up " + ip + "...",
+            android.widget.Toast.LENGTH_SHORT).show();
+        executor.execute(() -> {
+            try {
+                java.net.URL url = new java.net.URL(IP_WHOIS_URL + "?ip=" + ip);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(8000);
+                conn.setReadTimeout(8000);
+                java.io.BufferedReader br = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) sb.append(line);
+                br.close();
+                org.json.JSONObject j = new org.json.JSONObject(sb.toString());
+                StringBuilder msg = new StringBuilder();
+                if (j.has("org"))      msg.append("Org:     ").append(j.getString("org")).append("\n");
+                if (j.has("asn"))      msg.append("ASN:     ").append(j.getString("asn"));
+                if (j.has("asnName"))  msg.append(" (").append(j.getString("asnName")).append(")");
+                if (j.has("asn"))      msg.append("\n");
+                if (j.has("cidr"))     msg.append("CIDR:    ").append(j.getString("cidr")).append("\n");
+                if (j.has("country"))  msg.append("Country: ").append(j.getString("country")).append("\n");
+                if (j.has("netName"))  msg.append("Net:     ").append(j.getString("netName")).append("\n");
+                if (j.has("abuse"))    msg.append("Abuse:   ").append(j.getString("abuse")).append("\n");
+                if (msg.length() == 0) msg.append("No data returned.");
+                final String result = msg.toString().trim();
+                final String dlgTitle = title;
+                runOnUiThread(() -> showInfoDialog(dlgTitle, result));
+            } catch (Exception ex) {
+                runOnUiThread(() -> android.widget.Toast.makeText(this,
+                    "WHOIS failed: " + ex.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+            }
+        });
     }
 
     private void exportDeviceLog() {
