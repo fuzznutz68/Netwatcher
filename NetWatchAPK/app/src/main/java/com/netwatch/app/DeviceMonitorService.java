@@ -3,10 +3,11 @@ package com.netwatch.app;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.app.Service;
 import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.io.BufferedReader;
@@ -14,264 +15,278 @@ import java.io.FileReader;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
-/* loaded from: classes.dex */
 public class DeviceMonitorService extends Service {
-    public static final String ACTION_STOP = "com.netwatch.app.STOP_DEVICE_MON";
-    private static final String CHANNEL_ID = "netwatch_dev";
-    private static final int NOTIF_ID = 43;
-    private static final String TAG = "NetWatchDev";
+
+    public static final String ACTION_STOP    = "com.netwatch.app.STOP_DEVICE_MON";
     public static final String TRAFFIC_ACTION = "com.netwatch.app.DEVICE_TRAFFIC";
-    private ScheduledExecutorService dnsExecutor;
-    private PackageManager pm;
+
+    private static final String TAG        = "NetWatchDev";
+    private static final String CHANNEL_ID = "netwatch_dev";
+    private static final int    NOTIF_ID   = 43;
+
+    // How often to poll /proc/net (ms)
+    private static final long   POLL_INTERVAL_MS = 1000;
+    // How long to keep a seen entry before re-reporting (ms)
+    private static final long   SEEN_TTL_MS      = 30_000;
+
     private ScheduledExecutorService scheduler;
-    private final ConcurrentHashMap<String, Long> seen = new ConcurrentHashMap<>();
+    private ScheduledExecutorService dnsExecutor;
+    private PackageManager           pm;
+
+    // key = "ip:port", value = last-seen timestamp
+    private final ConcurrentHashMap<String, Long>    seen     = new ConcurrentHashMap<>();
+    // key = ip, value = resolved hostname (or ip itself if unresolved)
+    private final ConcurrentHashMap<String, String>  dnsCache = new ConcurrentHashMap<>();
+    // key = uid, value = app label
     private final ConcurrentHashMap<Integer, String> uidCache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
 
-    private Notification buildNotification() {
-        return new Notification.Builder(this, CHANNEL_ID).setContentTitle("📶 NetWatch Device Monitor").setContentText("Monitoring all device connections").setSmallIcon(android.R.drawable.ic_menu_compass).build();
-    }
+    // ── Lifecycle ────────────────────────────────────────────────
 
-    private void createNotificationChannel() {
-        ((NotificationManager) getSystemService("notification")).createNotificationChannel(new NotificationChannel(CHANNEL_ID, "NetWatch Device Monitor", 2));
-    }
-
-    private void emit(String str, String str2, int i2, String str3, String str4) {
-        String format = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
-        Intent intent = new Intent("com.netwatch.app.DEVICE_TRAFFIC");
-        intent.putExtra("host", str);
-        intent.putExtra("ipPort", str2 + ":" + i2);
-        intent.putExtra("protocol", str3);
-        intent.putExtra("app", str4);
-        intent.putExtra(TrafficMonitorService.EXTRA_TIMESTAMP, format);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        StringBuilder j2 = new StringBuilder("EMIT ").append(str3).append(" ");
-        if (str.isEmpty()) {
-            str = str2;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopSelf();
+            return START_NOT_STICKY;
         }
-        j2.append(str);
-        j2.append(":");
-        j2.append(i2);
-        j2.append(str4.isEmpty() ? "" : (" [" + str4 + "]"));
-        Log.d(TAG, j2.toString());
+        pm = getPackageManager();
+        createNotificationChannel();
+        startForeground(NOTIF_ID, buildNotification());
+
+        scheduler   = Executors.newSingleThreadScheduledExecutor();
+        dnsExecutor = Executors.newScheduledThreadPool(4);
+
+        scheduler.scheduleAtFixedRate(this::poll, 0, POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        return START_STICKY;
     }
 
-    private String getAppLabel(int i2) {
-        String str = this.uidCache.get(Integer.valueOf(i2));
-        if (str != null) {
-            return str;
-        }
-        try {
-            String[] packagesForUid = this.pm.getPackagesForUid(i2);
-            if (packagesForUid != null && packagesForUid.length > 0) {
-                String charSequence = this.pm.getApplicationLabel(this.pm.getApplicationInfo(packagesForUid[0], 0)).toString();
-                this.uidCache.put(Integer.valueOf(i2), charSequence);
-                return charSequence;
-            }
-        } catch (Exception unused) {
-        }
-        this.uidCache.put(Integer.valueOf(i2), "");
-        return "";
-    }
-
-    private static byte[] hexStringToBytes(String str) {
-        int length = str.length();
-        byte[] bArr = new byte[length / 2];
-        for (int i2 = 0; i2 < length; i2 += 2) {
-            bArr[i2 / 2] = (byte) (Character.digit(str.charAt(i2 + 1), 16) + (Character.digit(str.charAt(i2), 16) << 4));
-        }
-        return bArr;
-    }
-
-    private static String hexToIPv4(String str) {
-        if (str != null && str.length() == 8) {
-            try {
-                int parseLong = (int) Long.parseLong(str, 16);
-                return (parseLong & 255) + "." + ((parseLong >> 8) & 255) + "." + ((parseLong >> 16) & 255) + "." + ((parseLong >> 24) & 255);
-            } catch (NumberFormatException unused) {
-            }
-        }
-        return null;
-    }
-
-    private static String hexToIPv6(String str) {
-        if (str != null && str.length() == 32) {
-            try {
-                StringBuilder sb = new StringBuilder();
-                for (int i2 = 0; i2 < 4; i2++) {
-                    int i3 = i2 * 8;
-                    for (int i4 = 3; i4 >= 0; i4--) {
-                        int i5 = (i4 * 2) + i3;
-                        sb.append((CharSequence) str, i5, i5 + 2);
-                    }
-                }
-                StringBuilder sb2 = new StringBuilder();
-                for (int i6 = 0; i6 < 8; i6++) {
-                    int i7 = i6 * 4;
-                    sb2.append((CharSequence) sb, i7, i7 + 4);
-                }
-                return InetAddress.getByAddress(hexStringToBytes(sb.toString())).getHostAddress();
-            } catch (Exception unused) {
-            }
-        }
-        return null;
-    }
-
-    public static /* synthetic */ boolean lambda$poll$0(long j2, Map.Entry entry) {
-        return j2 - ((Long) entry.getValue()).longValue() > 15000;
-    }
-
-    public /* synthetic */ void lambda$resolveAndEmit$1(String str, int i2, String str2, String str3) {
-        try {
-            String hostName = InetAddress.getByName(str).getHostName();
-            if (hostName.equals(str)) {
-                this.dnsCache.put(str, str);
-            } else {
-                this.dnsCache.put(str, hostName);
-                emit(hostName, str, i2, str2, str3);
-            }
-        } catch (Exception unused) {
-            this.dnsCache.put(str, str);
-        }
-    }
-
-    private void parseProcNetFile(String str, boolean z, boolean z2, long j2) {
-        int i2;
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(str));
-            boolean z3 = true;
-            while (true) {
-                try {
-                    String readLine = bufferedReader.readLine();
-                    if (readLine == null) {
-                        bufferedReader.close();
-                        return;
-                    }
-                    if (z3) {
-                        z3 = false;
-                    } else {
-                        String trim = readLine.trim();
-                        if (!trim.isEmpty()) {
-                            String[] split = trim.split("\\s+");
-                            if (split.length >= 8) {
-                                String str2 = split[2];
-                                String str3 = split[3];
-                                try {
-                                    i2 = Integer.parseInt(split[7]);
-                                } catch (NumberFormatException unused) {
-                                    i2 = -1;
-                                }
-                                if (z || !"0A".equalsIgnoreCase(str3)) {
-                                    if (z || (!"07".equalsIgnoreCase(str3) && !"09".equalsIgnoreCase(str3))) {
-                                        int indexOf = str2.indexOf(58);
-                                        if (indexOf >= 0) {
-                                            String substring = str2.substring(0, indexOf);
-                                            try {
-                                                int parseInt = Integer.parseInt(str2.substring(indexOf + 1), 16);
-                                                if (parseInt != 0) {
-                                                    String hexToIPv6 = z2 ? hexToIPv6(substring) : hexToIPv4(substring);
-                                                    if (hexToIPv6 != null && !hexToIPv6.equals("0.0.0.0") && !hexToIPv6.equals("127.0.0.1") && !hexToIPv6.startsWith("::") && !hexToIPv6.equals("0:0:0:0:0:0:0:0")) {
-                                                        String str4 = hexToIPv6 + ":" + parseInt;
-                                                        if (this.seen.get(str4) == null) {
-                                                            this.seen.put(str4, Long.valueOf(j2));
-                                                            resolveAndEmit(hexToIPv6, parseInt, z ? "UDP" : "TCP", i2 >= 0 ? getAppLabel(i2) : "", j2);
-                                                        } else {
-                                                            this.seen.put(str4, Long.valueOf(j2));
-                                                        }
-                                                    }
-                                                }
-                                            } catch (NumberFormatException unused2) {
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } finally {
-                }
-            }
-        } catch (Exception unused3) {
-        }
-    }
-
-    public void poll() {
-        try {
-            final long currentTimeMillis = System.currentTimeMillis();
-            this.seen.entrySet().removeIf(new Predicate() { // from class: com.netwatch.app.a
-                @Override // java.util.function.Predicate
-                public final boolean test(Object obj) {
-                    boolean lambda$poll$0;
-                    lambda$poll$0 = DeviceMonitorService.lambda$poll$0(currentTimeMillis, (Map.Entry) obj);
-                    return lambda$poll$0;
-                }
-            });
-            parseProcNetFile("/proc/net/tcp", false, false, currentTimeMillis);
-            parseProcNetFile("/proc/net/tcp6", false, true, currentTimeMillis);
-            parseProcNetFile("/proc/net/udp", true, false, currentTimeMillis);
-            parseProcNetFile("/proc/net/udp6", true, true, currentTimeMillis);
-        } catch (Exception e2) {
-            Log.e(TAG, "Poll error: " + e2.getMessage());
-        }
-    }
-
-    private void resolveAndEmit(final String str, final int i2, final String str2, final String str3, long j2) {
-        String str4 = this.dnsCache.get(str);
-        if (str4 == null) {
-            emit("", str, i2, str2, str3);
-            this.dnsExecutor.submit(new Runnable() { // from class: com.netwatch.app.b
-                @Override // java.lang.Runnable
-                public final void run() {
-                    DeviceMonitorService.this.lambda$resolveAndEmit$1(str, i2, str2, str3);
-                }
-            });
-        } else {
-            if (str4.equals(str)) {
-                str4 = "";
-            }
-            emit(str4, str, i2, str2, str3);
-        }
-    }
-
-    @Override // android.app.Service
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override // android.app.Service
+    @Override
     public void onDestroy() {
-        ScheduledExecutorService scheduledExecutorService = this.scheduler;
-        if (scheduledExecutorService != null) {
-            scheduledExecutorService.shutdownNow();
-        }
-        ScheduledExecutorService scheduledExecutorService2 = this.dnsExecutor;
-        if (scheduledExecutorService2 != null) {
-            scheduledExecutorService2.shutdownNow();
-        }
+        if (scheduler   != null) scheduler.shutdownNow();
+        if (dnsExecutor != null) dnsExecutor.shutdownNow();
         super.onDestroy();
     }
 
-    @Override // android.app.Service
-    public int onStartCommand(Intent intent, int i2, int i3) {
-        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
-            stopSelf();
-            return 2;
+    @Override
+    public IBinder onBind(Intent intent) { return null; }
+
+    // ── Poll /proc/net ────────────────────────────────────────────
+
+    private void poll() {
+        try {
+            long now = System.currentTimeMillis();
+
+            // Expire old entries so connections that closed can re-appear later
+            Iterator<Map.Entry<String, Long>> it = seen.entrySet().iterator();
+            while (it.hasNext()) {
+                if (now - it.next().getValue() > SEEN_TTL_MS) it.remove();
+            }
+
+            parseProcNetFile("/proc/net/tcp",  false, false, now);
+            parseProcNetFile("/proc/net/tcp6", false, true,  now);
+            parseProcNetFile("/proc/net/udp",  true,  false, now);
+            parseProcNetFile("/proc/net/udp6", true,  true,  now);
+        } catch (Exception e) {
+            Log.d(TAG, "Poll error: " + e.getMessage());
         }
-        this.pm = getPackageManager();
-        createNotificationChannel();
-        startForeground(43, buildNotification());
-        this.dnsExecutor = Executors.newScheduledThreadPool(3);
-        ScheduledExecutorService newSingleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-        this.scheduler = newSingleThreadScheduledExecutor;
-        newSingleThreadScheduledExecutor.scheduleWithFixedDelay(this::poll, 0L, 750L, TimeUnit.MILLISECONDS);
-        return 1;
+    }
+
+    /**
+     * Parse a /proc/net/{tcp,tcp6,udp,udp6} file.
+     * Each data line (skip header) has fields separated by whitespace:
+     *   [0] sl  [1] local_addr  [2] rem_addr  [3] state  ... [7] uid
+     * local_addr and rem_addr are "HEXIP:HEXPORT" (little-endian for IPv4).
+     * State 0A = TIME_WAIT, 07 = CLOSE, 09 = CLOSE_WAIT (skip for TCP).
+     */
+    private void parseProcNetFile(String path, boolean isUdp, boolean isIPv6, long now) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            boolean firstLine = true;
+            while ((line = br.readLine()) != null) {
+                if (firstLine) { firstLine = false; continue; } // skip header
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("\\s+");
+                if (parts.length < 8) continue;
+
+                String remAddr = parts[2];  // remote address field
+                String state   = parts[3];  // connection state (hex)
+
+                // Parse UID (field index 7)
+                int uid = -1;
+                try { uid = Integer.parseInt(parts[7]); } catch (NumberFormatException ignored) {}
+
+                // Filter TCP states: skip TIME_WAIT(0A), CLOSE(07), CLOSE_WAIT(09)
+                if (!isUdp) {
+                    if ("0A".equalsIgnoreCase(state) ||
+                        "07".equalsIgnoreCase(state) ||
+                        "09".equalsIgnoreCase(state)) continue;
+                }
+
+                // Split "HEXIP:HEXPORT"
+                int colonIdx = remAddr.indexOf(':');
+                if (colonIdx < 0) continue;
+                String hexIp   = remAddr.substring(0, colonIdx);
+                String hexPort = remAddr.substring(colonIdx + 1);
+
+                int port;
+                try { port = Integer.parseInt(hexPort, 16); } catch (NumberFormatException e) { continue; }
+                if (port == 0) continue;
+
+                String ip = isIPv6 ? hexToIPv6(hexIp) : hexToIPv4(hexIp);
+                if (ip == null) continue;
+
+                // Skip loopback and unspecified
+                if (ip.equals("0.0.0.0") || ip.equals("127.0.0.1")
+                        || ip.equals("::1") || ip.equals("::")
+                        || ip.startsWith("::") || ip.equals("0:0:0:0:0:0:0:0")) continue;
+
+                String key = ip + ":" + port;
+                Long lastSeen = seen.get(key);
+                if (lastSeen != null) {
+                    seen.put(key, now); // refresh timestamp
+                    continue;          // already reported
+                }
+
+                seen.put(key, now);
+                String proto    = isUdp ? "UDP" : "TCP";
+                String appLabel = uid >= 0 ? getAppLabel(uid) : "";
+                resolveAndEmit(ip, port, proto, appLabel);
+            }
+        } catch (Exception e) {
+            // File may not exist on all devices (e.g. tcp6)
+        }
+    }
+
+    // ── DNS resolution ────────────────────────────────────────────
+
+    private void resolveAndEmit(String ip, int port, String proto, String appLabel) {
+        String cached = dnsCache.get(ip);
+        if (cached != null) {
+            String host = cached.equals(ip) ? "" : cached;
+            emit(ip, host, port, proto, appLabel);
+        } else {
+            emit(ip, "", port, proto, appLabel);
+            final String ipCopy = ip;
+            dnsExecutor.submit(() -> {
+                try {
+                    String host = InetAddress.getByName(ipCopy).getHostName();
+                    if (!host.equals(ipCopy)) {
+                        dnsCache.put(ipCopy, host);
+                        emit(ipCopy, host, port, proto, appLabel);
+                    } else {
+                        dnsCache.put(ipCopy, ipCopy);
+                    }
+                } catch (Exception ex) {
+                    dnsCache.put(ipCopy, ipCopy);
+                }
+            });
+        }
+    }
+
+    private void emit(String ip, String host, int port, String proto, String appLabel) {
+        String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
+        Intent i  = new Intent(TRAFFIC_ACTION);
+        i.putExtra("protocol",  proto);
+        i.putExtra("host",      host != null ? host : "");
+        i.putExtra("ipPort",    ip + ":" + port);
+        i.putExtra("app",       appLabel != null ? appLabel : "");
+        i.putExtra("timestamp", ts);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+        Log.d(TAG, proto + " " + (host != null && !host.isEmpty() ? host : ip) + ":" + port
+              + (appLabel != null && !appLabel.isEmpty() ? " [" + appLabel + "]" : ""));
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────
+
+    /**
+     * /proc/net/tcp stores IPv4 as 8 hex chars, little-endian (byte-reversed).
+     * E.g. "0101A8C0" → bytes [01,01,A8,C0] → reversed → [C0,A8,01,01] → 192.168.1.1
+     */
+    private static String hexToIPv4(String hex) {
+        if (hex == null || hex.length() != 8) return null;
+        try {
+            long val = Long.parseLong(hex, 16);
+            int  v   = (int) val;
+            return  (v        & 0xff) + "."
+                  + ((v >> 8)  & 0xff) + "."
+                  + ((v >> 16) & 0xff) + "."
+                  + ((v >> 24) & 0xff);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * /proc/net/tcp6 stores IPv6 as 32 hex chars, in 4 groups of 8 (little-endian per group).
+     */
+    private static String hexToIPv6(String hex) {
+        if (hex == null || hex.length() != 32) return null;
+        try {
+            // Reorder bytes within each 32-bit word (little-endian)
+            StringBuilder reordered = new StringBuilder();
+            for (int word = 0; word < 4; word++) {
+                int off = word * 8;
+                for (int byteIdx = 3; byteIdx >= 0; byteIdx--) {
+                    reordered.append(hex, off + byteIdx * 2, off + byteIdx * 2 + 2);
+                }
+            }
+            // Build 16-byte array
+            byte[] bytes = hexStringToBytes(reordered.toString());
+            InetAddress addr = InetAddress.getByAddress(bytes);
+            return addr.getHostAddress();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static byte[] hexStringToBytes(String s) {
+        int len = s.length();
+        byte[] out = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            out[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                                + Character.digit(s.charAt(i + 1), 16));
+        }
+        return out;
+    }
+
+    private String getAppLabel(int uid) {
+        String cached = uidCache.get(uid);
+        if (cached != null) return cached;
+        try {
+            String[] pkgs = pm.getPackagesForUid(uid);
+            if (pkgs != null && pkgs.length > 0) {
+                ApplicationInfo ai = pm.getApplicationInfo(pkgs[0], 0);
+                String label = pm.getApplicationLabel(ai).toString();
+                uidCache.put(uid, label);
+                return label;
+            }
+        } catch (Exception ignored) {}
+        uidCache.put(uid, "");
+        return "";
+    }
+
+    // ── Notification ─────────────────────────────────────────────
+
+    private void createNotificationChannel() {
+        NotificationChannel ch = new NotificationChannel(
+            CHANNEL_ID, "NetWatch Device Monitor", NotificationManager.IMPORTANCE_LOW);
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);
+    }
+
+    private Notification buildNotification() {
+        return new Notification.Builder(this, CHANNEL_ID)
+            .setContentTitle("📡 NetWatch Device Monitor")
+            .setContentText("Monitoring all device connections")
+            .setSmallIcon(android.R.drawable.ic_menu_compass)
+            .build();
     }
 }
