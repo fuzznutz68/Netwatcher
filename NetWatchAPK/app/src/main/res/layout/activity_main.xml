@@ -1,569 +1,800 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#0A0E17">
-
-    <!-- Header -->
+    android:background="#0a0e17"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:background="#0D1117"
+        android:background="#0d1117"
         android:padding="16dp"
-        android:gravity="center_vertical">
-
-        <!-- Title block -->
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_weight="1">
             <TextView
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#00e5ff"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="◈ NETWATCH"
-                android:textSize="20sp"
-                android:textColor="#00E5FF"
-                android:textStyle="bold"
                 android:fontFamily="monospace"
                 android:letterSpacing="0.15"/>
             <TextView
+                android:textSize="11sp"
+                android:textColor="#2a4a5a"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="// domain intelligence &amp; traffic monitor"
-                android:textSize="11sp"
-                android:textColor="#2A4A5A"
                 android:fontFamily="monospace"/>
         </LinearLayout>
-
-        <!-- Menu button top-right -->
         <TextView
+            android:textSize="24sp"
+            android:textColor="#00e5ff"
+            android:gravity="center"
             android:id="@+id/menuBtn"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:clickable="true"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="⋮"
-            android:textSize="24sp"
-            android:textColor="#00E5FF"
-            android:gravity="center"
-            android:fontFamily="monospace"
-            android:background="@android:color/transparent"
-            android:clickable="true"
-            android:focusable="true"/>
+            android:fontFamily="monospace"/>
     </LinearLayout>
-
-    <!-- Tab Bar -->
     <LinearLayout
-        android:id="@+id/tabBar"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
         android:orientation="horizontal"
-        android:background="#0D1117">
+        android:id="@+id/tabBar"
+        android:background="#0d1117"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
         <Button
+            android:textSize="13sp"
+            android:textColor="#e0e8f0"
             android:id="@+id/tabDomainBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="🔍 Domain Intel"
-            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
-            android:textSize="13sp"/>
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="�� Domain Intel"
+            android:layout_weight="1"/>
         <Button
+            android:textSize="12sp"
+            android:textColor="#e0e8f0"
             android:id="@+id/tabTrafficBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="📡 Traffic"
-            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
-        <Button
-            android:id="@+id/tabCheckerBtn"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_height="48dp"
+            android:text="�� Traffic"
+            android:layout_weight="1"/>
+        <Button
+            android:textSize="12sp"
+            android:textColor="#e0e8f0"
+            android:id="@+id/tabCheckerBtn"
+            android:background="@drawable/tab_selector"
+            android:layout_width="0dp"
             android:layout_height="48dp"
             android:text="✅ Checker"
-            android:textColor="#E0E8F0"
-            android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
+            android:layout_weight="1"/>
         <Button
+            android:textSize="12sp"
+            android:textColor="#e0e8f0"
             android:id="@+id/tabMyInfoBtn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="🌐 My Info"
-            android:textColor="#E0E8F0"
             android:background="@drawable/tab_selector"
-            android:textSize="12sp"/>
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="�� My Info"
+            android:layout_weight="1"/>
+        <Button
+            android:textSize="12sp"
+            android:textColor="#e0e8f0"
+            android:id="@+id/tabSpeedBtn"
+            android:background="@drawable/tab_selector"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="⚡ Speed"
+            android:layout_weight="1"/>
+        <Button
+            android:textSize="12sp"
+            android:textColor="#e0e8f0"
+            android:id="@+id/tabDeviceBtn"
+            android:background="@drawable/tab_selector"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="�� Device"
+            android:layout_weight="1"/>
     </LinearLayout>
-
-    <!-- ══════════════════════════════════════════════ -->
-    <!-- TAB 1 — Domain Intel                          -->
-    <!-- ══════════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/tab1"
+        android:visibility="visible"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible">
+        android:layout_height="match_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
-
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
             <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginBottom="12dp">
                 <EditText
+                    android:textSize="14sp"
+                    android:textColor="#00e5ff"
+                    android:textColorHint="#546e7a"
                     android:id="@+id/domainInput"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="48dp"
-                    android:hint="Enter domain (e.g. paypal.com)"
-                    android:textColor="#00E5FF"
-                    android:textColorHint="#546E7A"
                     android:background="@drawable/input_background"
                     android:paddingLeft="12dp"
                     android:paddingRight="12dp"
-                    android:inputType="text"
-                    android:imeOptions="actionSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:hint="Enter domain (e.g. paypal.com)"
                     android:singleLine="true"
-                    android:textSize="14sp"/>
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"/>
                 <Button
+                    android:textColor="#e0e8f0"
                     android:id="@+id/lookupBtn"
+                    android:background="@drawable/btn_primary"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
                     android:layout_marginLeft="8dp"
-                    android:text="SCAN"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_primary"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"/>
+                    android:text="SCAN"/>
             </LinearLayout>
-
             <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginBottom="10dp">
                 <TextView
+                    android:textSize="13sp"
+                    android:textColor="#78909c"
                     android:id="@+id/statusText"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="Enter a domain and tap SCAN"
-                    android:textColor="#78909C"
-                    android:textSize="13sp"/>
+                    android:layout_weight="1"/>
                 <Button
+                    android:textSize="12sp"
+                    android:textColor="#e0e8f0"
                     android:id="@+id/exportDomainBtn"
+                    android:background="@drawable/btn_primary"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:text="⬆ Export"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_primary"
-                    android:textSize="12sp"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"/>
+                    android:text="⬆ Export"/>
             </LinearLayout>
-
             <LinearLayout
+                android:orientation="vertical"
                 android:id="@+id/resultsContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </ScrollView>
-
-    <!-- ══════════════════════════════════════════════ -->
-    <!-- TAB 2 — Traffic Monitor                       -->
-    <!-- ══════════════════════════════════════════════ -->
     <LinearLayout
-        android:id="@+id/tab2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:id="@+id/tab2"
         android:padding="12dp"
-        android:visibility="gone">
-
-        <!-- App Picker Card -->
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
             android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="10dp">
-
             <TextView
+                android:textSize="11sp"
+                android:textColor="#00e5ff"
                 android:id="@+id/selectAppLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
                 android:text="SELECT APP TO MONITOR"
-                android:textSize="11sp"
-                android:textColor="#00E5FF"
-                android:textAllCaps="true"
-                android:layout_marginBottom="6dp"/>
-
+                android:textAllCaps="true"/>
             <Spinner
                 android:id="@+id/appSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
                 android:background="@drawable/input_background"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
                 android:layout_marginBottom="10dp"/>
-
-
-            <!-- Alert toggle -->
             <LinearLayout
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp">
+                android:layout_marginBottom="10dp">
                 <TextView
+                    android:textSize="13sp"
+                    android:textColor="#6a7a8a"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="🔔  Alert on unknown hosts"
-                    android:textColor="#6A7A8A"
-                    android:textSize="13sp"/>
+                    android:text="��  Alert on unknown hosts"
+                    android:layout_weight="1"/>
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/alertSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"/>
             </LinearLayout>
-
-            <!-- Button Row -->
             <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
                 <Button
+                    android:textSize="13sp"
+                    android:textColor="#e0e8f0"
                     android:id="@+id/startMonBtn"
+                    android:background="@drawable/btn_primary"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="44dp"
                     android:text="▶  START"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_primary"
-                    android:textSize="13sp"/>
+                    android:layout_weight="1"/>
                 <Button
+                    android:enabled="false"
+                    android:textSize="13sp"
+                    android:textColor="#e0e8f0"
                     android:id="@+id/stopMonBtn"
+                    android:background="@drawable/btn_danger"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
                     android:text="■  STOP"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_danger"
-                    android:textSize="13sp"
-                    android:enabled="false"/>
+                    android:layout_weight="1"/>
                 <Button
+                    android:textSize="16sp"
+                    android:textColor="#e0e8f0"
                     android:id="@+id/clearMonBtn"
+                    android:background="@drawable/btn_danger"
                     android:layout_width="48dp"
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
-                    android:text="🗑"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_danger"
-                    android:textSize="16sp"/>
+                    android:text="��"/>
                 <Button
+                    android:textSize="12sp"
+                    android:textColor="#e0e8f0"
                     android:id="@+id/exportTrafficBtn"
+                    android:background="@drawable/btn_primary"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
                     android:layout_width="wrap_content"
                     android:layout_height="44dp"
                     android:layout_marginLeft="8dp"
-                    android:text="⬆ Export"
-                    android:textColor="#E0E8F0"
-                    android:background="@drawable/btn_primary"
-                    android:textSize="12sp"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"/>
+                    android:text="⬆ Export"/>
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Status row -->
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="8dp">
             <TextView
+                android:textSize="13sp"
+                android:textColor="#78909c"
                 android:id="@+id/monStatusText"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="⚫  Monitoring inactive"
-                android:textColor="#78909C"
-                android:textSize="13sp"/>
+                android:layout_weight="1"/>
             <TextView
+                android:textSize="12sp"
+                android:textColor="#00e5ff"
                 android:id="@+id/connectionCountText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#00E5FF"
-                android:textSize="12sp"/>
+                android:text=""/>
         </LinearLayout>
-
-        <!-- Traffic Stats Row -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="@drawable/card_background"
             android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="10dp">
-
-            <!-- TX column -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
                 <TextView
+                    android:textSize="15sp"
+                    android:typeface="monospace"
+                    android:textStyle="bold"
+                    android:textColor="#ef9a9a"
                     android:id="@+id/txTotalText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TX  —"
-                    android:textSize="15sp"
-                    android:textColor="#EF9A9A"
-                    android:textStyle="bold"
-                    android:typeface="monospace"/>
+                    android:text="TX  —"/>
                 <TextView
+                    android:textSize="12sp"
+                    android:typeface="monospace"
+                    android:textColor="#546e7a"
                     android:id="@+id/txRateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="↑ 0 B/s"
-                    android:textSize="12sp"
-                    android:textColor="#546E7A"
-                    android:typeface="monospace"/>
+                    android:text="↑ 0 B/s"/>
             </LinearLayout>
-
-            <!-- Divider -->
             <View
+                android:background="#1a3a5c"
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#1A3A5C"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"/>
-
-            <!-- RX column -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
                 <TextView
+                    android:textSize="15sp"
+                    android:typeface="monospace"
+                    android:textStyle="bold"
+                    android:textColor="#a5d6a7"
                     android:id="@+id/rxTotalText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RX  —"
-                    android:textSize="15sp"
-                    android:textColor="#A5D6A7"
-                    android:textStyle="bold"
-                    android:typeface="monospace"/>
+                    android:text="RX  —"/>
                 <TextView
+                    android:textSize="12sp"
+                    android:typeface="monospace"
+                    android:textColor="#546e7a"
                     android:id="@+id/rxRateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="↓ 0 B/s"
-                    android:textSize="12sp"
-                    android:textColor="#546E7A"
-                    android:typeface="monospace"/>
+                    android:text="↓ 0 B/s"/>
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Host Log -->
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="6dp">
             <TextView
+                android:textSize="11sp"
+                android:textColor="#00e5ff"
                 android:id="@+id/liveHostsLabel"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="LIVE CONNECTION HOSTS"
-                android:textSize="11sp"
-                android:textColor="#00E5FF"
+                android:layout_weight="1"
                 android:textAllCaps="true"/>
         </LinearLayout>
-
         <ScrollView
             android:id="@+id/hostLogScroll"
+            android:background="@drawable/card_background"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/card_background">
+            android:layout_height="match_parent">
             <LinearLayout
-                android:id="@+id/hostLogContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp"/>
+                android:id="@+id/hostLogContainer"
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </ScrollView>
-
     </LinearLayout>
-
-
-    <!-- ══════════════════════════════════════════════ -->
-    <!-- TAB 3 — Domain Checker                        -->
-    <!-- ══════════════════════════════════════════════ -->
     <LinearLayout
-        android:id="@+id/tab3"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:id="@+id/tab3"
+        android:padding="12dp"
         android:visibility="gone"
-        android:padding="12dp">
-
-        <!-- Custom domain input -->
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="8dp">
             <EditText
+                android:textSize="13sp"
+                android:textColor="#00e5ff"
+                android:textColorHint="#546e7a"
                 android:id="@+id/customDomainInput"
+                android:background="@drawable/input_background"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="42dp"
                 android:hint="Enter domain or IP…"
-                android:textColorHint="#546E7A"
-                android:textColor="#00E5FF"
-                android:textSize="13sp"
-                android:background="@drawable/input_background"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
+                android:singleLine="true"
+                android:layout_weight="1"
                 android:inputType="textUri"
                 android:imeOptions="actionSearch"
-                android:singleLine="true"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:layout_marginEnd="6dp"/>
             <Button
+                android:textSize="13sp"
+                android:textColor="#e0e8f0"
                 android:id="@+id/checkCustomBtn"
+                android:background="@drawable/btn_primary"
                 android:layout_width="wrap_content"
                 android:layout_height="42dp"
                 android:text="Check"
-                android:textColor="#E0E8F0"
-                android:background="@drawable/btn_primary"
-                android:textSize="13sp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"/>
         </LinearLayout>
-
-        <!-- Control row -->
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="10dp">
             <Button
+                android:textSize="13sp"
+                android:textColor="#e0e8f0"
                 android:id="@+id/checkAllBtn"
+                android:background="@drawable/btn_primary"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="42dp"
                 android:text="▶  Check All"
-                android:textColor="#E0E8F0"
-                android:background="@drawable/btn_primary"
-                android:textSize="13sp"
+                android:layout_weight="1"
                 android:layout_marginEnd="6dp"/>
             <Button
+                android:enabled="false"
+                android:textSize="13sp"
+                android:textColor="#e0e8f0"
                 android:id="@+id/stopCheckBtn"
+                android:background="@drawable/btn_danger"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="42dp"
                 android:text="■  Stop"
-                android:textColor="#E0E8F0"
-                android:background="@drawable/btn_danger"
-                android:textSize="13sp"
-                android:enabled="false"/>
+                android:layout_weight="1"/>
         </LinearLayout>
-
-        <!-- Progress / status -->
         <TextView
+            android:textSize="12sp"
+            android:textColor="#4a5a6a"
             android:id="@+id/checkStatusText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tap ▶ Check All to test reachability"
-            android:textColor="#4A5A6A"
-            android:textSize="12sp"
-            android:layout_marginBottom="10dp"/>
-
-        <!-- Results list -->
+            android:layout_marginBottom="10dp"
+            android:text="Tap ▶ Check All to test reachability"/>
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <LinearLayout
-                android:id="@+id/checkResultsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="4dp"/>
+                android:id="@+id/checkResultsContainer"
+                android:padding="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </ScrollView>
-
     </LinearLayout>
-
-    <!-- ══════════════════════════════════════════════ -->
-    <!-- TAB 4 — My Network Info                       -->
-    <!-- ══════════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/tab4"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+        android:layout_height="match_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- Header -->
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
             <TextView
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#e0f7fa"
                 android:id="@+id/myInfoTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🌐 My Network Info"
-                android:textColor="#E0F7FA"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="6dp"/>
-
+                android:layout_marginBottom="6dp"
+                android:text="�� My Network Info"/>
             <TextView
+                android:textSize="12sp"
+                android:textColor="#4a5a6a"
                 android:id="@+id/myInfoDescText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Your public IP address, ISP, and location as seen from the internet."
-                android:textColor="#4A5A6A"
-                android:textSize="12sp"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Lookup button -->
+                android:layout_marginBottom="16dp"
+                android:text="Your public IP address, ISP, and location as seen from the internet."/>
             <Button
+                android:textColor="#e0e8f0"
                 android:id="@+id/myInfoRefreshBtn"
+                android:background="@drawable/btn_primary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="▶  Lookup My Info"
-                android:textColor="#E0E8F0"
-                android:background="@drawable/btn_primary"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Results card container -->
+                android:layout_marginBottom="16dp"
+                android:text="▶  Lookup My Info"/>
             <LinearLayout
+                android:orientation="vertical"
                 android:id="@+id/myInfoContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
-
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </ScrollView>
-
+    <ScrollView
+        android:id="@+id/tab5"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#ffd740"
+                android:id="@+id/speedTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="⚡ Internet Speed Test"/>
+            <TextView
+                android:textSize="12sp"
+                android:textColor="#4a5a6a"
+                android:id="@+id/speedDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Measure your download speed, upload speed, and latency to a selected server."/>
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="SELECT SERVER"
+                android:letterSpacing="0.15"/>
+            <Spinner
+                android:id="@+id/speedServerSpinner"
+                android:background="#0d1117"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="16dp"/>
+            <Button
+                android:textStyle="bold"
+                android:textColor="#0a0e17"
+                android:id="@+id/speedRunBtn"
+                android:background="@drawable/btn_speed"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="16dp"
+                android:text="▶  Run Speed Test"/>
+            <TextView
+                android:textSize="13sp"
+                android:textColor="#90a4ae"
+                android:id="@+id/speedStatusText"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text=""/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/speedResultsContainer"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:background="#0a1220"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textSize="10sp"
+                        android:textColor="#546e7a"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="⏱  LATENCY (PING)"
+                        android:letterSpacing="0.15"/>
+                    <TextView
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="#00e5ff"
+                        android:id="@+id/speedPingText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="—"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:background="#0a1220"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textSize="10sp"
+                        android:textColor="#546e7a"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="⬇  DOWNLOAD"
+                        android:letterSpacing="0.15"/>
+                    <TextView
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="#00ff88"
+                        android:id="@+id/speedDownText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="—"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:background="#0a1220"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textSize="10sp"
+                        android:textColor="#546e7a"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="⬆  UPLOAD"
+                        android:letterSpacing="0.15"/>
+                    <TextView
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="#ffd740"
+                        android:id="@+id/speedUpText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="—"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/tab6"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <TextView
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#ffd740"
+                    android:id="@+id/deviceTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="�� Device Monitor"/>
+                <TextView
+                    android:textSize="12sp"
+                    android:textColor="#546e7a"
+                    android:id="@+id/deviceStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stopped"/>
+            </LinearLayout>
+            <Button
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:id="@+id/deviceToggleBtn"
+                android:background="@drawable/btn_device_start"
+                android:layout_width="120dp"
+                android:layout_height="44dp"
+                android:text="▶  START"/>
+        </LinearLayout>
+        <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textSize="12sp"
+                android:textColor="#546e7a"
+                android:id="@+id/deviceCountText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="0 connections"
+                android:layout_weight="1"/>
+            <Button
+                android:textSize="11sp"
+                android:textColor="#00e5ff"
+                android:id="@+id/deviceExportBtn"
+                android:background="#0d1117"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="⬇ Export CSV"/>
+            <Button
+                android:textSize="11sp"
+                android:textColor="#ef9a9a"
+                android:id="@+id/deviceClearBtn"
+                android:background="#0d1117"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="�� Clear"/>
+        </LinearLayout>
+        <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:id="@+id/deviceHeaderRow"
+            android:background="#0a1220"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="28dp">
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:text="Dir"
+                android:letterSpacing="0.1"/>
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="DOMAIN / IP"
+                android:layout_weight="2"
+                android:letterSpacing="0.1"/>
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="PORT"
+                android:letterSpacing="0.1"/>
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="PROTO"
+                android:letterSpacing="0.1"/>
+            <TextView
+                android:textSize="10sp"
+                android:textColor="#546e7a"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="TIME"
+                android:letterSpacing="0.1"/>
+        </LinearLayout>
+        <ScrollView
+            android:id="@+id/deviceScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            android:layout_weight="1">
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/deviceLogContainer"
+                android:paddingBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>
