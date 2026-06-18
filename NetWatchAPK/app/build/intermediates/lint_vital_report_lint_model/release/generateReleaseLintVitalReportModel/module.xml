@@ -6,7 +6,7 @@
     maven="NetWatch:app:"
     agpVersion="8.2.2"
     buildFolder="build"
-    bootClassPath="/usr/lib/android-sdk/platforms/android-34/android.jar:/usr/lib/android-sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    bootClassPath="/opt/android-sdk/platforms/android-34/android.jar:/opt/android-sdk/build-tools/34.0.0/core-lambda-stubs.jar"
     javaSourceLevel="11"
     compileTarget="android-34">
   <lintOptions

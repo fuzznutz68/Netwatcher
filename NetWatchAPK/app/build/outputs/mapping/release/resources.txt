@@ -141,6 +141,7 @@ State
 maxLines
 layoutDescription
 nativeCreateFromTypeface
+Gemini
 androidx.view.accessibility.Accessibi...
 setSelectedPositionInt
 repeatMode
@@ -398,6 +399,7 @@ Spinner
 ActionBarDrawerToggle
 lge
 translationXLinear
+generativelanguage.googleapis.com
 aws.amazon.com
 contentFade
 paraIndex
@@ -844,6 +846,7 @@ targets
 googleapis.com
 android.intent.action.CREATE_REMINDER
 file
+ChatGPT
 stream
 waiters
 TONAL_SPOT
@@ -1667,6 +1670,7 @@ percentHeight
 NewApi
 ViewCompat
 To
+api.openai.com
 inverse_primary
 TextInputLayout
 results
@@ -1780,6 +1784,7 @@ disableScroll
 bounds
 PUBLIC
 geo:
+aistudio.google.com
 reportWhenComplete
 on_secondary_container
 Stopped
@@ -2445,6 +2450,7 @@ TOP_TO_TOP
 telecom
 power
 java.lang.Number
+gemini.google.com
 /json
 app:layout_constrainedHeight
 suggest_intent_data_id

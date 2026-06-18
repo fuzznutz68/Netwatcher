@@ -1561,6 +1561,14 @@ public class MainActivity extends Activity {
             {"PS CDN",            "dl.playstation.net"},
             {"PS Auth",           "auth.api.sonyentertainmentnetwork.com"},
         });
+        CHECKER_DOMAINS.put("🤖 AI Services", new String[][]{
+            {"ChatGPT",           "chatgpt.com"},
+            {"OpenAI API",        "api.openai.com"},
+            {"OpenAI CDN",        "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net"},
+            {"Gemini",            "gemini.google.com"},
+            {"Google AI API",     "generativelanguage.googleapis.com"},
+            {"Google AI Studio",  "aistudio.google.com"},
+        });
     }
 
     // Map host -> status TextView (populated by buildCheckerRows)
