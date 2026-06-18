@@ -758,10 +758,68 @@ public class MainActivity extends Activity {
                 trafficLogForExport.put(host, ts);
                 hostCount++;
             }
-            if (hostCount > 0)
+            if (hostCount > 0) {
                 connectionCountText.setText(hostCount + (isRussian ? " уникальных хостов" : " unique hosts"));
+                checkForWebViewOnlyTraffic();
+            }
             hostLogScroll.post(() -> hostLogScroll.fullScroll(ScrollView.FOCUS_DOWN));
         }
+    }
+
+    /** Show a notice if the log only contains WebView/system proxy hostnames */
+    private void checkForWebViewOnlyTraffic() {
+        if (seenHosts.isEmpty()) return;
+        boolean allSystem = true;
+        for (String h : seenHosts) {
+            String hl = h.toLowerCase();
+            // Strip geo prefix if present
+            int sp = hl.lastIndexOf("  ");
+            if (sp >= 0) hl = hl.substring(sp + 2).trim();
+            if (!isSystemProxyHost(hl)) { allSystem = false; break; }
+        }
+        if (allSystem) showWebViewNotice();
+    }
+
+    private boolean isSystemProxyHost(String h) {
+        return h.contains("chromium.org") || h.contains("android.com") ||
+               h.contains("android.app")  || h.contains("gvt1.com")    ||
+               h.contains("gvt2.com")     || h.contains("play.google") ||
+               h.contains("googleapis.com/generate_204") ||
+               h.equals("connectivitycheck.gstatic.com") ||
+               h.equals("clients3.google.com") ||
+               h.equals("connectivitycheck.android.com");
+    }
+
+    private void showWebViewNotice() {
+        // Only show once per monitoring session
+        if (hostLogContainer.findViewWithTag("webview_notice") != null) return;
+
+        LinearLayout notice = new LinearLayout(this);
+        notice.setTag("webview_notice");
+        notice.setOrientation(LinearLayout.VERTICAL);
+        notice.setBackgroundColor(Color.parseColor("#1A2A3A"));
+        notice.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        nlp.setMargins(0, dp(4), 0, dp(4));
+        notice.setLayoutParams(nlp);
+
+        TextView icon = new TextView(this);
+        icon.setText("ℹ️  " + (isRussian ? "Трафик через WebView" : "WebView Traffic Detected"));
+        icon.setTextSize(13); icon.setTextColor(Color.parseColor("#00E5FF"));
+        icon.setTypeface(null, android.graphics.Typeface.BOLD);
+        notice.addView(icon);
+
+        TextView msg = new TextView(this);
+        msg.setText(isRussian
+            ? "\u042d\u0442\u043e \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 WebView. \u0422\u0440\u0430\u0444\u0438\u043a \u0441\u043a\u0440\u044b\u0442 \u0437\u0430 \u0441\u0438\u0441\u0442\u0435\u043c\u043d\u044b\u043c \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u043e\u043c Android."
+            : "This app uses Android WebView for network calls. Real destination hosts are hidden behind the system process — only system domains like chromium.org or android.com are visible.");
+        msg.setTextSize(12); msg.setTextColor(Color.parseColor("#90A4AE"));
+        msg.setPadding(0, dp(4), 0, 0);
+        notice.addView(msg);
+
+        // Insert at the top of the log
+        hostLogContainer.addView(notice, 0);
     }
 
     private void addHostRow(String host, boolean active, String ts) {

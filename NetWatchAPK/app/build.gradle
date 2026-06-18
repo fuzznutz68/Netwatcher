@@ -10,8 +10,8 @@ android {
         applicationId "com.netwatch.app"
         minSdk 30
         targetSdk 34
-        versionCode 47
-        versionName "2.2.3"
+        versionCode 48
+        versionName "2.2.4"
     }
 
     signingConfigs {

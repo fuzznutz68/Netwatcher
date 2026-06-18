@@ -179,6 +179,7 @@ service
 akamaiedge.net
 ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE
 android.view.View$AttachInfo
+gvt2.com
 239.
 java.lang.Float
 Dispatchers.IO
@@ -223,6 +224,7 @@ COLOR_TYPE
 doAfterTextChanged
 RAINBOW
 BASELINE_TO_TOP
+connectivitycheck.android.com
 %.1fT
 %s.%sParcelizer
 TypefaceCompatApi24Impl
@@ -428,6 +430,7 @@ CANCEL_BUTTON_TAG
 changeTransform
 androidx.lifecycle.ViewModelProvider....
 klass.interfaces
+chromium.org
 performStopActivity
 netwatch_dev
 source
@@ -742,6 +745,7 @@ android.intent.action.OPEN_DOCUMENT
 InputConnectionCompat
 getRealSize
 app:layout_goneMarginEnd
+webview_notice
 secondary_fixed_dim
 toScene
 ACTION_ARGUMENT_HTML_ELEMENT_STRING
@@ -1260,6 +1264,7 @@ android:visibility:visibility
 0x%08x
 BOTTOM_TO_TOP
 telegram
+play.google
 int
 observeForever
 on_primary_container
@@ -1515,6 +1520,7 @@ kotlin.collections.Collection
 DesignTool
 triggerID
 app:layout_constraintHorizontal_chain...
+gvt1.com
 body
 ConstraintLayout
 OVERLAY
@@ -2047,6 +2053,7 @@ DATE_SELECTOR_KEY
 layout_constraintBottom_toTopOf
 WakefulBroadcastReceiv.
 sip
+clients3.google.com
 class
 wavePeriod
 PayPal
@@ -2210,6 +2217,7 @@ keyguard
 getIBinder
 COROUTINE_SUSPENDED
 DEBUG
+android.app
 androidx.lifecycle.PausingDispatcherK...
 MenuItemImpl
 android:changeTransform:matrix
@@ -2486,6 +2494,7 @@ mzstatic.com
 POSITIVE_BUTTON_CONTENT_DESCRIPTION_R...
 Facebook
 VERTICAL_DIMENSION
+googleapis.com/generate_204
 REMOVED
 EmojiCompat.FontRequestEmojiCompatCon...
 android.support.groupKey
@@ -2543,6 +2552,7 @@ x_right
 kotlin.CharSequence
 RESULT_IO_EXCEPTION
 redditstatic.com
+connectivitycheck.gstatic.com
 OnSwipe
 fragment
 FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
