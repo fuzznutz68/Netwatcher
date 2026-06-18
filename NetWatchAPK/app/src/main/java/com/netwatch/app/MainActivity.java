@@ -847,8 +847,240 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, 1));
         div.setBackgroundColor(Color.parseColor(isUnknown ? "#FF5252" : "#0D2137"));
 
+        // Tap row → run Domain Intel on this host
+        final String hostForIntel = host;
+        row.setOnClickListener(v -> showDomainIntelSheet(hostForIntel));
+        row.setForeground(getResources().getDrawable(
+                android.R.drawable.list_selector_background, getTheme()));
+
         hostLogContainer.addView(row);
         hostLogContainer.addView(div);
+    }
+
+    /** Show a modal bottom sheet with full Domain Intel for a host tapped in Traffic Monitor */
+    private void showDomainIntelSheet(String rawHost) {
+        // Strip geo prefix if present: e.g. "🇺🇸 Ashburn · Google  api.google.com"
+        String domain = rawHost;
+        int lastDouble = domain.lastIndexOf("  ");
+        if (lastDouble >= 0) domain = domain.substring(lastDouble + 2).trim();
+        // Strip port if present
+        domain = domain.replaceAll(":\\d+$", "").trim();
+
+        final String finalDomain = domain;
+
+        // Build bottom sheet dialog
+        android.app.Dialog dlg = new android.app.Dialog(this, android.R.style.Theme_DeviceDefault_NoActionBar);
+        dlg.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dlg.setContentView(R.layout.activity_main); // placeholder — we build programmatically
+
+        // Outer container
+        android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+        frame.setBackgroundColor(Color.parseColor("#0A1929"));
+        android.view.WindowManager.LayoutParams wlp = new android.view.WindowManager.LayoutParams();
+        wlp.copyFrom(dlg.getWindow().getAttributes());
+        wlp.width  = android.view.WindowManager.LayoutParams.MATCH_PARENT;
+        wlp.height = android.view.WindowManager.LayoutParams.MATCH_PARENT;
+        wlp.gravity = android.view.Gravity.BOTTOM;
+        dlg.getWindow().setAttributes(wlp);
+        dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(Color.parseColor("#0A1929"));
+        root.setPadding(dp(12), dp(12), dp(12), dp(24));
+
+        // Header row
+        LinearLayout hdr = new LinearLayout(this);
+        hdr.setOrientation(LinearLayout.HORIZONTAL);
+        hdr.setPadding(0, 0, 0, dp(8));
+        TextView hdrTitle = new TextView(this);
+        hdrTitle.setText("🔍  Domain Intel");
+        hdrTitle.setTextSize(16); hdrTitle.setTextColor(Color.parseColor("#00E5FF"));
+        hdrTitle.setTypeface(null, Typeface.BOLD);
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        hdrTitle.setLayoutParams(hlp);
+        hdr.addView(hdrTitle);
+        Button closeBtn = new Button(this);
+        closeBtn.setText("✕");
+        closeBtn.setTextSize(14); closeBtn.setTextColor(Color.WHITE);
+        closeBtn.setBackgroundColor(Color.parseColor("#1A3A5C"));
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(dp(40), dp(40));
+        closeBtn.setLayoutParams(clp);
+        closeBtn.setOnClickListener(v2 -> dlg.dismiss());
+        hdr.addView(closeBtn);
+        root.addView(hdr);
+
+        // Domain label
+        TextView domLbl = new TextView(this);
+        domLbl.setText(finalDomain);
+        domLbl.setTextSize(13); domLbl.setTextColor(Color.parseColor("#80DEEA"));
+        domLbl.setTypeface(Typeface.MONOSPACE); domLbl.setPadding(0, 0, 0, dp(8));
+        root.addView(domLbl);
+
+        // Status / spinner
+        TextView statusLbl = new TextView(this);
+        statusLbl.setText("⏳  Scanning...");
+        statusLbl.setTextSize(13); statusLbl.setTextColor(Color.parseColor("#90A4AE"));
+        root.addView(statusLbl);
+
+        // Scrollable results area
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f);
+        scroll.setLayoutParams(slp);
+        LinearLayout resultsBox = new LinearLayout(this);
+        resultsBox.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(resultsBox);
+        root.addView(scroll);
+
+        frame.addView(root);
+        dlg.setContentView(frame);
+        dlg.show();
+
+        // Run intel in background
+        executor.execute(() -> {
+            String json = postJson(DOMAIN_INTEL_URL, "{\"domain\":\"" + finalDomain + "\"}");
+            mainHandler.post(() -> {
+                if (json == null) {
+                    statusLbl.setText("❌  Network error"); return;
+                }
+                try {
+                    org.json.JSONObject intel = new org.json.JSONObject(json);
+                    int liveC  = intel.optInt("liveCount", 0);
+                    int totalC = intel.optInt("totalDiscovered", 0);
+                    String cdn = intel.optString("cdn", "");
+                    String cdnSuffix = (!cdn.isEmpty() && !cdn.equals("null")) ? "  •  CDN: " + cdn : "";
+                    statusLbl.setText("✅  " + liveC + " live / " + totalC + " subdomains" + cdnSuffix);
+                    statusLbl.setTextColor(Color.parseColor("#66BB6A"));
+
+                    // Root IP card
+                    org.json.JSONArray ipv4 = intel.optJSONArray("ipv4");
+                    if (ipv4 != null && ipv4.length() > 0) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ipv4.length(); i++) sb.append("IPv4:  ").append(ipv4.optString(i)).append("\n");
+                        String cname = intel.optString("cname", "");
+                        if (!cname.isEmpty() && !cname.equals("null")) sb.append("CNAME: ").append(cname).append("\n");
+                        if (!cdn.isEmpty() && !cdn.equals("null")) sb.append("CDN:   ").append(cdn);
+                        addIntelCard(resultsBox, "🌐  " + finalDomain, sb.toString().trim(), "#A5D6A7");
+                    }
+
+                    // Live subdomains
+                    org.json.JSONArray subs = intel.optJSONArray("subdomains");
+                    if (subs != null) {
+                        java.util.List<org.json.JSONObject> liveList = new java.util.ArrayList<>();
+                        java.util.List<org.json.JSONObject> deadList = new java.util.ArrayList<>();
+                        for (int i = 0; i < subs.length(); i++) {
+                            org.json.JSONObject s = subs.getJSONObject(i);
+                            if (s.optBoolean("live", false)) liveList.add(s); else deadList.add(s);
+                        }
+                        if (!liveList.isEmpty()) {
+                            LinearLayout liveCard = makeIntelCard(resultsBox, "🟢  LIVE SUBDOMAINS / CDN (" + liveList.size() + ")", "#00E5FF");
+                            for (int i = 0; i < liveList.size(); i++) {
+                                addSubdomainRowToLayout(liveCard, liveList.get(i));
+                                if (i < liveList.size()-1) addDivider(liveCard);
+                            }
+                        }
+                        if (!deadList.isEmpty()) {
+                            StringBuilder sb2 = new StringBuilder();
+                            for (org.json.JSONObject s : deadList) sb2.append("▸  ").append(s.optString("name","")).append("\n");
+                            addIntelCard(resultsBox, "⚫  UNRESOLVED (" + deadList.size() + ")", sb2.toString().trim(), "#546E7A");
+                        }
+                    }
+
+                    // Shared hosts
+                    org.json.JSONArray shared = intel.optJSONArray("sharedHostDomains");
+                    if (shared != null && shared.length() > 0) {
+                        StringBuilder sb3 = new StringBuilder();
+                        for (int i = 0; i < shared.length(); i++) sb3.append("▸  ").append(shared.optString(i)).append("\n");
+                        addIntelCard(resultsBox, "🕵️  SHARED HOST (" + shared.length() + ")", sb3.toString().trim(), "#FFCC80");
+                    }
+
+                } catch (Exception e) {
+                    statusLbl.setText("❌  Parse error: " + e.getMessage());
+                }
+            });
+        });
+    }
+
+    /** Add a simple text card inside the intel sheet */
+    private void addIntelCard(LinearLayout parent, String title, String body, String bodyColor) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.card_background);
+        card.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(8); card.setLayoutParams(lp);
+        TextView t = new TextView(this);
+        t.setText(title.toUpperCase()); t.setTextSize(11);
+        t.setTextColor(Color.parseColor("#00E5FF")); t.setTypeface(null, Typeface.BOLD);
+        t.setPadding(0, 0, 0, dp(4)); card.addView(t);
+        TextView v = new TextView(this);
+        v.setText(body); v.setTextSize(13);
+        try { v.setTextColor(Color.parseColor(bodyColor)); } catch(Exception e){ v.setTextColor(Color.WHITE); }
+        v.setTypeface(Typeface.MONOSPACE); card.addView(v);
+        parent.addView(card);
+    }
+
+    /** Make a card with title only, returns card for adding subdomain rows */
+    private LinearLayout makeIntelCard(LinearLayout parent, String title, String titleColor) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.card_background);
+        card.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(8); card.setLayoutParams(lp);
+        TextView t = new TextView(this);
+        t.setText(title); t.setTextSize(11);
+        try { t.setTextColor(Color.parseColor(titleColor)); } catch(Exception e){ t.setTextColor(Color.WHITE); }
+        t.setTypeface(null, Typeface.BOLD); t.setPadding(0, 0, 0, dp(4)); card.addView(t);
+        parent.addView(card);
+        return card;
+    }
+
+    /** Subdomain row used inside the intel sheet */
+    private void addSubdomainRowToLayout(LinearLayout card, org.json.JSONObject sub) {
+        String name  = sub.optString("name", "");
+        String cdn   = sub.optString("cdn", "");
+        String cname = sub.optString("cname", "");
+        org.json.JSONArray ips = sub.optJSONArray("ips");
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dp(3), 0, 0);
+        TextView nameV = new TextView(this);
+        nameV.setText("▸  " + name); nameV.setTextSize(12);
+        nameV.setTextColor(Color.parseColor("#80DEEA")); nameV.setTypeface(Typeface.MONOSPACE);
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        nameV.setLayoutParams(nlp); row.addView(nameV);
+        if (cdn != null && !cdn.isEmpty() && !cdn.equals("null")) {
+            TextView cdnV = new TextView(this);
+            cdnV.setText(cdn); cdnV.setTextSize(10);
+            cdnV.setTextColor(Color.parseColor("#FFB300")); cdnV.setTypeface(null, Typeface.BOLD);
+            cdnV.setPadding(dp(4), 0, 0, 0); row.addView(cdnV);
+        }
+        card.addView(row);
+        if (ips != null) {
+            StringBuilder sb = new StringBuilder("   ");
+            int cnt = 0;
+            for (int j = 0; j < ips.length(); j++) {
+                String ip = ips.optString(j);
+                if (ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) { if(cnt>0) sb.append("  |  "); sb.append(ip); cnt++; }
+            }
+            if (cnt > 0) {
+                TextView ipV = new TextView(this);
+                ipV.setText(sb.toString()); ipV.setTextSize(11);
+                ipV.setTextColor(Color.parseColor("#90A4AE")); ipV.setTypeface(Typeface.MONOSPACE);
+                card.addView(ipV);
+            }
+        }
+        if (cname != null && !cname.isEmpty() && !cname.equals("null")) {
+            TextView cnV = new TextView(this);
+            cnV.setText("   → " + cname); cnV.setTextSize(10);
+            cnV.setTextColor(Color.parseColor("#78909C")); cnV.setTypeface(Typeface.MONOSPACE);
+            card.addView(cnV);
+        }
     }
 
     /** True if host belongs to a trusted domain */
