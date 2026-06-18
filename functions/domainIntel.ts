@@ -1,4 +1,88 @@
-// NetWatch - Domain Intelligence (public, no auth required)
+// NetWatch - Domain Intelligence v2 (public, no auth required)
+// Enhanced: crt.sh + brute-force + CDN detection + live/dead split
+
+const CDN_CNAME_PATTERNS: Record<string, string> = {
+  'cloudflare': 'Cloudflare',
+  'akamai': 'Akamai',
+  'akamaitechnologies': 'Akamai',
+  'fastly': 'Fastly',
+  'cloudfront': 'AWS CloudFront',
+  'amazonaws': 'AWS',
+  'googleusercontent': 'Google Cloud',
+  'googleplex': 'Google',
+  'goog': 'Google',
+  'azureedge': 'Azure CDN',
+  'azure': 'Microsoft Azure',
+  'msecnd': 'Azure CDN',
+  'cdn77': 'CDN77',
+  'stackpathcdn': 'StackPath',
+  'netdna-cdn': 'StackPath',
+  'maxcdn': 'StackPath',
+  'edgekey': 'Akamai Edge',
+  'edgesuite': 'Akamai Edge',
+  'edgecastcdn': 'Verizon EdgeCast',
+  'llnwd': 'Limelight',
+  'limelight': 'Limelight',
+  'incapdns': 'Imperva/Incapsula',
+  'impervadns': 'Imperva',
+  'sucuri': 'Sucuri',
+  'zendesk': 'Zendesk',
+  'shopify': 'Shopify',
+  'github.io': 'GitHub Pages',
+  'netlify': 'Netlify',
+  'vercel': 'Vercel',
+  'pages.dev': 'Cloudflare Pages',
+  'workers.dev': 'Cloudflare Workers',
+  'heroku': 'Heroku',
+  'wpengine': 'WP Engine',
+  'kinsta': 'Kinsta',
+  'bunny.net': 'BunnyCDN',
+  'b-cdn.net': 'BunnyCDN',
+};
+
+const CDN_IP_RANGES: Array<{prefix: string, label: string}> = [
+  { prefix: '104.16.', label: 'Cloudflare' },
+  { prefix: '104.17.', label: 'Cloudflare' },
+  { prefix: '104.18.', label: 'Cloudflare' },
+  { prefix: '104.19.', label: 'Cloudflare' },
+  { prefix: '104.20.', label: 'Cloudflare' },
+  { prefix: '104.21.', label: 'Cloudflare' },
+  { prefix: '172.64.', label: 'Cloudflare' },
+  { prefix: '172.65.', label: 'Cloudflare' },
+  { prefix: '172.66.', label: 'Cloudflare' },
+  { prefix: '172.67.', label: 'Cloudflare' },
+  { prefix: '162.158.', label: 'Cloudflare' },
+  { prefix: '198.41.', label: 'Cloudflare' },
+  { prefix: '23.227.38.', label: 'Shopify' },
+  { prefix: '151.101.', label: 'Fastly' },
+  { prefix: '199.232.', label: 'Fastly/GitHub' },
+  { prefix: '13.', label: 'AWS' },
+  { prefix: '52.', label: 'AWS' },
+  { prefix: '54.', label: 'AWS' },
+  { prefix: '34.', label: 'Google Cloud' },
+  { prefix: '35.', label: 'Google Cloud' },
+  { prefix: '142.250.', label: 'Google' },
+  { prefix: '216.58.', label: 'Google' },
+  { prefix: '172.217.', label: 'Google' },
+  { prefix: '20.', label: 'Microsoft Azure' },
+  { prefix: '40.', label: 'Microsoft Azure' },
+];
+
+function detectCdn(cname: string, ips: string[]): string | null {
+  if (cname) {
+    const cn = cname.toLowerCase();
+    for (const [pattern, label] of Object.entries(CDN_CNAME_PATTERNS)) {
+      if (cn.includes(pattern)) return label;
+    }
+  }
+  for (const ip of ips) {
+    for (const range of CDN_IP_RANGES) {
+      if (ip.startsWith(range.prefix)) return range.label;
+    }
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
@@ -21,21 +105,23 @@ Deno.serve(async (req) => {
       ipv4: [],
       ipv6: [],
       cname: null,
-      subdomains: [],        // [{name, ips:[]}]
-      sharedHostDomains: [], // other domains on same IP
+      cdn: null,
+      subdomains: [],
+      sharedHostDomains: [],
       errors: []
     };
 
-    // ── 1. DNS lookups via Cloudflare DoH ────────────────────────────────────
+    // ── DNS helper via Cloudflare DoH ────────────────────────────────────────
     const fetchDns = async (name: string, type: string) => {
       const r = await fetch(
-        `https://cloudflare-dns.com/dns-query?name=${name}&type=${type}`,
-        { headers: { Accept: 'application/dns-json' }, signal: AbortSignal.timeout(6000) }
+        `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,
+        { headers: { Accept: 'application/dns-json' }, signal: AbortSignal.timeout(7000) }
       );
       const d = await r.json();
       return (d.Answer || []) as any[];
     };
 
+    // ── 1. Root domain DNS ───────────────────────────────────────────────────
     try {
       const recs = await fetchDns(cleanDomain, 'A');
       results.ipv4 = [...new Set(recs.map((r: any) => r.data as string))];
@@ -48,17 +134,18 @@ Deno.serve(async (req) => {
 
     try {
       const recs = await fetchDns(cleanDomain, 'CNAME');
-      if (recs.length > 0) results.cname = recs[0].data;
+      if (recs.length > 0) results.cname = recs[0].data.replace(/\.$/, '');
     } catch (_) {}
 
-    // ── 2. Subdomains ────────────────────────────────────────────────────────
-    const subMap = new Map<string, string[]>();
+    // Root CDN detection
+    results.cdn = detectCdn(results.cname || '', results.ipv4);
 
-    // Source A: crt.sh certificate transparency logs
+    // ── 2. crt.sh certificate transparency ──────────────────────────────────
+    const subSet = new Set<string>();
     try {
       const r = await fetch(
         `https://crt.sh/?q=%.${cleanDomain}&output=json`,
-        { signal: AbortSignal.timeout(15000) }
+        { signal: AbortSignal.timeout(20000) }
       );
       if (r.ok) {
         const text = await r.text();
@@ -71,8 +158,8 @@ Deno.serve(async (req) => {
             ];
             for (const raw of names) {
               const n = raw.trim().toLowerCase().replace(/^\*\./, '');
-              if (n.endsWith('.' + cleanDomain) && n !== cleanDomain) {
-                if (!subMap.has(n)) subMap.set(n, []);
+              if (n.endsWith('.' + cleanDomain) && n !== cleanDomain && !n.includes(' ') && !n.includes('@')) {
+                subSet.add(n);
               }
             }
           }
@@ -80,13 +167,26 @@ Deno.serve(async (req) => {
       }
     } catch (e: any) { results.errors.push('crt.sh: ' + e.message); }
 
-    // Source B: DNS brute-force on common prefixes
+    // ── 3. DNS brute-force common prefixes ───────────────────────────────────
     const commonPrefixes = [
-      'www', 'mail', 'ftp', 'smtp', 'api', 'dev', 'staging', 'blog', 'shop',
-      'app', 'cdn', 'static', 'media', 'admin', 'portal', 'news', 'support',
-      'help', 'docs', 'dashboard', 'login', 'secure', 'vpn', 'remote', 'mobile',
-      'm', 'img', 'images', 'assets', 'beta', 'test', 'uat', 'prod', 'store',
-      'web', 'v2', 'old', 'new', 'api2', 'status', 'auth', 'sso', 'id', 'accounts'
+      'www', 'www2', 'mail', 'ftp', 'smtp', 'pop', 'imap',
+      'api', 'api2', 'api3', 'rest', 'graphql', 'ws', 'websocket',
+      'dev', 'staging', 'stage', 'uat', 'test', 'beta', 'alpha', 'preview',
+      'prod', 'production', 'old', 'new', 'v1', 'v2', 'v3',
+      'app', 'apps', 'web', 'portal', 'dashboard', 'console', 'panel',
+      'admin', 'manage', 'management', 'cp', 'cpanel', 'plesk',
+      'cdn', 'cdn2', 'static', 'assets', 'media', 'img', 'images', 'video',
+      'upload', 'uploads', 'files', 'download', 'downloads', 'content',
+      'blog', 'news', 'forum', 'community', 'shop', 'store', 'pay',
+      'auth', 'sso', 'login', 'oauth', 'accounts', 'id', 'identity',
+      'support', 'help', 'docs', 'documentation', 'kb', 'status', 'monitor',
+      'vpn', 'remote', 'secure', 'ssl', 'mobile', 'm', 'wap',
+      'smtp', 'mx', 'mx1', 'mx2', 'relay', 'bounce',
+      'analytics', 'track', 'tracking', 'pixel', 'stats',
+      'search', 'data', 'db', 'sql', 'cache', 'redis',
+      'git', 'gitlab', 'github', 'ci', 'jenkins', 'build',
+      'grafana', 'kibana', 'elastic', 'logs',
+      'ns1', 'ns2', 'ns3', 'dns', 'dns1', 'dns2',
     ];
 
     const bruteResults = await Promise.allSettled(
@@ -94,50 +194,58 @@ Deno.serve(async (req) => {
         const fqdn = `${prefix}.${cleanDomain}`;
         try {
           const recs = await fetchDns(fqdn, 'A');
-          if (recs.length > 0) {
-            return { name: fqdn, ips: [...new Set(recs.map((r: any) => r.data as string))] };
-          }
+          if (recs.length > 0) subSet.add(fqdn);
         } catch (_) {}
-        return null;
       })
     );
 
-    for (const r of bruteResults) {
-      if (r.status === 'fulfilled' && r.value) {
-        subMap.set(r.value.name, r.value.ips);
+    // ── 4. Resolve all discovered subdomains in parallel (batched) ────────────
+    const allSubs = Array.from(subSet).sort();
+    const BATCH = 20;
+    const subdomainResults: any[] = [];
+
+    for (let i = 0; i < Math.min(allSubs.length, 150); i += BATCH) {
+      const batch = allSubs.slice(i, i + BATCH);
+      const resolved = await Promise.allSettled(
+        batch.map(async (sub) => {
+          try {
+            const [aRecs, cnameRecs] = await Promise.allSettled([
+              fetchDns(sub, 'A'),
+              fetchDns(sub, 'CNAME'),
+            ]);
+            const ips: string[] = aRecs.status === 'fulfilled'
+              ? [...new Set(aRecs.value.map((r: any) => r.data as string))]
+              : [];
+            const subCname = cnameRecs.status === 'fulfilled' && cnameRecs.value.length > 0
+              ? cnameRecs.value[0].data.replace(/\.$/, '')
+              : null;
+            const cdn = detectCdn(subCname || '', ips);
+            const live = ips.length > 0;
+            return { name: sub, ips, cname: subCname, cdn, live };
+          } catch (_) {
+            return { name: sub, ips: [], cname: null, cdn: null, live: false };
+          }
+        })
+      );
+      for (const r of resolved) {
+        if (r.status === 'fulfilled') subdomainResults.push(r.value);
       }
     }
 
-    // Resolve IPs for crt.sh subdomains that don't have IPs yet (up to 15)
-    const noIpSubs = Array.from(subMap.entries())
-      .filter(([, ips]) => ips.length === 0)
-      .slice(0, 15)
-      .map(([name]) => name);
+    // Sort: live first, then alphabetical
+    subdomainResults.sort((a, b) => {
+      if (a.live !== b.live) return a.live ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
 
-    const resolveResults = await Promise.allSettled(
-      noIpSubs.map(async (sub) => {
-        try {
-          const recs = await fetchDns(sub, 'A');
-          return { name: sub, ips: [...new Set(recs.map((r: any) => r.data as string))] };
-        } catch (_) { return { name: sub, ips: [] }; }
-      })
-    );
-    for (const r of resolveResults) {
-      if (r.status === 'fulfilled') subMap.set(r.value.name, r.value.ips);
-    }
+    results.subdomains = subdomainResults;
+    results.totalDiscovered = allSubs.length;
+    results.liveCount = subdomainResults.filter(s => s.live).length;
 
-    results.subdomains = Array.from(subMap.entries())
-      .map(([name, ips]) => ({ name, ips }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, 50);
-
-    // ── 3. Shared-host / hidden domains via DNS PTR records ──────────────────
-    // For each resolved IP, attempt a PTR lookup
+    // ── 5. PTR / Shared-host ─────────────────────────────────────────────────
     const ptrDomains = new Set<string>();
-    const ipLookups = results.ipv4.slice(0, 3);
-    await Promise.allSettled(ipLookups.map(async (ip: string) => {
+    await Promise.allSettled(results.ipv4.slice(0, 3).map(async (ip: string) => {
       try {
-        // Reverse the IP for PTR query: e.g. 1.2.3.4 → 4.3.2.1.in-addr.arpa
         const reversed = ip.split('.').reverse().join('.') + '.in-addr.arpa';
         const recs = await fetchDns(reversed, 'PTR');
         for (const r of recs) {

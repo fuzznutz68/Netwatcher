@@ -961,7 +961,18 @@ public class MainActivity extends Activity {
                     statusText.setText(isRussian ? "❌  Ошибка сети" : "❌  Network error");
                     return;
                 }
-                statusText.setText(isRussian ? "✅  Сканирование завершено: " + domain : "✅  Scan complete for " + domain);
+                try {
+                        org.json.JSONObject tmp = new org.json.JSONObject(intelJson);
+                        int live2 = tmp.optInt("liveCount", 0);
+                        int total2 = tmp.optInt("totalDiscovered", 0);
+                        String cdn2 = tmp.optString("cdn","");
+                        String cdnSuffix = (!cdn2.isEmpty() && !cdn2.equals("null")) ? "  •  CDN: " + cdn2 : "";
+                        statusText.setText(isRussian
+                            ? "✅  " + domain + "  •  " + live2 + " живых / " + total2 + " субдоменов" + cdnSuffix
+                            : "✅  " + domain + "  •  " + live2 + " live / " + total2 + " subdomains" + cdnSuffix);
+                    } catch (Exception _e) {
+                        statusText.setText(isRussian ? "✅  Сканирование завершено: " + domain : "✅  Scan complete for " + domain);
+                    }
                 lastDomainForExport    = domain;
                 lastIntelJsonForExport = intelJson != null ? intelJson : "";
                 lastProbeJsonForExport = "";
@@ -1026,6 +1037,8 @@ public class MainActivity extends Activity {
                     }
                     for (String ip : ipv6List) sb.append("IPv6:  ").append(ip).append("\n");
                     if (!finalCname.isEmpty() && !finalCname.equals("null")) sb.append("CNAME: ").append(finalCname);
+                    String cdnVal = intel.optString("cdn","");
+                    if (!cdnVal.isEmpty() && !cdnVal.equals("null")) sb.append("\nCDN:   ").append(cdnVal);
                     final String result = sb.toString().trim();
                     mainHandler.post(() -> {
                         if (result.length() > 0) addCard("🌐  " + finalDomain, result, "#A5D6A7");
@@ -1058,44 +1071,124 @@ public class MainActivity extends Activity {
     // ── Card helpers ─────────────────────────────────────────────────────────
 
     private void addSubdomainsCard(JSONArray subs) {
-        LinearLayout card = makeCardContainer();
-        TextView title = new TextView(this);
-        title.setText("🌿  SUBDOMAINS  (" + subs.length() + ")");
-        title.setTextSize(11); title.setTextColor(Color.parseColor("#00E5FF"));
-        title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
-        card.addView(title);
+        // Split into live and dead
+        java.util.List<JSONObject> live = new java.util.ArrayList<>();
+        java.util.List<JSONObject> dead = new java.util.ArrayList<>();
         try {
-            for (int i=0; i<subs.length(); i++) {
+            for (int i = 0; i < subs.length(); i++) {
                 JSONObject sub = subs.getJSONObject(i);
-                String name = sub.optString("name","");
-                JSONArray ips = sub.optJSONArray("ips");
-                TextView nameView = new TextView(this);
-                nameView.setText("▸  " + name); nameView.setTextSize(14);
-                nameView.setTextColor(Color.parseColor("#80DEEA"));
-                nameView.setTypeface(Typeface.MONOSPACE); nameView.setPadding(0,dp(4),0,0);
-                card.addView(nameView);
-                if (ips != null) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int j=0;j<ips.length();j++) {
-                        String ip = ips.optString(j);
-                        if (ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) { if(sb.length()>0) sb.append("  |  "); sb.append(ip); }
-                    }
-                    if (sb.length()>0) {
-                        TextView ipView = new TextView(this);
-                        ipView.setText("   "+sb); ipView.setTextSize(12);
-                        ipView.setTextColor(Color.parseColor("#90A4AE")); ipView.setTypeface(Typeface.MONOSPACE);
-                        card.addView(ipView);
-                    }
-                }
-                if (i < subs.length()-1) {
-                    View div = new View(this);
-                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
-                    lp.topMargin=dp(4); lp.bottomMargin=dp(2); div.setLayoutParams(lp);
-                    div.setBackgroundColor(Color.parseColor("#1A3A5C")); card.addView(div);
-                }
+                if (sub.optBoolean("live", sub.optJSONArray("ips") != null && sub.optJSONArray("ips").length() > 0))
+                    live.add(sub);
+                else
+                    dead.add(sub);
             }
         } catch (Exception ignored) {}
-        resultsContainer.addView(card);
+
+        // Live subdomains card
+        if (!live.isEmpty()) {
+            LinearLayout card = makeCardContainer();
+            TextView title = new TextView(this);
+            title.setText("🟢  LIVE SUBDOMAINS / CDN  (" + live.size() + ")");
+            title.setTextSize(11); title.setTextColor(Color.parseColor("#00E5FF"));
+            title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
+            card.addView(title);
+            for (int i = 0; i < live.size(); i++) {
+                addSubdomainRow(card, live.get(i));
+                if (i < live.size()-1) addDivider(card);
+            }
+            resultsContainer.addView(card);
+        }
+
+        // Dead / unresolved subdomains card (collapsed list)
+        if (!dead.isEmpty()) {
+            LinearLayout card = makeCardContainer();
+            TextView title = new TextView(this);
+            title.setText("⚫  UNRESOLVED SUBDOMAINS  (" + dead.size() + ")");
+            title.setTextSize(11); title.setTextColor(Color.parseColor("#607D8B"));
+            title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
+            card.addView(title);
+            StringBuilder sb = new StringBuilder();
+            for (JSONObject sub : dead) {
+                sb.append("▸  ").append(sub.optString("name","")).append("\n");
+            }
+            TextView deadView = new TextView(this);
+            deadView.setText(sb.toString().trim()); deadView.setTextSize(12);
+            deadView.setTextColor(Color.parseColor("#546E7A")); deadView.setTypeface(Typeface.MONOSPACE);
+            card.addView(deadView);
+            resultsContainer.addView(card);
+        }
+
+        if (live.isEmpty() && dead.isEmpty()) {
+            addCard("🌿  Subdomains", "None discovered", "#546E7A");
+        }
+    }
+
+    private void addSubdomainRow(LinearLayout card, JSONObject sub) {
+        String name = sub.optString("name","");
+        JSONArray ips = sub.optJSONArray("ips");
+        String cdn = sub.optString("cdn", "");
+        String cname = sub.optString("cname", "");
+
+        // Name line
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dp(4), 0, 0);
+
+        TextView nameView = new TextView(this);
+        nameView.setText("▸  " + name);
+        nameView.setTextSize(13);
+        nameView.setTextColor(Color.parseColor("#80DEEA"));
+        nameView.setTypeface(Typeface.MONOSPACE);
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        nameView.setLayoutParams(nlp);
+        row.addView(nameView);
+
+        // CDN badge
+        if (cdn != null && !cdn.isEmpty() && !cdn.equals("null")) {
+            TextView cdnView = new TextView(this);
+            cdnView.setText("  " + cdn);
+            cdnView.setTextSize(10);
+            cdnView.setTextColor(Color.parseColor("#FFB300"));
+            cdnView.setTypeface(null, Typeface.BOLD);
+            cdnView.setPadding(dp(6), dp(2), dp(6), dp(2));
+            row.addView(cdnView);
+        }
+        card.addView(row);
+
+        // IPs (only real IPs, not CNAME chain entries)
+        if (ips != null && ips.length() > 0) {
+            StringBuilder sb = new StringBuilder("   ");
+            int count = 0;
+            for (int j = 0; j < ips.length(); j++) {
+                String ip = ips.optString(j);
+                if (ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) {
+                    if (count > 0) sb.append("  |  ");
+                    sb.append(ip);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                TextView ipView = new TextView(this);
+                ipView.setText(sb.toString()); ipView.setTextSize(11);
+                ipView.setTextColor(Color.parseColor("#90A4AE")); ipView.setTypeface(Typeface.MONOSPACE);
+                card.addView(ipView);
+            }
+        }
+
+        // CNAME if present and different from name
+        if (cname != null && !cname.isEmpty() && !cname.equals("null") && !cname.equals(name)) {
+            TextView cnView = new TextView(this);
+            cnView.setText("   → " + cname); cnView.setTextSize(11);
+            cnView.setTextColor(Color.parseColor("#78909C")); cnView.setTypeface(Typeface.MONOSPACE);
+            card.addView(cnView);
+        }
+    }
+
+    private void addDivider(LinearLayout card) {
+        View div = new View(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+        lp.topMargin = dp(4); lp.bottomMargin = dp(2); div.setLayoutParams(lp);
+        div.setBackgroundColor(Color.parseColor("#1A3A5C")); card.addView(div);
     }
 
     private void addCard(String title, String value, String valueColor) {
