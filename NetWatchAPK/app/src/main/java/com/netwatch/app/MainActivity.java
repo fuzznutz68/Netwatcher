@@ -588,7 +588,7 @@ public class MainActivity extends Activity {
         if (speedDescText != null) speedDescText.setText(isRussian
             ? "Измерьте скорость загрузки, выгрузки и задержку до выбранного сервера."
             : "Measure your download speed, upload speed, and latency to a selected server.");
-        if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📶 Устройство" : "📶 Device");
+        if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📱 Устройство" : "📱 Device");
     }
 
     // ── Refresh All UI Strings on Language Change ────────────────────────────
