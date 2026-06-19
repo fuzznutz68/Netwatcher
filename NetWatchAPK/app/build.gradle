@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace 'com.netwatch.app'
 
     defaultConfig {
         applicationId "com.netwatch.net"
         minSdk 30
-        targetSdk 34
+        targetSdk 35
         versionCode 50
         versionName "2.2.5"
     }
