@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetWatch — Privacy Policy</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #222; line-height: 1.7; }
+  h1 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+  h2 { color: #333; margin-top: 32px; }
+  .date { color: #666; font-size: 0.9em; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .highlight { background: #f0f7ff; border-left: 4px solid #1a73e8; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+  footer { margin-top: 48px; color: #888; font-size: 0.85em; border-top: 1px solid #eee; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<h1>🔍 NetWatch — Privacy Policy</h1>
+<p class="date">Effective Date: June 19, 2026 &nbsp;|&nbsp; Last Updated: June 19, 2026</p>
+
+<div class="highlight">
+  <strong>Short version:</strong> NetWatch processes all data locally on your device. We do not collect, store, or transmit any personal information to our servers.
+</div>
+
+<h2>1. Overview</h2>
+<p>NetWatch ("the App") is a network monitoring application for Android that allows users to inspect outbound network connections made by apps installed on their device. This Privacy Policy explains what data the App accesses, how it is used, and your rights as a user.</p>
+
+<h2>2. Data We Collect</h2>
+<p>NetWatch does <strong>not</strong> collect any personal data. All processing happens entirely on your device. Specifically:</p>
+<ul>
+  <li><strong>Network traffic data</strong> — The App intercepts and displays outbound DNS queries and connection hostnames for the selected application. This data is displayed in-app only and is never transmitted off your device.</li>
+  <li><strong>IP addresses and domain names</strong> — Used locally for Geo-IP lookups and Domain Intelligence scans. Lookups are made to third-party public APIs (see Section 4) solely to enrich the display.</li>
+  <li><strong>Device information</strong> — The App reads basic network state (Wi-Fi/mobile) to display connectivity status. No device identifiers are collected or stored.</li>
+</ul>
+
+<h2>3. Data We Do NOT Collect</h2>
+<ul>
+  <li>No account registration or login required</li>
+  <li>No analytics or crash reporting SDKs</li>
+  <li>No advertising identifiers</li>
+  <li>No location data</li>
+  <li>No contacts, messages, photos, or files</li>
+  <li>No data is ever uploaded to NetWatch servers</li>
+</ul>
+
+<h2>4. Third-Party Services</h2>
+<p>When you use certain features, the App makes requests to the following public APIs on your behalf:</p>
+<ul>
+  <li><strong>ip-api.com</strong> — Geo-IP lookups (country, city, ISP). Requests contain only the IP address being queried.</li>
+  <li><strong>crt.sh</strong> — Certificate Transparency logs for subdomain discovery. Requests contain only the domain name being queried.</li>
+  <li><strong>NetWatch Backend API</strong> — Domain Intelligence and WHOIS lookups. Requests contain only the domain or IP being queried. No user-identifying information is sent.</li>
+  <li><strong>Speedtest servers</strong> — Used only when you manually run a speed test. No personal data is transmitted.</li>
+</ul>
+<p>These services have their own privacy policies. NetWatch is not responsible for their data practices.</p>
+
+<h2>5. VPN Permission</h2>
+<p>NetWatch uses Android's VPN API (<code>VpnService</code>) solely to intercept and inspect DNS queries and outbound connections on your device. This is a local VPN — no traffic is routed through any external VPN server. All traffic continues to flow through your normal internet connection. NetWatch does not log, store, or transmit the content of any network packets.</p>
+
+<h2>6. Permissions Explained</h2>
+<ul>
+  <li><strong>INTERNET</strong> — Required to perform domain and IP lookups.</li>
+  <li><strong>BIND_VPN_SERVICE</strong> — Required to monitor local network traffic via Android's VPN API.</li>
+  <li><strong>FOREGROUND_SERVICE</strong> — Keeps monitoring active while the App is in the background.</li>
+  <li><strong>QUERY_ALL_PACKAGES</strong> — Required to list installed apps in the app picker. No app data is transmitted.</li>
+  <li><strong>POST_NOTIFICATIONS</strong> — Used to notify you when monitoring is active.</li>
+  <li><strong>VIBRATE</strong> — Used for alerts when an unknown domain is detected.</li>
+</ul>
+
+<h2>7. Data Retention</h2>
+<p>NetWatch stores no data on any server. Connection logs displayed in the Traffic Monitor exist only in memory and are cleared when you stop monitoring or close the App. The CSV export feature saves a file locally to your device storage only at your explicit request.</p>
+
+<h2>8. Children's Privacy</h2>
+<p>NetWatch is not directed at children under the age of 13. We do not knowingly collect any information from children.</p>
+
+<h2>9. Changes to This Policy</h2>
+<p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated effective date. Continued use of the App after changes constitutes acceptance of the updated policy.</p>
+
+<h2>10. Contact Us</h2>
+<p>If you have any questions about this Privacy Policy, please contact us at:</p>
+<p><strong>Email:</strong> <a href="mailto:netwatch.app@proton.me">netwatch.app@proton.me</a></p>
+
+<footer>
+  &copy; 2026 NetWatch. All rights reserved. &nbsp;|&nbsp; This policy applies to NetWatch for Android.
+</footer>
+
+</body>
+</html>
