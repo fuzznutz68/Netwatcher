@@ -7,7 +7,7 @@ android {
     namespace 'com.netwatch.app'
 
     defaultConfig {
-        applicationId "com.netwatch.app"
+        applicationId "com.netwatch.net"
         minSdk 30
         targetSdk 34
         versionCode 50

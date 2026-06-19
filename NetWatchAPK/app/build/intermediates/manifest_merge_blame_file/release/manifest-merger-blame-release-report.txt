@@ -1,6 +1,6 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-3    package="com.netwatch.app"
+3    package="com.netwatch.net"
 4    android:versionCode="50"
 5    android:versionName="2.2.5" >
 6
@@ -38,12 +38,12 @@
 20
 21    <permission
 21-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
-22        android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+22        android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
 22-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
 23        android:protectionLevel="signature" />
 23-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
 24
-25    <uses-permission android:name="com.netwatch.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+25    <uses-permission android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 25-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
 25-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
 26
@@ -135,7 +135,7 @@
 72        <provider
 73            android:name="androidx.core.content.FileProvider"
 73-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:62:13-62
-74            android:authorities="com.netwatch.app.provider"
+74            android:authorities="com.netwatch.net.provider"
 74-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:63:13-60
 75            android:exported="false"
 75-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:64:13-37
@@ -152,7 +152,7 @@
 81-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
 82            android:name="androidx.startup.InitializationProvider"
 82-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
-83            android:authorities="com.netwatch.app.androidx-startup"
+83            android:authorities="com.netwatch.net.androidx-startup"
 83-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
 84            android:exported="false" >
 84-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
