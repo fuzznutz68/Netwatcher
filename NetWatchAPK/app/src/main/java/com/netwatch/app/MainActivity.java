@@ -403,7 +403,9 @@ public class MainActivity extends Activity {
                         "  • Geo-IP поиск для каждого соединения\n" +
                         "  • Обнаружение смежных доменов (CDN, поддомены)\n" +
                         "  • Вибрация при соединении с неизвестным доменом\n" +
-                        "  • Экспорт лога соединений в формате RFC 4180 CSV");
+                        "  • Экспорт лога соединений в формате RFC 4180 CSV\n\n" +
+                        "Нажмите на строку домена — запустит полное сканирование Domain Intel (поддомены, CDN, IP).\n" +
+                        "Долгое нажатие на строку — копирует хост или IP в буфер обмена.");
                 } else {
                     showInfoDialog("📡 Traffic Monitor — Help",
                         "Monitor live network connections for any installed app.\n\n" +
@@ -415,7 +417,9 @@ public class MainActivity extends Activity {
                         "  • Geo-IP lookup for every connection\n" +
                         "  • Companion domain detection (CDNs, subdomains)\n" +
                         "  • Vibration alert for unknown/unlisted domains\n" +
-                        "  • Export connection log as RFC 4180 CSV");
+                        "  • Export connection log as RFC 4180 CSV\n\n" +
+                        "Tap a domain row — runs a full Domain Intel scan (subdomains, CDN, IPs).\n" +
+                        "Long-press a domain row — copy hostname or IP to clipboard.");
                 }
                 return true;
             } else if (id == R.id.menu_instructions_checker) {
