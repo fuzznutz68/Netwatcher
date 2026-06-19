@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
         {"🇺🇸 US Miami   (Ookla BlueStream)",     "http://speedtest03.bluestreamfiber.net:8080", "ookla"},
         {"🇺🇸 US Seattle (Ookla Ziply)",          "http://speedtest1-sttlwawb.as20055.net:8080", "ookla"},
         {"🇺🇸 US Atlanta (Ookla Point)",          "http://speedtest14.point-broadband.com:8080", "ookla"},
-        {"🇷🇺 Russia     (MTS Moscow)",           "http://speed.mts.ru",                         "linode"},
+        {"🇷🇺 Russia     (Selectel Moscow)",       "http://speedtest.selectel.ru",                "linode"},
         {"🌍 Global      (Cloudflare)",            "https://speed.cloudflare.com",                "cloudflare"},
     };
 
@@ -423,10 +423,12 @@ public class MainActivity extends Activity {
                     showInfoDialog("✅ Проверка доменов — Справка",
                         "Быстрая проверка доступности известных сервисных доменов.\n\n" +
                         "Категории:\n" +
-                        "  • Microsoft, Google, Apple, Cloudflare\n" +
-                        "  • Социальные сети и мессенджеры\n" +
+                        "  • Google, Microsoft, Cloudflare\n" +
+                        "  • Соцсети и мессенджеры (включая GitHub)\n" +
+                        "  • Стриминг (Netflix, Hulu, Spotify, Twitch)\n" +
                         "  • Финансы и платежи\n" +
-                        "  • Игры (Xbox, PlayStation)\n\n" +
+                        "  • Игры (Xbox, PlayStation)\n" +
+                        "  • AI-сервисы (ChatGPT, Gemini)\n\n" +
                         "Статус каждого домена:\n" +
                         "  🟢 Доступен  |  🔴 Заблокирован / Недоступен\n\n" +
                         "Нажмите «Проверить всё» для запуска всех тестов.\n" +
@@ -435,10 +437,12 @@ public class MainActivity extends Activity {
                     showInfoDialog("✅ Domain Checker — Help",
                         "Quickly verify connectivity to well-known service domains.\n\n" +
                         "Categories include:\n" +
-                        "  • Microsoft, Google, Apple, Cloudflare\n" +
-                        "  • Social & Messaging\n" +
+                        "  • Google, Microsoft, Cloudflare\n" +
+                        "  • Social & Messaging (incl. GitHub)\n" +
+                        "  • Streaming (Netflix, Hulu, Spotify, Twitch)\n" +
                         "  • Finance & Payments\n" +
-                        "  • Gaming (Xbox, PlayStation)\n\n" +
+                        "  • Gaming (Xbox, PlayStation)\n" +
+                        "  • AI Services (ChatGPT, Gemini)\n\n" +
                         "Each domain shows a live status:\n" +
                         "  🟢 Reachable  |  🔴 Blocked / Unreachable\n\n" +
                         "Tap Check All to run all tests at once.\n" +
@@ -1891,7 +1895,6 @@ public class MainActivity extends Activity {
             {"OneDrive",          "onedrive.live.com"},
             {"Teams",             "teams.microsoft.com"},
             {"Azure",             "azure.microsoft.com"},
-            {"GitHub",            "github.com"},
             {"Microsoft CDN",     "msftconnecttest.com"},
         });
         CHECKER_DOMAINS.put("🟡 Cloudflare", new String[][]{
@@ -1909,10 +1912,12 @@ public class MainActivity extends Activity {
             {"LinkedIn",          "linkedin.com"},
             {"TikTok",            "tiktok.com"},
             {"Reddit",            "reddit.com"},
+            {"GitHub",            "github.com"},
             {"Disqus",            "disqus.com"},
         });
         CHECKER_DOMAINS.put("🔴 Streaming", new String[][]{
             {"Netflix",           "netflix.com"},
+            {"Hulu",              "hulu.com"},
             {"Spotify",           "spotify.com"},
             {"Twitch",            "twitch.tv"},
             {"Apple iCloud",      "icloud.com"},

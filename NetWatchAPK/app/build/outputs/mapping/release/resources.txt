@@ -18,6 +18,7 @@ tel
 setBase
 android.speech.extra.RESULTS_PENDINGI...
 vnd.android.cursor.dir/contact
+http://speedtest.selectel.ru
 android.hardware.display.category.PRE...
 SOURCE_AUTOFILL
 google.com
@@ -359,7 +360,6 @@ accessibility
 android:visibility:parent
 endColor
 spotifycdn.com
-http://speed.mts.ru
 00000000
 AppCompatCustomView
 android:orientation
@@ -871,6 +871,7 @@ controlY1
 t.me
 surface_container_highest
 menu
+hulu.com
 uri
 androidx.core.view.inputmethod.InputC...
 Flow
@@ -2456,6 +2457,7 @@ flag
 android.support.action.semanticAction
 java.lang.Double
 promo
+Hulu
 com.sony.dtv.hardware.panel.qfhd
 get
 TOP_TO_TOP
