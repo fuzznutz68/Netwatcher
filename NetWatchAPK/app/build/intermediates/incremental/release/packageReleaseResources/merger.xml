@@ -7,6 +7,9 @@
         <item name="android:textColorPrimary">#E0E8F0</item>
         <item name="android:editTextColor">#E0E8F0</item>
         <item name="android:textColorHint">#3A4A5A</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
     </style><style name="CardStyle">
         <item name="android:background">@drawable/card_background</item>
         <item name="android:padding">16dp</item>
@@ -30,4 +33,17 @@
         <item name="android:background">@drawable/tab_selector</item>
         <item name="android:textSize">11sp</item>
         <item name="android:fontFamily">monospace</item>
+    </style></file><file path="/app/NetWatchAPK/app/src/main/res/values-v35/themes.xml" qualifiers="v35"><style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#00E5FF</item>
+        <item name="colorPrimaryDark">#0A0E17</item>
+        <item name="colorAccent">#00E5FF</item>
+        <item name="android:windowBackground">#0A0E17</item>
+        <item name="android:textColorPrimary">#E0E8F0</item>
+        <item name="android:editTextColor">#E0E8F0</item>
+        <item name="android:textColorHint">#3A4A5A</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style></file></source></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/app/NetWatchAPK/app/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release" generated-set="release$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/app/NetWatchAPK/app/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/app/NetWatchAPK/app/build/generated/res/resValues/release"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/app/NetWatchAPK/app/build/generated/res/resValues/release"/></dataSet><mergedItems/></merger>

@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.netwatch.net"
-4    android:versionCode="51"
-5    android:versionName="2.2.5" >
+4    android:versionCode="52"
+5    android:versionName="2.3.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="30"
@@ -75,8 +75,8 @@
 39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:28:13-36
 40            android:label="@string/app_name"
 40-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:29:13-45
-41            android:screenOrientation="portrait"
-41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-49
+41            android:screenOrientation="unspecified"
+41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-52
 42            android:windowSoftInputMode="adjustResize" >
 42-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:31:13-55
 43            <intent-filter>

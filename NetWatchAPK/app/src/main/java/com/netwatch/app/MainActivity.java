@@ -69,6 +69,9 @@ import android.app.AlertDialog;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
 public class MainActivity extends Activity {
 
@@ -164,6 +167,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // ── Edge-to-edge insets (Android 15+ / SDK 35) ──────────────────────
+        android.view.View rootView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         // Language preference
         SharedPreferences prefs0 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);

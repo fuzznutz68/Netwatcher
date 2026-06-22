@@ -2,7 +2,7 @@
     name="release"
     package="com.netwatch.app"
     minSdkVersion="30"
-    targetSdkVersion="34"
+    targetSdkVersion="35"
     shrinking="true"
     mergedManifest="build/intermediates/merged_manifest/release/AndroidManifest.xml"
     manifestMergeReport="build/outputs/logs/manifest-merger-release-report.txt"
@@ -24,7 +24,7 @@
   <artifact
       classOutputs="build/intermediates/javac/release/classes:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/R.jar"
       type="MAIN"
-      applicationId="com.netwatch.app"
+      applicationId="com.netwatch.net"
       generatedSourceFolders="build/generated/ap_generated_sources/release/out"
       generatedResourceFolders="build/generated/res/resValues/release"
       desugaredMethodsFiles="/root/.gradle/caches/transforms-3/c53e198a15af26ea3acbbfc37da9bc11/transformed/D8BackportedDesugaredMethods.txt">

@@ -144,7 +144,7 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /root/.gradle/caches/transf
 activity#com.netwatch.app.MainActivity
 ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:26:9-36:20
 	android:screenOrientation
-		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-49
+		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-52
 	android:label
 		ADDED from /app/NetWatchAPK/app/src/main/AndroidManifest.xml:29:13-45
 	android:windowSoftInputMode

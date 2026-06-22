@@ -9,6 +9,9 @@
         <item name="android:textColorPrimary">#E0E8F0</item>
         <item name="android:editTextColor">#E0E8F0</item>
         <item name="android:textColorHint">#3A4A5A</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
     </style>
     <style name="CardStyle">
         <item name="android:background">@drawable/card_background</item>

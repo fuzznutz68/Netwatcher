@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.netwatch.app-mergeReleaseResources-2:/values-v35/values-v35.xml",
+            "map": [
+                {
+                    "source": "/app/NetWatchAPK/app/src/main/res/values-v35/themes.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "120",
+                        "endLines": "16",
+                        "endColumns": "12",
+                        "endOffsets": "958"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "15",
+                        "endColumns": "12",
+                        "endOffsets": "893"
+                    }
+                }
+            ]
+        }
+    ]
+}

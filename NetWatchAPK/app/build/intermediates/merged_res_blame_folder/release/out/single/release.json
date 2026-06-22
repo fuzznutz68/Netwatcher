@@ -4,12 +4,12 @@
         "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/color/mtrl_navigation_item_icon_tint.xml"
     },
     {
-        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/color_m3_switch_thumb_tint.xml.flat",
-        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/color/m3_switch_thumb_tint.xml"
-    },
-    {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/color_material_timepicker_button_stroke.xml.flat",
         "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/color/material_timepicker_button_stroke.xml"
+    },
+    {
+        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/color_m3_switch_thumb_tint.xml.flat",
+        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/color/m3_switch_thumb_tint.xml"
     },
     {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/color-v31_m3_ref_palette_dynamic_neutral6.xml.flat",
@@ -24,16 +24,16 @@
         "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/drawable/mtrl_switch_thumb_unchecked_pressed.xml"
     },
     {
-        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable_abc_ic_clear_material.xml.flat",
-        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-appcompat-1.6.1-20:/drawable/abc_ic_clear_material.xml"
+        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable-xxhdpi-v4_abc_spinner_mtrl_am_alpha.9.png.flat",
+        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-appcompat-1.6.1-20:/drawable-xxhdpi-v4/abc_spinner_mtrl_am_alpha.9.png"
     },
     {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/anim-v21_design_bottom_sheet_slide_in.xml.flat",
         "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/anim-v21/design_bottom_sheet_slide_in.xml"
     },
     {
-        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable-xxhdpi-v4_abc_spinner_mtrl_am_alpha.9.png.flat",
-        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-appcompat-1.6.1-20:/drawable-xxhdpi-v4/abc_spinner_mtrl_am_alpha.9.png"
+        "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable_abc_ic_clear_material.xml.flat",
+        "source": "/root/.gradle/daemon/8.2/com.netwatch.app-appcompat-1.6.1-20:/drawable/abc_ic_clear_material.xml"
     },
     {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/layout_mtrl_picker_header_toggle.xml.flat",
@@ -2090,10 +2090,6 @@
     {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable_material_ic_keyboard_arrow_right_black_24dp.xml.flat",
         "source": "/root/.gradle/daemon/8.2/com.netwatch.app-material-1.11.0-25:/drawable/material_ic_keyboard_arrow_right_black_24dp.xml"
-    },
-    {
-        "merged": "com.netwatch.app-merged_res-5:/layout_activity_main.xml.flat",
-        "source": "com.netwatch.app-main-6:/layout/activity_main.xml"
     },
     {
         "merged": "/root/.gradle/daemon/8.2/com.netwatch.app-merged_res-5:/drawable-xxhdpi-v4_abc_list_selector_disabled_holo_dark.9.png.flat",
