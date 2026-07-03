@@ -3,8 +3,11 @@ package com.netwatch.app;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -51,6 +54,14 @@ public class NetWatchVpnService extends VpnService {
             running = false;
             stopSelf();
             return START_NOT_STICKY;
+        }
+        // Both the Traffic Monitor tab (per-app) and Device Monitor tab (device-wide)
+        // now share this single VPN engine — only one Android VPN tunnel can be active
+        // at a time anyway. If it's already up, just keep it running as-is.
+        if (running) {
+            createNotificationChannel();
+            startForeground(NOTIF_ID, buildNotification());
+            return START_STICKY;
         }
         createNotificationChannel();
         startForeground(NOTIF_ID, buildNotification());
@@ -150,7 +161,7 @@ public class NetWatchVpnService extends VpnService {
             Long   last = seenKeys.get(key);
             if (last == null || now - last > DEDUP_MS) {
                 seenKeys.put(key, now);
-                reportConnection(isTcp ? "TCP" : "UDP", dstIp, dstPort);
+                reportConnection(isTcp ? "TCP" : "UDP", proto, srcIp, srcPort, dstIp, dstPort);
             }
 
             if (isUdp) {
@@ -218,7 +229,7 @@ public class NetWatchVpnService extends VpnService {
             Long   last = seenKeys.get(key);
             if (last == null || now - last > DEDUP_MS) {
                 seenKeys.put(key, now);
-                reportConnection(isTcp ? "TCP" : "UDP", dstIp, dstPort);
+                reportConnection(isTcp ? "TCP" : "UDP", proto, srcIp, srcPort, dstIp, dstPort);
             }
 
             out.write(pkt, 0, len);
@@ -338,17 +349,24 @@ public class NetWatchVpnService extends VpnService {
 
     // ── Async DNS + broadcast ─────────────────────────────────────
 
-    private void reportConnection(String proto, String ip, int port) {
+    private void reportConnection(String protoLabel, int protoNum, String localIp, int localPort,
+                                   String ip, int port) {
+        // Best-effort: identify which app's UID owns this connection. Requires API 29+ and
+        // only works while THIS app is the active VpnService — exactly our situation here.
+        // Some OEM builds still refuse to resolve it; callers must treat -1 as "unknown".
+        int ownerUid = resolveOwnerUid(protoNum, localIp, localPort, ip, port);
+
         String cached = dnsCache.get(ip);
         if (cached == null) {
-            emit(proto, "", ip, port);
+            emit(protoLabel, "", ip, port, ownerUid);
             final String ipCopy = ip;
+            final int    uidCopy = ownerUid;
             dnsExecutor.submit(() -> {
                 try {
                     String host = InetAddress.getByName(ipCopy).getHostName();
                     if (!host.equals(ipCopy)) {
                         dnsCache.put(ipCopy, host);
-                        emit(proto, host, ipCopy, port);
+                        emit(protoLabel, host, ipCopy, port, uidCopy);
                     } else {
                         dnsCache.put(ipCopy, ipCopy);
                     }
@@ -357,20 +375,36 @@ public class NetWatchVpnService extends VpnService {
                 }
             });
         } else {
-            emit(proto, cached.equals(ip) ? "" : cached, ip, port);
+            emit(protoLabel, cached.equals(ip) ? "" : cached, ip, port, ownerUid);
         }
     }
 
-    private void emit(String proto, String host, String ip, int port) {
+    /** Returns the owning app's UID for this connection, or -1 if it can't be determined
+     *  (API < 29, OEM restriction, or the conntrack entry already expired). */
+    private int resolveOwnerUid(int protoNum, String localIp, int localPort, String remoteIp, int remotePort) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return -1;
+        try {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm == null) return -1;
+            java.net.InetSocketAddress local  = new java.net.InetSocketAddress(InetAddress.getByName(localIp),  localPort);
+            java.net.InetSocketAddress remote = new java.net.InetSocketAddress(InetAddress.getByName(remoteIp), remotePort);
+            return cm.getConnectionOwnerUid(protoNum, local, remote);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private void emit(String proto, String host, String ip, int port, int ownerUid) {
         String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
         Intent i  = new Intent("com.netwatch.app.DEVICE_TRAFFIC");
         i.putExtra("protocol",  proto);
         i.putExtra("host",      host);
         i.putExtra("ipPort",    ip + ":" + port);
         i.putExtra("app",       "");
+        i.putExtra("uid",       ownerUid);
         i.putExtra("timestamp", ts);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-        Log.d(TAG, "EMIT " + proto + " " + (host.isEmpty() ? ip : host) + ":" + port);
+        Log.d(TAG, "EMIT " + proto + " " + (host.isEmpty() ? ip : host) + ":" + port + " uid=" + ownerUid);
     }
 
     // ── Helpers ───────────────────────────────────────────────────

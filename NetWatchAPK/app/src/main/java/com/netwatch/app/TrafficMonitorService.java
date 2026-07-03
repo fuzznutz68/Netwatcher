@@ -4,13 +4,18 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -58,14 +63,22 @@ public class TrafficMonitorService extends Service {
     private String  targetName = "";
     private boolean running    = false;
 
-    // Some OEMs/kernels restrict /proc/net/tcp visibility to the reading app's own
-    // socket entries (SELinux hidepid / per-app isolation). If per-UID filtering
-    // returns zero connections for several consecutive polls while the device is
-    // clearly online, we fall back to showing ALL device connections so the user
-    // still sees traffic instead of a permanently empty list.
-    private int     emptyUidPollStreak = 0;
-    private boolean uidFilterDisabled  = false;
-    private static final int UID_FALLBACK_THRESHOLD = 6; // ~6 seconds of empty polls
+    // Real per-app host discovery: /proc/net/tcp is restricted on modern Android to an
+    // app's OWN socket entries only (kernel/SELinux enforced — not something pollable
+    // around). Instead we rely on NetWatchVpnService (a VpnService that sees the raw
+    // packet stream regardless of UID isolation) and resolve each connection's owning
+    // app via ConnectivityManager.getConnectionOwnerUid(), attached as a "uid" extra
+    // on its LocalBroadcast. If that resolution itself is ever unavailable (older
+    // Android, some OEM restriction) we gracefully fall back to showing all captured
+    // traffic instead of a permanently empty list.
+    private BroadcastReceiver vpnHostReceiver;
+    private int     unresolvedUidStreak = 0;
+    private boolean deviceWideFallback  = false;
+    private static final int UID_RESOLVE_FALLBACK_THRESHOLD = 6; // consecutive unresolved events
+
+    // IPs already accepted into the enrichment pipeline (post UID-match), to avoid
+    // re-processing the same destination repeatedly.
+    private final Set<String> activeIpsFromVpn = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private long lastTx = TrafficStats.UNSUPPORTED;
     private long lastRx = TrafficStats.UNSUPPORTED;
@@ -116,15 +129,95 @@ public class TrafficMonitorService extends Service {
 
         dnsCache.clear(); geoCache.clear();
         submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
+        activeIpsFromVpn.clear();
         lastTx = TrafficStats.UNSUPPORTED;
         lastRx = TrafficStats.UNSUPPORTED;
-        emptyUidPollStreak = 0;
-        uidFilterDisabled  = false;
+        unresolvedUidStreak = 0;
+        deviceWideFallback  = false;
         running = true;
 
+        registerVpnHostReceiver();
         if (!targetPkg.isEmpty()) seedDomainsFromBackend(targetPkg);
         handler.post(pollRunnable);
         return START_STICKY;
+    }
+
+    /** Real host discovery now comes from NetWatchVpnService's raw packet capture
+     *  (MainActivity ensures it's running with VPN consent already granted), matched
+     *  to the selected app's UID via ConnectivityManager.getConnectionOwnerUid(). */
+    private void registerVpnHostReceiver() {
+        if (vpnHostReceiver != null) return;
+        vpnHostReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context ctx, Intent intent) {
+                int    uid    = intent.getIntExtra("uid", -1);
+                String ipPort = intent.getStringExtra("ipPort");
+                if (ipPort == null || ipPort.isEmpty()) return;
+
+                boolean accept;
+                if (deviceWideFallback) {
+                    accept = true;
+                } else if (targetUid == -1) {
+                    accept = true; // whole-device mode, no app selected to scope to
+                } else if (uid == targetUid) {
+                    accept = true;
+                    unresolvedUidStreak = 0;
+                } else if (uid != -1) {
+                    // Resolved, but belongs to a different app — correctly filtered out.
+                    accept = false;
+                    unresolvedUidStreak = 0;
+                } else {
+                    // Owner UID could not be resolved on this device.
+                    accept = false;
+                    unresolvedUidStreak++;
+                    if (unresolvedUidStreak >= UID_RESOLVE_FALLBACK_THRESHOLD) {
+                        deviceWideFallback = true;
+                        Log.w(TAG, "Connection-owner UID could not be resolved for "
+                                + UID_RESOLVE_FALLBACK_THRESHOLD + " consecutive connections — "
+                                + "falling back to device-wide capture");
+                        sendFallbackNotice();
+                        accept = true; // this event itself: show it too, not just future ones
+                    }
+                }
+                if (!accept) return;
+
+                String ip = ipPort.contains(":") ? ipPort.substring(0, ipPort.lastIndexOf(':')) : ipPort;
+                if (ip.isEmpty() || ip.startsWith("127.") || ip.equals("::1")) return;
+                onNewActiveIp(ip);
+            }
+        };
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(vpnHostReceiver, new IntentFilter("com.netwatch.app.DEVICE_TRAFFIC"));
+    }
+
+    private void unregisterVpnHostReceiver() {
+        if (vpnHostReceiver == null) return;
+        try { LocalBroadcastManager.getInstance(this).unregisterReceiver(vpnHostReceiver); }
+        catch (Exception ignored) {}
+        vpnHostReceiver = null;
+    }
+
+    /** A new destination IP was captured for the monitored app — run it through the
+     *  same PTR/geo/companion-domain enrichment pipeline used for every discovered host. */
+    private void onNewActiveIp(String ip) {
+        if (!activeIpsFromVpn.add(ip)) return; // already known
+        if (!geoSubmitted.contains(ip)) { geoSubmitted.add(ip); fetchGeoInBackground(new ArrayList<>(Collections.singletonList(ip))); }
+        if (!submittedIps.contains(ip)) {
+            submittedIps.add(ip);
+            final String toResolve = ip;
+            ioExec.submit(() -> {
+                try {
+                    String host = InetAddress.getByName(toResolve).getHostName();
+                    String resolved = host.equals(toResolve) ? toResolve : host;
+                    dnsCache.put(toResolve, resolved);
+                    broadcastIpAsHost(toResolve);
+                } catch (Exception e) {
+                    dnsCache.put(toResolve, toResolve);
+                    broadcastIpAsHost(toResolve);
+                }
+            });
+        } else {
+            broadcastIpAsHost(ip);
+        }
     }
 
     // ── Domain seeding ────────────────────────────────────────────────────────
@@ -256,6 +349,8 @@ public class TrafficMonitorService extends Service {
 
     // ── Poll loop ─────────────────────────────────────────────────────────────
 
+    /** Runs every second purely for TX/RX byte-counter stats now — real host discovery
+     *  is event-driven via registerVpnHostReceiver() / onNewActiveIp() above. */
     private void poll() {
         // TrafficStats — prefer per-UID, fall back to device total for whole-device mode
         long tx, rx;
@@ -281,58 +376,6 @@ public class TrafficMonitorService extends Service {
             rxRate = Math.max(0, rx - lastRx);
         }
         lastTx = tx; lastRx = rx;
-
-        // Active IPs from /proc/net/tcp
-        List<String> activeIps = readAllEstablishedIps();
-
-        // If UID-scoped filtering keeps coming back empty (some OEM kernels hide other
-        // apps' socket entries entirely), switch to device-wide capture so the user
-        // still sees connections rather than a permanently blank log.
-        if (targetUid != -1 && !uidFilterDisabled) {
-            if (activeIps.isEmpty()) {
-                emptyUidPollStreak++;
-                if (emptyUidPollStreak >= UID_FALLBACK_THRESHOLD) {
-                    uidFilterDisabled = true;
-                    Log.w(TAG, "Per-app UID filtering returned no connections for "
-                            + UID_FALLBACK_THRESHOLD + "s — falling back to device-wide capture");
-                    sendFallbackNotice();
-                    activeIps = readAllEstablishedIps();
-                }
-            } else {
-                emptyUidPollStreak = 0;
-            }
-        }
-
-        // Collect IPs needing geo lookup
-        List<String> needGeo = new ArrayList<>();
-        for (String ip : activeIps) {
-            if (!geoSubmitted.contains(ip)) { needGeo.add(ip); geoSubmitted.add(ip); }
-        }
-        if (!needGeo.isEmpty()) fetchGeoInBackground(new ArrayList<>(needGeo));
-
-        // PTR reverse DNS for new IPs
-        for (String ip : activeIps) {
-            if (!submittedIps.contains(ip)) {
-                submittedIps.add(ip);
-                final String toResolve = ip;
-                ioExec.submit(() -> {
-                    try {
-                        String host = InetAddress.getByName(toResolve).getHostName();
-                        String resolved = host.equals(toResolve) ? toResolve : host;
-                        dnsCache.put(toResolve, resolved);
-                        broadcastIpAsHost(toResolve);
-                    } catch (Exception e) {
-                        dnsCache.put(toResolve, toResolve);
-                        broadcastIpAsHost(toResolve);
-                    }
-                });
-            }
-        }
-
-        // Broadcast any cached IPs not yet sent
-        for (String ip : activeIps) {
-            if (dnsCache.containsKey(ip)) broadcastIpAsHost(ip);
-        }
 
         // Stats-only broadcast so byte counters always update
         sendStatsBroadcast(tx, rx, txRate, rxRate, "");
@@ -461,60 +504,6 @@ public class TrafficMonitorService extends Service {
         sendBroadcast(ev);
     }
 
-    // ── /proc/net/tcp ─────────────────────────────────────────────────────────
-
-    private List<String> readAllEstablishedIps() {
-        List<String> ips = new ArrayList<>();
-        parseProcNetFile("/proc/net/tcp",  false, ips);
-        parseProcNetFile("/proc/net/tcp6", true,  ips);
-        return new ArrayList<>(new LinkedHashSet<>(ips));
-    }
-
-    private void parseProcNetFile(String path, boolean isIpv6, List<String> out) {
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line; boolean first = true;
-            while ((line = br.readLine()) != null) {
-                if (first) { first = false; continue; }
-                String[] parts = line.trim().split("\\s+");
-                if (parts.length < 4) continue;
-                String state = parts[3];
-                if (!"01".equals(state) && !"06".equals(state) && !"08".equals(state)) continue;
-                if (targetUid != -1 && !uidFilterDisabled && parts.length >= 8) {
-                    try { int uid = Integer.parseInt(parts[7]); if (uid != targetUid) continue; }
-                    catch (Exception ignored) {}
-                }
-                String remAddr = parts[2];
-                String ip = hexToIp(remAddr, isIpv6);
-                if (ip == null || ip.isEmpty()) continue;
-                if (ip.startsWith("0.0.0.0") || ip.startsWith("127.") || ip.equals("::1")) continue;
-                String portHex = remAddr.contains(":") ? remAddr.substring(remAddr.indexOf(':') + 1) : "0";
-                try { if (Integer.parseInt(portHex, 16) == 0) continue; } catch (Exception ignored) {}
-                out.add(ip);
-            }
-        } catch (Exception e) { Log.w(TAG, "parseProcNet " + path + ": " + e.getMessage()); }
-    }
-
-    private static String hexToIp(String hexAddr, boolean isIpv6) {
-        try {
-            int colon = hexAddr.indexOf(':');
-            if (colon < 0) return null;
-            String hexIp = hexAddr.substring(0, colon);
-            if (!isIpv6) {
-                long val = Long.parseLong(hexIp, 16);
-                return ((val)&0xFF)+"."+((val>>8)&0xFF)+"."+((val>>16)&0xFF)+"."+((val>>24)&0xFF);
-            } else {
-                if (hexIp.length() < 32) return null;
-                byte[] b = new byte[16];
-                for (int w = 0; w < 4; w++) {
-                    long word = Long.parseLong(hexIp.substring(w*8, w*8+8), 16);
-                    b[w*4]=(byte)(word&0xFF); b[w*4+1]=(byte)((word>>8)&0xFF);
-                    b[w*4+2]=(byte)((word>>16)&0xFF); b[w*4+3]=(byte)((word>>24)&0xFF);
-                }
-                return InetAddress.getByAddress(b).getHostAddress();
-            }
-        } catch (Exception e) { return null; }
-    }
-
     // ── HTTP helper ───────────────────────────────────────────────────────────
 
     private static String postJson(String urlStr, String body) {
@@ -537,7 +526,9 @@ public class TrafficMonitorService extends Service {
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @Override public void onDestroy() {
-        running = false; handler.removeCallbacks(pollRunnable); ioExec.shutdownNow(); super.onDestroy();
+        running = false; handler.removeCallbacks(pollRunnable); ioExec.shutdownNow();
+        unregisterVpnHostReceiver();
+        super.onDestroy();
     }
     @Override public IBinder onBind(Intent intent) { return null; }
 
