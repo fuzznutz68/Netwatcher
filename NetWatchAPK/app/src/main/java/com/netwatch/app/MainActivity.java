@@ -837,6 +837,21 @@ public class MainActivity extends Activity {
         monStatusText.setText((isRussian ? "🟢  Мониторинг: " : "🟢  Monitoring: ") + selectedApp.label);
         monStatusText.setTextColor(Color.parseColor("#66BB6A"));
 
+        // Real per-app host discovery needs the VPN capture engine (proc/net/tcp can't
+        // see other apps' sockets on modern Android). Ask for VPN consent once, then start.
+        pendingVpnPurpose = VPN_PURPOSE_TRAFFIC;
+        android.content.Intent vpnIntent = android.net.VpnService.prepare(this);
+        if (vpnIntent != null) {
+            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+        } else {
+            launchTrafficMonitoringInternal();
+        }
+    }
+
+    private void launchTrafficMonitoringInternal() {
+        trafficVpnEngineActive = true;
+        ensureVpnEngineRunning();
+
         Intent si = new Intent(this, TrafficMonitorService.class);
         si.putExtra("target_uid",  selectedApp.uid);
         si.putExtra("target_pkg",  selectedApp.packageName);
@@ -856,6 +871,16 @@ public class MainActivity extends Activity {
         Intent si = new Intent(this, TrafficMonitorService.class);
         si.setAction(TrafficMonitorService.ACTION_STOP);
         startService(si);
+
+        // Only tear down the shared VPN engine if Device Monitor isn't also relying on it.
+        if (trafficVpnEngineActive) {
+            trafficVpnEngineActive = false;
+            if (!deviceMonRunning) {
+                Intent vpnStop = new Intent(this, NetWatchVpnService.class);
+                vpnStop.setAction(NetWatchVpnService.ACTION_STOP);
+                startService(vpnStop);
+            }
+        }
 
         // Persist this session to Connection History (no-op if nothing was logged)
         if (!trafficLogForExport.isEmpty()) {
@@ -2660,6 +2685,7 @@ public class MainActivity extends Activity {
     }
 
     private void startDeviceMonitor() {
+        pendingVpnPurpose = VPN_PURPOSE_DEVICE;
         android.content.Intent vpnIntent = android.net.VpnService.prepare(this);
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
@@ -2668,12 +2694,41 @@ public class MainActivity extends Activity {
         launchDeviceVpn();
     }
 
+    // 0=none, 1=Device Monitor tab, 2=Traffic Monitor tab (per-app, VPN-backed host discovery)
+    private static final int VPN_PURPOSE_DEVICE  = 1;
+    private static final int VPN_PURPOSE_TRAFFIC = 2;
+    private int pendingVpnPurpose = 0;
+    private boolean trafficVpnEngineActive = false; // NetWatchVpnService started specifically for Traffic Monitor
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            launchDeviceVpn();
+        if (requestCode == VPN_REQUEST_CODE) {
+            int purpose = pendingVpnPurpose;
+            pendingVpnPurpose = 0;
+            if (resultCode == RESULT_OK) {
+                if (purpose == VPN_PURPOSE_DEVICE) {
+                    launchDeviceVpn();
+                } else if (purpose == VPN_PURPOSE_TRAFFIC) {
+                    launchTrafficMonitoringInternal();
+                }
+            } else if (purpose == VPN_PURPOSE_TRAFFIC) {
+                // User declined VPN permission — Traffic Monitor can't discover real hosts
+                // without it, but stats-only monitoring still runs.
+                showToast(isRussian
+                    ? "Разрешение VPN отклонено — обнаружение хостов недоступно, статистика трафика продолжается"
+                    : "VPN permission declined — host discovery unavailable, traffic stats still active");
+                launchTrafficMonitoringInternal();
+            }
         }
+    }
+
+    /** Ensures the shared VPN capture engine is running (harmless no-op if Device
+     *  Monitor already has it up) so Traffic Monitor gets real per-app host discovery. */
+    private void ensureVpnEngineRunning() {
+        android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
+        svc.setAction("START");
+        startForegroundService(svc);
     }
 
     private void launchDeviceVpn() {
@@ -2743,11 +2798,14 @@ public class MainActivity extends Activity {
             deviceReceiver = null;
         }
 
-        android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
-        svc.setAction(NetWatchVpnService.ACTION_STOP);
-        startService(svc);
-
         deviceMonRunning = false;
+
+        // Only tear down the shared VPN engine if Traffic Monitor isn't also relying on it.
+        if (!trafficVpnEngineActive) {
+            android.content.Intent svc = new android.content.Intent(this, NetWatchVpnService.class);
+            svc.setAction(NetWatchVpnService.ACTION_STOP);
+            startService(svc);
+        }
         if (deviceToggleBtn != null) {
             deviceToggleBtn.setText(isRussian ? "▶  СТАРТ" : "▶  START");
             deviceToggleBtn.setBackgroundResource(R.drawable.btn_device_start);
