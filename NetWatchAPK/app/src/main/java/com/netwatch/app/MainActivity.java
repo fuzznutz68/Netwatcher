@@ -681,6 +681,8 @@ public class MainActivity extends Activity {
         themeState.set(newLight);
         ThemeManager.setLight(this, newLight);
         ThemeManager.apply(findViewById(android.R.id.content), newLight);
+        refreshSpinnerTheme(appSpinner);
+        refreshSpinnerTheme(speedServerSpinner);
         showToast(newLight
             ? (isRussian ? "☀️ Светлая тема включена" : "☀️ Light theme enabled")
             : (isRussian ? "🌙 Тёмная тема включена" : "🌙 Dark theme enabled"));
@@ -843,9 +845,7 @@ public class MainActivity extends Activity {
 
             appList = entries;
             mainHandler.post(() -> {
-                appAdapter = new ArrayAdapter<>(this,
-                        android.R.layout.simple_spinner_item, appList);
-                appAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                appAdapter = new ThemedArrayAdapter<>(appList);
                 appSpinner.setAdapter(appAdapter);
                 if (!appList.isEmpty()) selectedApp = appList.get(0);
             });
@@ -2469,9 +2469,7 @@ public class MainActivity extends Activity {
         // Populate spinner with server labels
         String[] labels = new String[SPEED_SERVERS.length];
         for (int i = 0; i < SPEED_SERVERS.length; i++) labels[i] = SPEED_SERVERS[i][0];
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, labels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ThemedArrayAdapter<String> adapter = new ThemedArrayAdapter<>(labels);
         speedServerSpinner.setAdapter(adapter);
 
         speedRunBtn.setOnClickListener(v -> {
@@ -2902,5 +2900,48 @@ public class MainActivity extends Activity {
             android.widget.Toast.makeText(this, "Export failed: " + e.getMessage(),
                 android.widget.Toast.LENGTH_LONG).show();
         }
+    }
+
+    // ── Theme-aware Spinner Adapter ─────────────────────────────────────────
+    // Spinners (App picker, Speed Test server) use the platform's built-in
+    // simple_spinner_item layout, whose default text color does not track our
+    // custom Light/Dark palette. This adapter force-tints both the collapsed
+    // selected-item view and the dropdown rows on every bind, so they stay
+    // readable in either theme.
+    private class ThemedArrayAdapter<T> extends ArrayAdapter<T> {
+        ThemedArrayAdapter(java.util.List<T> items) {
+            super(MainActivity.this, android.R.layout.simple_spinner_item, items);
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        }
+        ThemedArrayAdapter(T[] items) {
+            super(MainActivity.this, android.R.layout.simple_spinner_item, items);
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        }
+        private void tint(View v) {
+            if (v instanceof TextView) {
+                ((TextView) v).setTextColor(themeState.isLight()
+                    ? Color.parseColor("#16202B") : Color.parseColor("#E0E8F0"));
+            }
+        }
+        @Override public View getView(int position, View convertView, android.view.ViewGroup parent) {
+            View v = super.getView(position, convertView, parent);
+            tint(v);
+            return v;
+        }
+        @Override public View getDropDownView(int position, View convertView, android.view.ViewGroup parent) {
+            View v = super.getDropDownView(position, convertView, parent);
+            tint(v);
+            return v;
+        }
+    }
+
+    /** Force a Spinner's currently-shown item to re-bind through the adapter so a
+     *  freshly-toggled theme color is applied immediately (without losing selection). */
+    private void refreshSpinnerTheme(Spinner spinner) {
+        if (spinner == null || spinner.getAdapter() == null) return;
+        int pos = spinner.getSelectedItemPosition();
+        android.widget.SpinnerAdapter ad = spinner.getAdapter();
+        spinner.setAdapter(ad);
+        if (pos >= 0 && pos < ad.getCount()) spinner.setSelection(pos, false);
     }
 }

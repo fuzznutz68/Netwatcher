@@ -111,6 +111,13 @@ public class ThemeManager {
     }
 
     private static void remapText(TextView tv, boolean light) {
+        // Buttons (tab bar + action buttons like START/STOP/EXPORT) always sit on a
+        // hardcoded dark/colorful "chip" background (selector/shape drawables that are
+        // intentionally left untouched by remapBackground). Their light #e0e8f0 text is
+        // part of that fixed design and must NOT be remapped — otherwise in light mode
+        // the text turns dark while the background stays dark, making it unreadable.
+        if (tv instanceof android.widget.Button) return;
+
         Map<Integer, Integer> map = light ? TEXT_MAP : TEXT_MAP_REV;
         int current = tv.getCurrentTextColor();
         Integer mapped = map.get(current);
