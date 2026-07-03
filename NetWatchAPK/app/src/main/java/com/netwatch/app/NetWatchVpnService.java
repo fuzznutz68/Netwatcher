@@ -351,6 +351,12 @@ public class NetWatchVpnService extends VpnService {
 
     private void reportConnection(String protoLabel, int protoNum, String localIp, int localPort,
                                    String ip, int port) {
+        // Raw packet capture sees EVERY destination — including local-network chatter
+        // (DNS resolver, gateway, multicast/mDNS, link-local) that a socket-table-based
+        // view would never show. Skip those so the log only lists real internet hosts,
+        // not something that reads like a traceroute hop list.
+        if (isPrivateOrLocalDestination(ip)) return;
+
         // Best-effort: identify which app's UID owns this connection. Requires API 29+ and
         // only works while THIS app is the active VpnService — exactly our situation here.
         // Some OEM builds still refuse to resolve it; callers must treat -1 as "unknown".
@@ -391,6 +397,21 @@ public class NetWatchVpnService extends VpnService {
             return cm.getConnectionOwnerUid(protoNum, local, remote);
         } catch (Exception e) {
             return -1;
+        }
+    }
+
+    /** True for loopback / link-local / RFC1918 private / multicast / broadcast addresses —
+     *  local-network infrastructure, not a real remote host worth showing in the log. */
+    private static boolean isPrivateOrLocalDestination(String ip) {
+        if (ip == null || ip.isEmpty()) return true;
+        if (ip.equals("255.255.255.255")) return true;
+        try {
+            // For a literal IP string this only parses bytes — no DNS lookup/network call.
+            InetAddress addr = InetAddress.getByName(ip);
+            return addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()
+                    || addr.isMulticastAddress() || addr.isAnyLocalAddress();
+        } catch (Exception e) {
+            return false; // if we can't parse it, don't silently drop it
         }
     }
 
