@@ -323,6 +323,10 @@ public class MainActivity extends Activity {
         trafficReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
+                if (intent.getBooleanExtra(TrafficMonitorService.EXTRA_FALLBACK_NOTICE, false)) {
+                    showFallbackNotice();
+                    return;
+                }
                 long txBytes = intent.getLongExtra(TrafficMonitorService.EXTRA_TX_BYTES, 0);
                 long rxBytes = intent.getLongExtra(TrafficMonitorService.EXTRA_RX_BYTES, 0);
                 long txRate  = intent.getLongExtra(TrafficMonitorService.EXTRA_TX_RATE,  0);
@@ -940,6 +944,52 @@ public class MainActivity extends Activity {
                h.equals("connectivitycheck.gstatic.com") ||
                h.equals("clients3.google.com") ||
                h.equals("connectivitycheck.android.com");
+    }
+
+    /** Some OEM kernels hide other apps' /proc/net/tcp entries entirely from
+     *  non-root apps, so per-app filtering falls back to device-wide capture.
+     *  Once that happens the log is no longer scoped to the selected app, so the
+     *  "unknown host" allowlist alert would just fire for every other app on the
+     *  device — pure noise. Show a one-time banner and auto-mute the alert for
+     *  the rest of this session (the saved preference itself is left untouched). */
+    private void showFallbackNotice() {
+        if (hostLogContainer.findViewWithTag("fallback_notice") != null) return;
+
+        LinearLayout notice = new LinearLayout(this);
+        notice.setTag("fallback_notice");
+        notice.setOrientation(LinearLayout.VERTICAL);
+        notice.setBackgroundColor(Color.parseColor("#1A2A3A"));
+        notice.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        nlp.setMargins(0, dp(4), 0, dp(4));
+        notice.setLayoutParams(nlp);
+
+        TextView icon = new TextView(this);
+        icon.setText("ℹ️  " + (isRussian ? "Фильтр по приложению недоступен" : "Per-App Filtering Unavailable"));
+        icon.setTextSize(13); icon.setTextColor(Color.parseColor("#00E5FF"));
+        icon.setTypeface(null, android.graphics.Typeface.BOLD);
+        notice.addView(icon);
+
+        TextView msg = new TextView(this);
+        msg.setText(isRussian
+            ? "Это устройство скрывает сетевые соединения других приложений. Показан трафик всего устройства. Оповещения о неизвестных хостах отключены на это сеанс, так как они больше не относятся только к выбранному приложению."
+            : "This device hides other apps' network connections, so all device traffic is shown instead of just the selected app. The unknown-host alert has been muted for this session since it's no longer scoped to one app.");
+        msg.setTextSize(12); msg.setTextColor(Color.parseColor("#90A4AE"));
+        msg.setPadding(0, dp(4), 0, 0);
+        notice.addView(msg);
+
+        hostLogContainer.addView(notice, 0);
+
+        // Auto-mute the unknown-host alert for this session only — it would otherwise
+        // fire constantly for domains contacted by apps other than the one you picked.
+        if (alertsEnabled) {
+            alertsEnabled = false;
+            alertSwitch.setChecked(false);
+            showToast(isRussian
+                ? "🔕 Оповещения отключены (фильтр по приложению недоступен)"
+                : "🔕 Unknown-host alerts muted (per-app filtering unavailable)");
+        }
     }
 
     private void showWebViewNotice() {

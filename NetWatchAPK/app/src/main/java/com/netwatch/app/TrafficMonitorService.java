@@ -45,6 +45,7 @@ public class TrafficMonitorService extends Service {
     public static final String EXTRA_RX_RATE   = "rx_rate";
     public static final String EXTRA_HOSTS     = "hosts";       // newline-separated "flag host (city, country) [org]"
     public static final String EXTRA_TIMESTAMP = "timestamp";
+    public static final String EXTRA_FALLBACK_NOTICE = "fallback_notice"; // true = per-app UID filtering unavailable on this device
 
     private static final String CHANNEL_ID      = "netwatch_monitor";
     private static final int    NOTIF_ID        = 43;
@@ -294,9 +295,7 @@ public class TrafficMonitorService extends Service {
                     uidFilterDisabled = true;
                     Log.w(TAG, "Per-app UID filtering returned no connections for "
                             + UID_FALLBACK_THRESHOLD + "s — falling back to device-wide capture");
-                    List<String> notice = new ArrayList<>();
-                    notice.add("ℹ️  Per-app filtering unavailable on this device — showing all device traffic");
-                    broadcastNewHosts(notice);
+                    sendFallbackNotice();
                     activeIps = readAllEstablishedIps();
                 }
             } else {
@@ -438,6 +437,15 @@ public class TrafficMonitorService extends Service {
         ev.putExtra(EXTRA_RX_RATE,   0L);
         ev.putExtra(EXTRA_HOSTS,     sb.toString().trim());
         ev.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
+        sendBroadcast(ev);
+    }
+
+    /** One-shot system notice — kept OUT of EXTRA_HOSTS so it never gets treated as a
+     *  real destination (no false "unknown host" alert/vibration, no allowlist checks). */
+    private void sendFallbackNotice() {
+        Intent ev = new Intent(EVENT_ACTION);
+        ev.setPackage(getPackageName());
+        ev.putExtra(EXTRA_FALLBACK_NOTICE, true);
         sendBroadcast(ev);
     }
 

@@ -2548,6 +2548,7 @@ NetWatch/2.0.3
 tertiary_container
 scale
 kotlinName
+fallback_notice
 androidx.contentpager.content.wakelockid
 Variables
 mAccessibilityDelegate
@@ -16542,8 +16543,7 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
     @com.netwatch.net:attr/fabAnchorMode
     @com.netwatch.net:attr/removeEmbeddedFabElevation
     @com.netwatch.net:attr/fabAlignmentMode
-    @com.netwatch.net:attr/menuAlignmentMode
-   ummy file of size 9 bytes)
+    @com.netwatch.net:attr/menuAced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/abc_slide_out_top.xml: 556 bytes (replaced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/design_snackbar_in.xml: 238 bytes (replaced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/design_snackbar_out.xml: 238 bytes (replaced with small dummy file of size 9 bytes)
