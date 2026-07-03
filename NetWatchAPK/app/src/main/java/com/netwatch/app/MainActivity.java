@@ -435,7 +435,8 @@ public class MainActivity extends Activity {
                         "  • Geo-IP поиск для каждого соединения\n" +
                         "  • Обнаружение смежных доменов (CDN, поддомены)\n" +
                         "  • Вибрация при соединении с неизвестным доменом\n" +
-                        "  • Экспорт лога соединений в формате RFC 4180 CSV\n\n" +
+                        "  • Экспорт лога соединений в формате RFC 4180 CSV\n" +
+                        "  • Каждая сессия автоматически сохраняется в 🕓 Историю соединений (меню)\n\n" +
                         "Нажмите на строку домена — запустит полное сканирование Domain Intel (поддомены, CDN, IP).\n" +
                         "Долгое нажатие на строку — копирует хост или IP в буфер обмена.");
                 } else {
@@ -449,7 +450,8 @@ public class MainActivity extends Activity {
                         "  • Geo-IP lookup for every connection\n" +
                         "  • Companion domain detection (CDNs, subdomains)\n" +
                         "  • Vibration alert for unknown/unlisted domains\n" +
-                        "  • Export connection log as RFC 4180 CSV\n\n" +
+                        "  • Export connection log as RFC 4180 CSV\n" +
+                        "  • Every session is auto-saved to 🕓 Connection History (overflow menu)\n\n" +
                         "Tap a domain row — runs a full Domain Intel scan (subdomains, CDN, IPs).\n" +
                         "Long-press a domain row — copy hostname or IP to clipboard.");
                 }
@@ -673,6 +675,132 @@ public class MainActivity extends Activity {
             .show();
     }
 
+    // ── Theme Toggle ─────────────────────────────────────────────────────────
+    private void toggleTheme() {
+        boolean newLight = !themeState.isLight();
+        themeState.set(newLight);
+        ThemeManager.setLight(this, newLight);
+        ThemeManager.apply(findViewById(android.R.id.content), newLight);
+        showToast(newLight
+            ? (isRussian ? "☀️ Светлая тема включена" : "☀️ Light theme enabled")
+            : (isRussian ? "🌙 Тёмная тема включена" : "🌙 Dark theme enabled"));
+    }
+
+    // ── Connection History ───────────────────────────────────────────────────
+    private void showConnectionHistory() {
+        List<HistoryManager.Session> sessions = HistoryManager.listAll(this);
+
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(dp(4), dp(4), dp(4), dp(4));
+        scroll.addView(container);
+
+        if (sessions.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText(isRussian
+                ? "История пуста.
+Запустите мониторинг трафика, чтобы сохранить сессию."
+                : "No saved sessions yet.
+Run Traffic Monitor to save one automatically.");
+            empty.setTextColor(Color.parseColor("#546E7A"));
+            empty.setTextSize(13);
+            empty.setPadding(dp(8), dp(24), dp(8), dp(24));
+            container.addView(empty);
+        } else {
+            SimpleDateFormat fmt = new SimpleDateFormat("MMM d, HH:mm", Locale.US);
+            for (HistoryManager.Session s : sessions) {
+                LinearLayout card = makeCardContainer();
+
+                TextView title = new TextView(this);
+                title.setText("📱 " + s.appLabel);
+                title.setTextSize(14);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setTextColor(Color.parseColor("#00E5FF"));
+                card.addView(title);
+
+                long durationSec = Math.max(0, (s.endTime - s.startTime) / 1000);
+                String duration = durationSec >= 60
+                    ? (durationSec / 60) + "m " + (durationSec % 60) + "s"
+                    : durationSec + "s";
+                TextView meta = new TextView(this);
+                meta.setText(fmt.format(new Date(s.startTime)) + "  •  " + duration + "  •  " +
+                    s.connectionCount() + (isRussian ? " хостов" : " hosts"));
+                meta.setTextSize(12);
+                meta.setTypeface(Typeface.MONOSPACE);
+                meta.setTextColor(Color.parseColor("#78909C"));
+                meta.setPadding(0, dp(4), 0, 0);
+                card.addView(meta);
+
+                card.setOnClickListener(v -> showSessionDetail(s));
+                container.addView(card);
+            }
+        }
+
+        ThemeManager.apply(scroll, themeState.isLight());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+            .setTitle(isRussian ? "🕓 История соединений" : "🕓 Connection History")
+            .setView(scroll)
+            .setPositiveButton(isRussian ? "Закрыть" : "Close", null);
+        if (!sessions.isEmpty()) {
+            builder.setNeutralButton(isRussian ? "Очистить всё" : "Clear All", (d, w) -> {
+                HistoryManager.deleteAll(this);
+                showToast(isRussian ? "История очищена" : "History cleared");
+            });
+        }
+        builder.show();
+    }
+
+    private void showSessionDetail(HistoryManager.Session s) {
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(dp(8), dp(8), dp(8), dp(8));
+        scroll.addView(container);
+
+        if (s.hosts.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText(isRussian ? "Нет данных" : "No data");
+            empty.setTextColor(Color.parseColor("#546E7A"));
+            container.addView(empty);
+        } else {
+            for (Map.Entry<String, String> e : s.hosts.entrySet()) {
+                TextView row = new TextView(this);
+                row.setText(e.getValue() + "   " + e.getKey());
+                row.setTextSize(12);
+                row.setTypeface(Typeface.MONOSPACE);
+                row.setTextColor(Color.parseColor("#C8D8E8"));
+                row.setPadding(0, dp(3), 0, dp(3));
+                container.addView(row);
+            }
+        }
+
+        ThemeManager.apply(scroll, themeState.isLight());
+
+        new AlertDialog.Builder(this)
+            .setTitle("📱 " + s.appLabel)
+            .setView(scroll)
+            .setPositiveButton(isRussian ? "Экспорт CSV" : "Export CSV", (d, w) -> exportSessionCsv(s))
+            .setNegativeButton(isRussian ? "Удалить" : "Delete", (d, w) -> {
+                HistoryManager.delete(this, s.id);
+                showToast(isRussian ? "Сессия удалена" : "Session deleted");
+            })
+            .setNeutralButton(isRussian ? "Закрыть" : "Close", null)
+            .show();
+    }
+
+    private void exportSessionCsv(HistoryManager.Session s) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("timestamp,host_or_ip\n");
+        for (Map.Entry<String, String> e : s.hosts.entrySet()) {
+            sb.append(csv(e.getValue())).append(",").append(csv(e.getKey())).append("\n");
+        }
+        String ts = new SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(new Date(s.startTime));
+        String filename = "NetWatch_History_" + s.appLabel.replaceAll("[^a-zA-Z0-9]", "_") + "_" + ts + ".csv";
+        shareCsv(filename, sb.toString());
+    }
+
     private void loadAppList() {
         executor.execute(() -> {
             PackageManager pm = getPackageManager();
@@ -733,6 +861,7 @@ public class MainActivity extends Activity {
 
         clearLog();
         monitoring = true;
+        monitoringStartTime = System.currentTimeMillis();
         startMonBtn.setEnabled(false);
         stopMonBtn.setEnabled(true);
         appSpinner.setEnabled(false);
@@ -759,6 +888,19 @@ public class MainActivity extends Activity {
         Intent si = new Intent(this, TrafficMonitorService.class);
         si.setAction(TrafficMonitorService.ACTION_STOP);
         startService(si);
+
+        // Persist this session to Connection History (no-op if nothing was logged)
+        if (!trafficLogForExport.isEmpty()) {
+            HistoryManager.Session s = new HistoryManager.Session();
+            s.appLabel    = selectedApp != null ? selectedApp.label : "Device";
+            s.packageName = selectedApp != null ? selectedApp.packageName : "";
+            s.startTime   = monitoringStartTime;
+            s.endTime     = System.currentTimeMillis();
+            s.txBytes     = lastKnownTx;
+            s.rxBytes     = lastKnownRx;
+            s.hosts.putAll(trafficLogForExport);
+            HistoryManager.save(this, s);
+        }
     }
 
     private void clearLog() {
