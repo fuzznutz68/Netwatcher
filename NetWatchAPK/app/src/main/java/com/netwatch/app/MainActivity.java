@@ -72,10 +72,6 @@ import android.widget.TextView;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
-import android.app.AppOpsManager;
-import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManager;
-import android.provider.Settings;
 
 public class MainActivity extends Activity {
 
@@ -167,102 +163,6 @@ public class MainActivity extends Activity {
     private static final String IP_WHOIS_URL = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
     private long monitoringStartTime = 0L;
-
-    // ── Auto-stop when the monitored app is closed ─────────────────────────
-    // Uses UsageStatsManager (requires the "Usage Access" special permission) to detect
-    // when the target app leaves the foreground and stays away — signalling the user
-    // closed it — so the monitor doesn't keep running silently in the background.
-    private final Runnable appCloseWatcher = this::checkIfMonitoredAppClosed;
-    private static final long APP_CLOSE_POLL_MS   = 3000;  // how often to check
-    private static final long APP_CLOSE_GRACE_MS  = 6000;  // must be away this long to count as "closed"
-    private static final long APP_CLOSE_STARTUP_GRACE_MS = 5000; // ignore checks right after Start (auto-launch transition)
-    private long lastForegroundTimeForTarget = 0L; // 0 = "seen since start", set once target leaves foreground
-
-    private boolean hasUsageAccessPermission() {
-        try {
-            AppOpsManager aom = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-            int mode;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                mode = aom.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                        android.os.Process.myUid(), getPackageName());
-            } else {
-                mode = aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                        android.os.Process.myUid(), getPackageName());
-            }
-            return mode == AppOpsManager.MODE_ALLOWED;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void maybePromptForUsageAccess() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        if (hasUsageAccessPermission() || prefs.getBoolean("usage_access_prompted", false)) return;
-        prefs.edit().putBoolean("usage_access_prompted", true).apply();
-
-        new AlertDialog.Builder(this)
-            .setTitle(isRussian ? "Автостоп при закрытии приложения" : "Auto-stop when app closes")
-            .setMessage(isRussian
-                ? "Чтобы мониторинг трафика автоматически останавливался, когда вы закрываете отслеживаемое приложение, предоставьте доступ к статистике использования. Это необязательно — без него мониторинг работает как обычно, но не остановится сам."
-                : "To have traffic monitoring stop automatically when you close the app you're tracking, grant Usage Access. This is optional — monitoring still works fine without it, it just won't auto-stop.")
-            .setPositiveButton(isRussian ? "Настройки" : "Open Settings", (d, w) -> {
-                try { startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } catch (Exception ignored) {}
-            })
-            .setNegativeButton(isRussian ? "Не сейчас" : "Not now", null)
-            .show();
-    }
-
-    /** Returns the package name currently in the foreground, using recent UsageEvents,
-     *  or null if it can't be determined (permission missing / no events yet). */
-    private String getCurrentForegroundPackage(long sinceMs) {
-        try {
-            UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usm == null) return null;
-            long now = System.currentTimeMillis();
-            UsageEvents events = usm.queryEvents(sinceMs, now);
-            String lastForegroundPkg = null;
-            UsageEvents.Event ev = new UsageEvents.Event();
-            while (events.hasNextEvent()) {
-                events.getNextEvent(ev);
-                if (ev.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND
-                        || ev.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
-                    lastForegroundPkg = ev.getPackageName();
-                }
-            }
-            return lastForegroundPkg;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private void checkIfMonitoredAppClosed() {
-        if (!monitoring || selectedApp == null || !hasUsageAccessPermission()) return;
-
-        long elapsedSinceStart = System.currentTimeMillis() - monitoringStartTime;
-        if (elapsedSinceStart < APP_CLOSE_STARTUP_GRACE_MS) {
-            mainHandler.postDelayed(appCloseWatcher, APP_CLOSE_POLL_MS);
-            return;
-        }
-
-        String fg = getCurrentForegroundPackage(System.currentTimeMillis() - APP_CLOSE_POLL_MS - 500);
-        long now = System.currentTimeMillis();
-        if (fg != null && fg.equals(selectedApp.packageName)) {
-            lastForegroundTimeForTarget = now; // still in front — reset the "away" clock
-        } else if (fg != null) {
-            // Some other app (or launcher) took the foreground — start/continue the away-clock
-            if (lastForegroundTimeForTarget == 0L) lastForegroundTimeForTarget = now;
-            if (now - lastForegroundTimeForTarget >= APP_CLOSE_GRACE_MS) {
-                String closedAppName = selectedApp.label;
-                stopMonitoring();
-                showToast(isRussian
-                    ? "🔒 " + closedAppName + " закрыт — мониторинг остановлен автоматически"
-                    : "🔒 " + closedAppName + " closed — monitoring stopped automatically");
-                return; // stopMonitoring() already cancels further polling
-            }
-        }
-
-        mainHandler.postDelayed(appCloseWatcher, APP_CLOSE_POLL_MS);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -523,7 +423,7 @@ public class MainActivity extends Activity {
                         "  • Обнаружение смежных доменов (CDN, поддомены)\n" +
                         "  • Вибрация при соединении с неизвестным доменом\n" +
                         "  • Экспорт лога соединений в формате RFC 4180 CSV\n" +
-                        "  • Мониторинг останавливается автоматически, если вы закроете приложение (требуется доступ к статистике использования)\n" +
+                        "  • Мониторинг автоматически останавливается при закрытии NetWatch\n" +
                         "  • Каждая сессия автоматически сохраняется в 🕓 Историю соединений (меню)\n\n" +
                         "Нажмите на строку домена — запустит полное сканирование Domain Intel (поддомены, CDN, IP).\n" +
                         "Долгое нажатие на строку — копирует хост или IP в буфер обмена.");
@@ -539,7 +439,7 @@ public class MainActivity extends Activity {
                         "  • Companion domain detection (CDNs, subdomains)\n" +
                         "  • Vibration alert for unknown/unlisted domains\n" +
                         "  • Export connection log as RFC 4180 CSV\n" +
-                        "  • Monitoring auto-stops when you close the app (requires Usage Access permission)\n" +
+                        "  • Monitoring automatically stops when NetWatch itself is closed\n" +
                         "  • Every session is auto-saved to 🕓 Connection History (overflow menu)\n\n" +
                         "Tap a domain row — runs a full Domain Intel scan (subdomains, CDN, IPs).\n" +
                         "Long-press a domain row — copy hostname or IP to clipboard.");
@@ -932,15 +832,9 @@ public class MainActivity extends Activity {
         clearLog();
         monitoring = true;
         monitoringStartTime = System.currentTimeMillis();
-        lastForegroundTimeForTarget = 0L;
         startMonBtn.setEnabled(false);
         stopMonBtn.setEnabled(true);
         appSpinner.setEnabled(false);
-
-        // Kick off (or prompt to enable) the auto-stop-on-close watcher
-        maybePromptForUsageAccess();
-        mainHandler.removeCallbacks(appCloseWatcher);
-        mainHandler.postDelayed(appCloseWatcher, APP_CLOSE_POLL_MS);
 
         monStatusText.setText((isRussian ? "🟢  Мониторинг: " : "🟢  Monitoring: ") + selectedApp.label);
         monStatusText.setTextColor(Color.parseColor("#66BB6A"));
@@ -969,7 +863,6 @@ public class MainActivity extends Activity {
 
     private void stopMonitoring() {
         monitoring = false;
-        mainHandler.removeCallbacks(appCloseWatcher);
         startMonBtn.setEnabled(true);
         stopMonBtn.setEnabled(false);
         appSpinner.setEnabled(true);
@@ -2192,7 +2085,6 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         try { unregisterReceiver(trafficReceiver); } catch (Exception ignored) {}
-        mainHandler.removeCallbacks(appCloseWatcher);
         executor.shutdownNow();
     }
 

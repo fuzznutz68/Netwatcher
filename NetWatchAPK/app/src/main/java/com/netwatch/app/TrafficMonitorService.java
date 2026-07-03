@@ -546,6 +546,15 @@ public class TrafficMonitorService extends Service {
     }
     @Override public IBinder onBind(Intent intent) { return null; }
 
+    /** Fires when the user swipes NetWatch away from Recents (task removed). Stop
+     *  monitoring immediately — it shouldn't keep running once the app itself is closed. */
+    @Override public void onTaskRemoved(Intent rootIntent) {
+        running = false;
+        stopForeground(true);
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
     private void createChannel() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "NetWatch Monitor", NotificationManager.IMPORTANCE_LOW);

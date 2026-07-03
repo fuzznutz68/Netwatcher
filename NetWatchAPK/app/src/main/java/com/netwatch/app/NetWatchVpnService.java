@@ -80,6 +80,17 @@ public class NetWatchVpnService extends VpnService {
         super.onDestroy();
     }
 
+    /** Fires when the user swipes NetWatch away from Recents (task removed). The VPN
+     *  tunnel has no business staying up once the app itself is closed, so tear it down
+     *  immediately rather than relying on MainActivity (which may no longer exist). */
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        running = false;
+        stopForeground(true);
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
     private void closeVpn() {
         try { if (vpnInterface != null) { vpnInterface.close(); vpnInterface = null; } }
         catch (Exception ignored) {}

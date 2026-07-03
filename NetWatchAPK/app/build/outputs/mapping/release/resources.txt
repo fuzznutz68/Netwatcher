@@ -152,7 +152,6 @@ androidx.core.app.unusedapprestrictio...
 RESULT_BASELINE_PROFILE_NOT_FOUND
 GitHub
 DEEP_COPY_VALIDATOR_KEY
-android:get_usage_stats
 sColorStateCacheLock
 _invoked
 twitch.tv
@@ -708,7 +707,6 @@ TraceCompat
 invokeSuspend
 AnimatedStateListDrawableCompat
 BLOCKED
-Настройки
 http://speedtest.newark.linode.com
 onBackInvokedDispatcher
 uid
@@ -962,7 +960,6 @@ fd00::1
 thread
 ResourceManagerInternal
 com.mediatek.
-android.settings.USAGE_ACCESS_SETTINGS
 Trace
 wrap_content
 ACTVAutoSizeHelper
@@ -1688,7 +1685,6 @@ ContextCompat
 addGhost
 view
 percentHeight
-usage_access_prompted
 NewApi
 ViewCompat
 To
@@ -16546,8 +16542,9 @@ Marking attr:viewTransitionOnCross:2130904256 used because it matches string poo
 @com.netwatch.net:style/Widget_Material3_BottomAppBar_Legacy : reachable=false
     @com.netwatch.net:style/Widget_MaterialComponents_BottomAppBar
     @com.netwatch.net:attr/fabAnimationMode
-    @com.netwatchc_slide_in_top.xml: 556 bytes (replaced with small dummy file of size 9 bytes)
-Skipped unused resource res/anim/abc_slide_out_bottom.xml: 555 bytes (replaced with small dummy file of size 9 bytes)
+    @com.netwatch.net:attr/fabAnchorMode
+    @com.netwatch.net:attr/removeEmbeddedFabElevation
+    @com.netwatch.net:attres/anim/abc_slide_out_bottom.xml: 555 bytes (replaced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/abc_slide_out_top.xml: 556 bytes (replaced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/design_snackbar_in.xml: 238 bytes (replaced with small dummy file of size 9 bytes)
 Skipped unused resource res/anim/design_snackbar_out.xml: 238 bytes (replaced with small dummy file of size 9 bytes)

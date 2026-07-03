@@ -74,6 +74,15 @@ public class DeviceMonitorService extends Service {
         super.onDestroy();
     }
 
+    /** Fires when the user swipes NetWatch away from Recents (task removed). Stop
+     *  monitoring immediately — it shouldn't keep running once the app itself is closed. */
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        stopForeground(true);
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
     @Override
     public IBinder onBind(Intent intent) { return null; }
 
