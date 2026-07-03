@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
     private Button       exportDomainBtn, exportTrafficBtn, myInfoRefreshBtn;
     private LinearLayout myInfoContainer;
     private SwitchCompat alertSwitch;
-    private boolean      alertsEnabled  = true;
+    private boolean      alertsEnabled  = false; // off by default — user must opt in
 
     // --- Tab 3: Domain Checker ---
     private LinearLayout  tab3;
@@ -258,7 +258,7 @@ public class MainActivity extends Activity {
 
         // Restore alert toggle preference
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        alertsEnabled = prefs.getBoolean("alerts_enabled", true);
+        alertsEnabled = prefs.getBoolean("alerts_enabled", false); // off by default — user must opt in
         alertSwitch.setChecked(alertsEnabled);
         alertSwitch.setOnCheckedChangeListener((btn, checked) -> {
             alertsEnabled = checked;

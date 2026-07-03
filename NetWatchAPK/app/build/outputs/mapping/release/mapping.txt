@@ -3,8 +3,8 @@
 # min_api: 30
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 377da59
-# pg_map_hash: SHA-256 377da591373e6bd759a3f2aa00c3bd4f8e223c2e31874310638079e93a1896cd
+# pg_map_id: 38fb968
+# pg_map_hash: SHA-256 38fb9687edb32d1666579f1015fff87638bdc24d74e44426215d9f558c291a7d
 android.app.UiModeManager$ContrastChangeListener -> android.app.UiModeManager$ContrastChangeListener:
 # {"id":"com.android.tools.r8.synthesized"}
 android.os.OutcomeReceiver -> android.os.OutcomeReceiver:
@@ -102366,13 +102366,13 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     0:2:void <init>():76:76 -> <init>
     3:17:void <init>():125:125 -> <init>
     18:24:void <init>():130:130 -> <init>
-    25:42:void <init>():132:132 -> <init>
-    43:61:void <init>():149:149 -> <init>
-    62:76:void <init>():155:155 -> <init>
-    77:82:void <init>():162:162 -> <init>
-    83:95:void <init>():164:164 -> <init>
-    96:110:void <init>():2176:2176 -> <init>
-    111:122:void <init>():2634:2634 -> <init>
+    25:41:void <init>():132:132 -> <init>
+    42:60:void <init>():149:149 -> <init>
+    61:75:void <init>():155:155 -> <init>
+    76:81:void <init>():162:162 -> <init>
+    82:94:void <init>():164:164 -> <init>
+    95:109:void <init>():2176:2176 -> <init>
+    110:121:void <init>():2634:2634 -> <init>
     0:3:void $r8$lambda$Wv02SEYysa9O_edsJl7kvOe7bBw(com.netwatch.app.MainActivity,android.view.View):0:0 -> A
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$X83HdDLCbXjHF-mQ7EKqpeCMqFo(com.netwatch.app.MainActivity,android.content.SharedPreferences,android.widget.CompoundButton,boolean):0:0 -> B
@@ -104571,6 +104571,7 @@ com.netwatch.app.MainActivity$ThemedArrayAdapter -> com.netwatch.app.MainActivit
     0:15:void tint(android.view.View):2982:2982 -> tint
 com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
 # {"id":"sourceFile","fileName":"NetWatchVpnService.java"}
+    0:31:void <clinit>():425:425 -> <clinit>
     0:5:void <init>():32:32 -> <init>
     6:12:void <init>():46:46 -> <init>
     13:20:void <init>():47:47 -> <init>
@@ -104578,11 +104579,11 @@ com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
       # {"id":"com.android.tools.r8.synthesized"}
     0:3:void $r8$lambda$cHvkso0SIs-xsA9YiEOWLC3oPG4(com.netwatch.app.NetWatchVpnService):0:0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    0:8:android.app.Notification buildNotification():465:465 -> buildNotification
-    9:14:android.app.Notification buildNotification():466:466 -> buildNotification
-    15:21:android.app.Notification buildNotification():467:467 -> buildNotification
-    22:25:android.app.Notification buildNotification():468:468 -> buildNotification
-    26:30:android.app.Notification buildNotification():469:469 -> buildNotification
+    0:8:android.app.Notification buildNotification():480:480 -> buildNotification
+    9:14:android.app.Notification buildNotification():481:481 -> buildNotification
+    15:21:android.app.Notification buildNotification():482:482 -> buildNotification
+    22:25:android.app.Notification buildNotification():483:483 -> buildNotification
+    26:30:android.app.Notification buildNotification():484:484 -> buildNotification
     3:7:byte[] buildUdpReply(java.lang.String,int,java.lang.String,int,byte[],int):303:303 -> buildUdpReply
     8:10:byte[] buildUdpReply(java.lang.String,int,java.lang.String,int,byte[],int):306:306 -> buildUdpReply
     11:16:byte[] buildUdpReply(java.lang.String,int,java.lang.String,int,byte[],int):307:307 -> buildUdpReply
@@ -104609,26 +104610,26 @@ com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
     0:3:void $r8$lambda$dcdHMUw6yfwAURON8dQhidnvhfw(com.netwatch.app.NetWatchVpnService,java.lang.String,java.lang.String,int,int):0:0 -> c
       # {"id":"com.android.tools.r8.synthesized"}
     4:10:void closeVpn():84:84 -> closeVpn
-    0:11:void createNotificationChannel():459:459 -> createNotificationChannel
-    12:21:void createNotificationChannel():461:461 -> createNotificationChannel
+    0:11:void createNotificationChannel():474:474 -> createNotificationChannel
+    12:21:void createNotificationChannel():476:476 -> createNotificationChannel
     0:3:void $r8$lambda$dsEcpwibYC3PqzMtXCcR69jFP6o(com.netwatch.app.NetWatchVpnService,byte[],int,java.lang.String,int,int):0:0 -> d
       # {"id":"com.android.tools.r8.synthesized"}
-    0:17:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):425:425 -> emit
-    18:26:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):426:426 -> emit
-    27:31:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):427:427 -> emit
-    32:34:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):428:428 -> emit
-    35:63:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):429:429 -> emit
-    64:68:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):430:430 -> emit
-    69:73:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):431:431 -> emit
-    74:76:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):432:432 -> emit
-    77:87:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):433:433 -> emit
+    0:17:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):440:440 -> emit
+    18:26:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):441:441 -> emit
+    27:31:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):442:442 -> emit
+    32:34:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):443:443 -> emit
+    35:63:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):444:444 -> emit
+    64:68:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):445:445 -> emit
+    69:73:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):446:446 -> emit
+    74:76:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):447:447 -> emit
+    77:87:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):448:448 -> emit
     88:91:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):0:0 -> emit
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"0":126,"2":128,"5":131,"8":135},"outline":"Landroidx/activity/result/a;j(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/StringBuilder;"}
-    92:125:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):434:434 -> emit
-    126:126:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):434:434 -> emit
-    128:128:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):434:434 -> emit
-    131:131:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):434:434 -> emit
-    135:135:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):434:434 -> emit
+    92:125:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):449:449 -> emit
+    126:126:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):449:449 -> emit
+    128:128:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):449:449 -> emit
+    131:131:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):449:449 -> emit
+    135:135:void emit(java.lang.String,java.lang.String,java.lang.String,int,int):449:449 -> emit
     2:14:void forwardTcp(byte[],int,java.lang.String,int,int):244:244 -> forwardTcp
     15:18:void forwardTcp(byte[],int,java.lang.String,int,int):250:250 -> forwardTcp
     19:25:void forwardTcp(byte[],int,java.lang.String,int,int):251:251 -> forwardTcp
@@ -104700,24 +104701,25 @@ com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
     242:245:void handleIPv6(byte[],int,java.io.FileOutputStream):237:237 -> handleIPv6
     8:28:int ipChecksum(byte[],int,int):344:344 -> ipChecksum
     29:49:int ipChecksum(byte[],int,int):345:345 -> ipChecksum
-    0:54:java.lang.String ipv4(byte[],int):440:440 -> ipv4
-    0:13:java.lang.String ipv6(byte[],int):444:444 -> ipv6
-    14:18:java.lang.String ipv6(byte[],int):446:446 -> ipv6
-    19:51:java.lang.String ipv6(byte[],int):447:447 -> ipv6
-    52:56:java.lang.String ipv6(byte[],int):449:449 -> ipv6
-    3:11:boolean isPrivateOrLocalDestination(java.lang.String):412:412 -> isPrivateOrLocalDestination
-    12:19:boolean isPrivateOrLocalDestination(java.lang.String):413:413 -> isPrivateOrLocalDestination
-    20:23:boolean isPrivateOrLocalDestination(java.lang.String):416:416 -> isPrivateOrLocalDestination
-    24:41:boolean isPrivateOrLocalDestination(java.lang.String):417:417 -> isPrivateOrLocalDestination
-    42:58:boolean isPrivateOrLocalDestination(java.lang.String):418:418 -> isPrivateOrLocalDestination
+    0:54:java.lang.String ipv4(byte[],int):455:455 -> ipv4
+    0:13:java.lang.String ipv6(byte[],int):459:459 -> ipv6
+    14:18:java.lang.String ipv6(byte[],int):461:461 -> ipv6
+    19:51:java.lang.String ipv6(byte[],int):462:462 -> ipv6
+    52:56:java.lang.String ipv6(byte[],int):464:464 -> ipv6
+    2:6:boolean isKnownDnsResolver(java.lang.String):436:436 -> isKnownDnsResolver
+    3:11:boolean isPrivateOrLocalDestination(java.lang.String):413:413 -> isPrivateOrLocalDestination
+    12:19:boolean isPrivateOrLocalDestination(java.lang.String):414:414 -> isPrivateOrLocalDestination
+    20:23:boolean isPrivateOrLocalDestination(java.lang.String):417:417 -> isPrivateOrLocalDestination
+    24:41:boolean isPrivateOrLocalDestination(java.lang.String):418:418 -> isPrivateOrLocalDestination
+    42:58:boolean isPrivateOrLocalDestination(java.lang.String):419:419 -> isPrivateOrLocalDestination
     0:3:void lambda$handleIPv4$0(byte[],int,java.lang.String,int,java.lang.String,int,int,java.io.FileOutputStream):176:176 -> lambda$handleIPv4$0
     0:3:void lambda$handleIPv4$1(byte[],int,java.lang.String,int,int):186:186 -> lambda$handleIPv4$1
-    0:7:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):378:378 -> lambda$reportConnection$2
-    8:15:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):379:379 -> lambda$reportConnection$2
-    16:23:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):380:380 -> lambda$reportConnection$2
-    24:29:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):381:381 -> lambda$reportConnection$2
-    30:35:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):383:383 -> lambda$reportConnection$2
-    36:39:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):386:386 -> lambda$reportConnection$2
+    0:7:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):379:379 -> lambda$reportConnection$2
+    8:15:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):380:380 -> lambda$reportConnection$2
+    16:23:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):381:381 -> lambda$reportConnection$2
+    24:29:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):382:382 -> lambda$reportConnection$2
+    30:35:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):384:384 -> lambda$reportConnection$2
+    36:39:void lambda$reportConnection$2(java.lang.String,java.lang.String,int,int):387:387 -> lambda$reportConnection$2
     7:13:void onDestroy():77:77 -> onDestroy
     14:16:void onDestroy():78:78 -> onDestroy
     17:19:void onDestroy():79:79 -> onDestroy
@@ -104731,16 +104733,17 @@ com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
     50:56:int onStartCommand(android.content.Intent,int,int):68:68 -> onStartCommand
     57:64:int onStartCommand(android.content.Intent,int,int):69:69 -> onStartCommand
     65:73:int onStartCommand(android.content.Intent,int,int):70:70 -> onStartCommand
-    0:17:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):358:358 -> reportConnection
-    18:23:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):369:369 -> reportConnection
-    24:38:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):371:371 -> reportConnection
-    39:43:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):373:373 -> reportConnection
-    44:56:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):376:376 -> reportConnection
-    57:74:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):390:390 -> reportConnection
-    3:11:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):399:399 -> resolveOwnerUid
-    12:20:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):401:401 -> resolveOwnerUid
-    21:29:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):402:402 -> resolveOwnerUid
-    30:35:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):403:403 -> resolveOwnerUid
+    0:10:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):358:358 -> reportConnection
+    11:23:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):365:365 -> reportConnection
+    24:29:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):370:370 -> reportConnection
+    30:44:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):372:372 -> reportConnection
+    45:49:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):374:374 -> reportConnection
+    50:62:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):377:377 -> reportConnection
+    63:80:void reportConnection(java.lang.String,int,java.lang.String,int,java.lang.String,int):391:391 -> reportConnection
+    3:11:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):400:400 -> resolveOwnerUid
+    12:20:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):402:402 -> resolveOwnerUid
+    21:29:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):403:403 -> resolveOwnerUid
+    30:35:int resolveOwnerUid(int,java.lang.String,int,java.lang.String,int):404:404 -> resolveOwnerUid
     3:9:void runVpn():92:92 -> runVpn
     10:17:void runVpn():93:93 -> runVpn
     18:23:void runVpn():94:94 -> runVpn
@@ -104767,7 +104770,7 @@ com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
     175:181:void runVpn():129:129 -> runVpn
     182:184:void runVpn():132:132 -> runVpn
     185:185:void runVpn():133:133 -> runVpn
-    0:13:int u16(byte[],int):453:453 -> u16
+    0:13:int u16(byte[],int):468:468 -> u16
 com.netwatch.app.NetWatchVpnService$$ExternalSyntheticLambda0 -> com.netwatch.app.c0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}

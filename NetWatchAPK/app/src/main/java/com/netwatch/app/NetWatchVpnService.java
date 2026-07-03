@@ -357,11 +357,12 @@ public class NetWatchVpnService extends VpnService {
         // not something that reads like a traceroute hop list.
         if (isPrivateOrLocalDestination(ip)) return;
 
-        // Port 53 = the DNS lookup itself (to 8.8.8.8 / 1.1.1.1), not a real server the
-        // app is talking to — it's how the app FOUND the real server. Skip it so the log
-        // only lists actual destinations (the resolved hostname will show up separately
-        // once the app connects to it on its real port).
-        if (port == 53) return;
+        // The DNS lookup itself (to our tunnel's resolvers, 8.8.8.8 / 1.1.1.1, or any
+        // other well-known public DNS provider) is not a real server the app is talking
+        // to — it's how the app FOUND the real server. Skip it regardless of port: plain
+        // DNS is 53, but DNS-over-HTTPS rides on port 443 and would otherwise slip past
+        // a port-only check and still show up as a bogus "host".
+        if (port == 53 || isKnownDnsResolver(ip)) return;
 
         // Best-effort: identify which app's UID owns this connection. Requires API 29+ and
         // only works while THIS app is the active VpnService — exactly our situation here.
@@ -419,6 +420,20 @@ public class NetWatchVpnService extends VpnService {
         } catch (Exception e) {
             return false; // if we can't parse it, don't silently drop it
         }
+    }
+
+    private static final java.util.Set<String> KNOWN_DNS_RESOLVERS = new java.util.HashSet<>(Arrays.asList(
+            "8.8.8.8", "8.8.4.4",             // Google Public DNS (our tunnel's own resolvers)
+            "1.1.1.1", "1.0.0.1",             // Cloudflare DNS
+            "9.9.9.9", "149.112.112.112",     // Quad9
+            "208.67.222.222", "208.67.220.220" // OpenDNS
+    ));
+
+    /** True for well-known public DNS resolver addresses, regardless of the port used —
+     *  covers plain DNS (53), DoT (853), and DoH (443, which would otherwise look like an
+     *  ordinary HTTPS destination). */
+    private static boolean isKnownDnsResolver(String ip) {
+        return KNOWN_DNS_RESOLVERS.contains(ip);
     }
 
     private void emit(String proto, String host, String ip, int port, int ownerUid) {
