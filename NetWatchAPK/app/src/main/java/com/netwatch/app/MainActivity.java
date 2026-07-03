@@ -699,10 +699,8 @@ public class MainActivity extends Activity {
         if (sessions.isEmpty()) {
             TextView empty = new TextView(this);
             empty.setText(isRussian
-                ? "История пуста.
-Запустите мониторинг трафика, чтобы сохранить сессию."
-                : "No saved sessions yet.
-Run Traffic Monitor to save one automatically.");
+                ? "История пуста.\nЗапустите мониторинг трафика, чтобы сохранить сессию."
+                : "No saved sessions yet.\nRun Traffic Monitor to save one automatically.");
             empty.setTextColor(Color.parseColor("#546E7A"));
             empty.setTextSize(13);
             empty.setPadding(dp(8), dp(24), dp(8), dp(24));

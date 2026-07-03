@@ -102,12 +102,6 @@ public class ThemeManager {
                     Integer mapped = map.get(current);
                     if (mapped != null) gd.setColor(mapped);
                 }
-                android.content.res.ColorStateList strokeCsl = gd.getStrokeColor();
-                if (strokeCsl != null) {
-                    int current = strokeCsl.getDefaultColor();
-                    Integer mapped = map.get(current);
-                    if (mapped != null) gd.setStroke(2, mapped);
-                }
                 v.setBackground(gd);
             }
         } catch (Exception ignored) {
