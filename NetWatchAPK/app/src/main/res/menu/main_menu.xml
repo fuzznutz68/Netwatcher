@@ -23,9 +23,6 @@
         android:id="@+id/menu_history"
         android:title="🕓 Connection History"/>
     <item
-        android:id="@+id/menu_theme"
-        android:title="🌓 Theme: Dark"/>
-    <item
         android:id="@+id/menu_language"
         android:title="🌍 Language / Язык"/>
     <item

@@ -3374,7 +3374,6 @@ id menu_instructions_myinfo
 id menu_instructions_speed
 id menu_instructions_traffic
 id menu_language
-id menu_theme
 id message
 id middle
 id mini

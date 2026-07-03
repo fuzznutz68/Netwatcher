@@ -57,6 +57,15 @@ public class TrafficMonitorService extends Service {
     private String  targetName = "";
     private boolean running    = false;
 
+    // Some OEMs/kernels restrict /proc/net/tcp visibility to the reading app's own
+    // socket entries (SELinux hidepid / per-app isolation). If per-UID filtering
+    // returns zero connections for several consecutive polls while the device is
+    // clearly online, we fall back to showing ALL device connections so the user
+    // still sees traffic instead of a permanently empty list.
+    private int     emptyUidPollStreak = 0;
+    private boolean uidFilterDisabled  = false;
+    private static final int UID_FALLBACK_THRESHOLD = 6; // ~6 seconds of empty polls
+
     private long lastTx = TrafficStats.UNSUPPORTED;
     private long lastRx = TrafficStats.UNSUPPORTED;
 
@@ -108,6 +117,8 @@ public class TrafficMonitorService extends Service {
         submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
         lastTx = TrafficStats.UNSUPPORTED;
         lastRx = TrafficStats.UNSUPPORTED;
+        emptyUidPollStreak = 0;
+        uidFilterDisabled  = false;
         running = true;
 
         if (!targetPkg.isEmpty()) seedDomainsFromBackend(targetPkg);
@@ -272,6 +283,26 @@ public class TrafficMonitorService extends Service {
 
         // Active IPs from /proc/net/tcp
         List<String> activeIps = readAllEstablishedIps();
+
+        // If UID-scoped filtering keeps coming back empty (some OEM kernels hide other
+        // apps' socket entries entirely), switch to device-wide capture so the user
+        // still sees connections rather than a permanently blank log.
+        if (targetUid != -1 && !uidFilterDisabled) {
+            if (activeIps.isEmpty()) {
+                emptyUidPollStreak++;
+                if (emptyUidPollStreak >= UID_FALLBACK_THRESHOLD) {
+                    uidFilterDisabled = true;
+                    Log.w(TAG, "Per-app UID filtering returned no connections for "
+                            + UID_FALLBACK_THRESHOLD + "s — falling back to device-wide capture");
+                    List<String> notice = new ArrayList<>();
+                    notice.add("ℹ️  Per-app filtering unavailable on this device — showing all device traffic");
+                    broadcastNewHosts(notice);
+                    activeIps = readAllEstablishedIps();
+                }
+            } else {
+                emptyUidPollStreak = 0;
+            }
+        }
 
         // Collect IPs needing geo lookup
         List<String> needGeo = new ArrayList<>();
@@ -440,7 +471,7 @@ public class TrafficMonitorService extends Service {
                 if (parts.length < 4) continue;
                 String state = parts[3];
                 if (!"01".equals(state) && !"06".equals(state) && !"08".equals(state)) continue;
-                if (targetUid != -1 && parts.length >= 8) {
+                if (targetUid != -1 && !uidFilterDisabled && parts.length >= 8) {
                     try { int uid = Integer.parseInt(parts[7]); if (uid != targetUid) continue; }
                     catch (Exception ignored) {}
                 }

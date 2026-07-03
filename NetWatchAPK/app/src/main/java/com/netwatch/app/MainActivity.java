@@ -162,7 +162,6 @@ public class MainActivity extends Activity {
     private final ExecutorService executor    = Executors.newCachedThreadPool();
     private static final String IP_WHOIS_URL = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
-    private ThemeManager.ThemeState themeState;
     private long monitoringStartTime = 0L;
 
     @Override
@@ -179,10 +178,6 @@ public class MainActivity extends Activity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
-
-        // ── Theme (Light/Dark) ───────────────────────────────────────────────
-        boolean startLight = ThemeManager.isLight(this);
-        themeState = new ThemeManager.ThemeState(startLight);
 
         // Language preference
         SharedPreferences prefs0 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -216,7 +211,6 @@ public class MainActivity extends Activity {
         domainInput      = findViewById(R.id.domainInput);
         lookupBtn        = findViewById(R.id.lookupBtn);
         resultsContainer = findViewById(R.id.resultsContainer);
-        ThemeManager.autoTheme(resultsContainer, themeState);
         statusText       = findViewById(R.id.statusText);
         lookupBtn.setOnClickListener(v -> performLookup());
         domainInput.setOnEditorActionListener((v, action, event) -> { performLookup(); return true; });
@@ -232,14 +226,12 @@ public class MainActivity extends Activity {
         txRateText         = findViewById(R.id.txRateText);
         rxRateText         = findViewById(R.id.rxRateText);
         hostLogContainer   = findViewById(R.id.hostLogContainer);
-        ThemeManager.autoTheme(hostLogContainer, themeState);
         hostLogScroll      = findViewById(R.id.hostLogScroll);
 
         // Tab 3
         tab3                = findViewById(R.id.tab3);
         tab4                = findViewById(R.id.tab4);
         myInfoContainer     = findViewById(R.id.myInfoContainer);
-        ThemeManager.autoTheme(myInfoContainer, themeState);
         myInfoRefreshBtn    = findViewById(R.id.myInfoRefreshBtn);
         myInfoTitleText    = findViewById(R.id.myInfoTitleText);
         selectAppLabel     = findViewById(R.id.selectAppLabel);
@@ -253,7 +245,6 @@ public class MainActivity extends Activity {
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
         checkStatusText     = findViewById(R.id.checkStatusText);
         checkResultsContainer = findViewById(R.id.checkResultsContainer);
-        ThemeManager.autoTheme(checkResultsContainer, themeState);
         customDomainInput = findViewById(R.id.customDomainInput);
         checkCustomBtn    = findViewById(R.id.checkCustomBtn);
         connectionCountText= findViewById(R.id.connectionCountText);
@@ -362,8 +353,6 @@ public class MainActivity extends Activity {
         // Load app list in background
         loadAppList();
 
-        // Apply saved theme to the fully-inflated view tree (covers all 6 tabs)
-        ThemeManager.apply(rootView, themeState.isLight());
     }
 
     // ── Launch App ──────────────────────────────────────────────────────────
@@ -393,12 +382,6 @@ public class MainActivity extends Activity {
         // Update menu label to show current language
         popup.getMenu().findItem(R.id.menu_language)
              .setTitle(isRussian ? "🌍 Language: Русский" : "🌍 Language: English");
-
-        // Update menu label to show current theme
-        popup.getMenu().findItem(R.id.menu_theme)
-             .setTitle(themeState.isLight()
-                     ? (isRussian ? "🌓 Тема: Светлая" : "🌓 Theme: Light")
-                     : (isRussian ? "🌓 Тема: Тёмная" : "🌓 Theme: Dark"));
 
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
@@ -552,9 +535,6 @@ public class MainActivity extends Activity {
                         "Tap Export to save as CSV. Tap Stop to close the tunnel.");
                 }
                 return true;
-            } else if (id == R.id.menu_theme) {
-                toggleTheme();
-                return true;
             } else if (id == R.id.menu_history) {
                 showConnectionHistory();
                 return true;
@@ -676,18 +656,6 @@ public class MainActivity extends Activity {
     }
 
     // ── Theme Toggle ─────────────────────────────────────────────────────────
-    private void toggleTheme() {
-        boolean newLight = !themeState.isLight();
-        themeState.set(newLight);
-        ThemeManager.setLight(this, newLight);
-        ThemeManager.apply(findViewById(android.R.id.content), newLight);
-        refreshSpinnerTheme(appSpinner);
-        refreshSpinnerTheme(speedServerSpinner);
-        showToast(newLight
-            ? (isRussian ? "☀️ Светлая тема включена" : "☀️ Light theme enabled")
-            : (isRussian ? "🌙 Тёмная тема включена" : "🌙 Dark theme enabled"));
-    }
-
     // ── Connection History ───────────────────────────────────────────────────
     private void showConnectionHistory() {
         List<HistoryManager.Session> sessions = HistoryManager.listAll(this);
@@ -737,7 +705,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        ThemeManager.apply(scroll, themeState.isLight());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
             .setTitle(isRussian ? "🕓 История соединений" : "🕓 Connection History")
@@ -776,7 +743,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        ThemeManager.apply(scroll, themeState.isLight());
 
         new AlertDialog.Builder(this)
             .setTitle("📱 " + s.appLabel)
@@ -2463,7 +2429,6 @@ public class MainActivity extends Activity {
         speedDownText         = findViewById(R.id.speedDownText);
         speedUpText           = findViewById(R.id.speedUpText);
         speedResultsContainer = findViewById(R.id.speedResultsContainer);
-        ThemeManager.autoTheme(speedResultsContainer, themeState);
         speedRunBtn           = findViewById(R.id.speedRunBtn);
 
         // Populate spinner with server labels
@@ -2625,7 +2590,6 @@ public class MainActivity extends Activity {
         deviceCountText  = findViewById(R.id.deviceCountText);
         deviceHeaderRow  = findViewById(R.id.deviceHeaderRow);
         deviceLogContainer = findViewById(R.id.deviceLogContainer);
-        ThemeManager.autoTheme(deviceLogContainer, themeState);
         deviceScrollView = findViewById(R.id.deviceScrollView);
 
         deviceToggleBtn.setOnClickListener(v -> {
@@ -2902,12 +2866,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ── Theme-aware Spinner Adapter ─────────────────────────────────────────
+    // ── Spinner Adapter ───────────────────────────────────────────────────────
     // Spinners (App picker, Speed Test server) use the platform's built-in
-    // simple_spinner_item layout, whose default text color does not track our
-    // custom Light/Dark palette. This adapter force-tints both the collapsed
-    // selected-item view and the dropdown rows on every bind, so they stay
-    // readable in either theme.
+    // simple_spinner_item layout, whose default text color can be low-contrast
+    // against our dark terminal UI. This adapter force-tints both the collapsed
+    // selected-item view and the dropdown rows to the app's fixed light text color.
     private class ThemedArrayAdapter<T> extends ArrayAdapter<T> {
         ThemedArrayAdapter(java.util.List<T> items) {
             super(MainActivity.this, android.R.layout.simple_spinner_item, items);
@@ -2918,10 +2881,7 @@ public class MainActivity extends Activity {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         }
         private void tint(View v) {
-            if (v instanceof TextView) {
-                ((TextView) v).setTextColor(themeState.isLight()
-                    ? Color.parseColor("#16202B") : Color.parseColor("#E0E8F0"));
-            }
+            if (v instanceof TextView) ((TextView) v).setTextColor(Color.parseColor("#E0E8F0"));
         }
         @Override public View getView(int position, View convertView, android.view.ViewGroup parent) {
             View v = super.getView(position, convertView, parent);
@@ -2933,15 +2893,5 @@ public class MainActivity extends Activity {
             tint(v);
             return v;
         }
-    }
-
-    /** Force a Spinner's currently-shown item to re-bind through the adapter so a
-     *  freshly-toggled theme color is applied immediately (without losing selection). */
-    private void refreshSpinnerTheme(Spinner spinner) {
-        if (spinner == null || spinner.getAdapter() == null) return;
-        int pos = spinner.getSelectedItemPosition();
-        android.widget.SpinnerAdapter ad = spinner.getAdapter();
-        spinner.setAdapter(ad);
-        if (pos >= 0 && pos < ad.getCount()) spinner.setSelection(pos, false);
     }
 }
