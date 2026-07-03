@@ -162,6 +162,8 @@ public class MainActivity extends Activity {
     private final ExecutorService executor    = Executors.newCachedThreadPool();
     private static final String IP_WHOIS_URL = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
+    private ThemeManager.ThemeState themeState;
+    private long monitoringStartTime = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +179,10 @@ public class MainActivity extends Activity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
+
+        // ── Theme (Light/Dark) ───────────────────────────────────────────────
+        boolean startLight = ThemeManager.isLight(this);
+        themeState = new ThemeManager.ThemeState(startLight);
 
         // Language preference
         SharedPreferences prefs0 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -210,6 +216,7 @@ public class MainActivity extends Activity {
         domainInput      = findViewById(R.id.domainInput);
         lookupBtn        = findViewById(R.id.lookupBtn);
         resultsContainer = findViewById(R.id.resultsContainer);
+        ThemeManager.autoTheme(resultsContainer, themeState);
         statusText       = findViewById(R.id.statusText);
         lookupBtn.setOnClickListener(v -> performLookup());
         domainInput.setOnEditorActionListener((v, action, event) -> { performLookup(); return true; });
@@ -225,12 +232,14 @@ public class MainActivity extends Activity {
         txRateText         = findViewById(R.id.txRateText);
         rxRateText         = findViewById(R.id.rxRateText);
         hostLogContainer   = findViewById(R.id.hostLogContainer);
+        ThemeManager.autoTheme(hostLogContainer, themeState);
         hostLogScroll      = findViewById(R.id.hostLogScroll);
 
         // Tab 3
         tab3                = findViewById(R.id.tab3);
         tab4                = findViewById(R.id.tab4);
         myInfoContainer     = findViewById(R.id.myInfoContainer);
+        ThemeManager.autoTheme(myInfoContainer, themeState);
         myInfoRefreshBtn    = findViewById(R.id.myInfoRefreshBtn);
         myInfoTitleText    = findViewById(R.id.myInfoTitleText);
         selectAppLabel     = findViewById(R.id.selectAppLabel);
@@ -244,6 +253,7 @@ public class MainActivity extends Activity {
         stopCheckBtn        = findViewById(R.id.stopCheckBtn);
         checkStatusText     = findViewById(R.id.checkStatusText);
         checkResultsContainer = findViewById(R.id.checkResultsContainer);
+        ThemeManager.autoTheme(checkResultsContainer, themeState);
         customDomainInput = findViewById(R.id.customDomainInput);
         checkCustomBtn    = findViewById(R.id.checkCustomBtn);
         connectionCountText= findViewById(R.id.connectionCountText);
@@ -351,6 +361,9 @@ public class MainActivity extends Activity {
 
         // Load app list in background
         loadAppList();
+
+        // Apply saved theme to the fully-inflated view tree (covers all 6 tabs)
+        ThemeManager.apply(rootView, themeState.isLight());
     }
 
     // ── Launch App ──────────────────────────────────────────────────────────
@@ -380,6 +393,12 @@ public class MainActivity extends Activity {
         // Update menu label to show current language
         popup.getMenu().findItem(R.id.menu_language)
              .setTitle(isRussian ? "🌍 Language: Русский" : "🌍 Language: English");
+
+        // Update menu label to show current theme
+        popup.getMenu().findItem(R.id.menu_theme)
+             .setTitle(themeState.isLight()
+                     ? (isRussian ? "🌓 Тема: Светлая" : "🌓 Theme: Light")
+                     : (isRussian ? "🌓 Тема: Тёмная" : "🌓 Theme: Dark"));
 
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
@@ -530,6 +549,12 @@ public class MainActivity extends Activity {
                         "Each entry: host/IP, protocol, app name, timestamp.\n" +
                         "Tap Export to save as CSV. Tap Stop to close the tunnel.");
                 }
+                return true;
+            } else if (id == R.id.menu_theme) {
+                toggleTheme();
+                return true;
+            } else if (id == R.id.menu_history) {
+                showConnectionHistory();
                 return true;
             } else if (id == R.id.menu_language) {
                 showLanguageDialog();
@@ -2298,6 +2323,7 @@ public class MainActivity extends Activity {
         speedDownText         = findViewById(R.id.speedDownText);
         speedUpText           = findViewById(R.id.speedUpText);
         speedResultsContainer = findViewById(R.id.speedResultsContainer);
+        ThemeManager.autoTheme(speedResultsContainer, themeState);
         speedRunBtn           = findViewById(R.id.speedRunBtn);
 
         // Populate spinner with server labels
@@ -2461,6 +2487,7 @@ public class MainActivity extends Activity {
         deviceCountText  = findViewById(R.id.deviceCountText);
         deviceHeaderRow  = findViewById(R.id.deviceHeaderRow);
         deviceLogContainer = findViewById(R.id.deviceLogContainer);
+        ThemeManager.autoTheme(deviceLogContainer, themeState);
         deviceScrollView = findViewById(R.id.deviceScrollView);
 
         deviceToggleBtn.setOnClickListener(v -> {

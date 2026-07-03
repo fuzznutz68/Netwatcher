@@ -1,0 +1,127 @@
+package com.netwatch.app;
+
+import android.content.Context;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Persists completed Traffic Monitor sessions to disk as JSON files so the user
+ * can review them later ("Connection History"). No network/server involved —
+ * everything is stored locally under the app's private files directory.
+ */
+public class HistoryManager {
+
+    private static final String DIR_NAME = "traffic_history";
+    private static final int    MAX_SESSIONS = 100; // keep storage bounded
+
+    public static class Session {
+        public String id;             // filename-safe timestamp
+        public String appLabel;
+        public String packageName;
+        public long   startTime;      // epoch millis
+        public long   endTime;        // epoch millis
+        public long   txBytes;
+        public long   rxBytes;
+        public LinkedHashMap<String, String> hosts = new LinkedHashMap<>(); // host -> HH:mm:ss
+
+        public int connectionCount() { return hosts.size(); }
+    }
+
+    private static File dir(Context ctx) {
+        File d = new File(ctx.getFilesDir(), DIR_NAME);
+        if (!d.exists()) d.mkdirs();
+        return d;
+    }
+
+    /** Save a completed monitoring session. No-op if there were zero connections logged. */
+    public static void save(Context ctx, Session s) {
+        if (s.hosts.isEmpty()) return;
+        try {
+            JSONObject o = new JSONObject();
+            o.put("appLabel", s.appLabel);
+            o.put("packageName", s.packageName);
+            o.put("startTime", s.startTime);
+            o.put("endTime", s.endTime);
+            o.put("txBytes", s.txBytes);
+            o.put("rxBytes", s.rxBytes);
+            JSONArray arr = new JSONArray();
+            for (Map.Entry<String, String> e : s.hosts.entrySet()) {
+                JSONObject h = new JSONObject();
+                h.put("host", e.getKey());
+                h.put("ts", e.getValue());
+                arr.put(h);
+            }
+            o.put("hosts", arr);
+
+            String filename = "session_" + s.startTime + ".json";
+            File f = new File(dir(ctx), filename);
+            try (FileWriter fw = new FileWriter(f)) { fw.write(o.toString()); }
+
+            trimOldSessions(ctx);
+        } catch (JSONException | IOException ignored) { }
+    }
+
+    private static void trimOldSessions(Context ctx) {
+        File[] files = dir(ctx).listFiles();
+        if (files == null || files.length <= MAX_SESSIONS) return;
+        List<File> list = new ArrayList<>();
+        Collections.addAll(list, files);
+        list.sort(Comparator.comparingLong(File::lastModified));
+        int toDelete = list.size() - MAX_SESSIONS;
+        for (int i = 0; i < toDelete; i++) list.get(i).delete();
+    }
+
+    /** List all sessions, newest first. */
+    public static List<Session> listAll(Context ctx) {
+        List<Session> result = new ArrayList<>();
+        File[] files = dir(ctx).listFiles();
+        if (files == null) return result;
+        for (File f : files) {
+            try {
+                String json = new String(Files.readAllBytes(f.toPath()));
+                JSONObject o = new JSONObject(json);
+                Session s = new Session();
+                s.id = f.getName();
+                s.appLabel    = o.optString("appLabel", "Device");
+                s.packageName = o.optString("packageName", "");
+                s.startTime   = o.optLong("startTime", 0);
+                s.endTime     = o.optLong("endTime", 0);
+                s.txBytes     = o.optLong("txBytes", -1);
+                s.rxBytes     = o.optLong("rxBytes", -1);
+                JSONArray arr = o.optJSONArray("hosts");
+                if (arr != null) {
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject h = arr.optJSONObject(i);
+                        if (h != null) s.hosts.put(h.optString("host"), h.optString("ts"));
+                    }
+                }
+                result.add(s);
+            } catch (Exception ignored) { }
+        }
+        result.sort((a, b) -> Long.compare(b.startTime, a.startTime));
+        return result;
+    }
+
+    public static void delete(Context ctx, String sessionId) {
+        new File(dir(ctx), sessionId).delete();
+    }
+
+    public static void deleteAll(Context ctx) {
+        File[] files = dir(ctx).listFiles();
+        if (files == null) return;
+        for (File f : files) f.delete();
+    }
+}
