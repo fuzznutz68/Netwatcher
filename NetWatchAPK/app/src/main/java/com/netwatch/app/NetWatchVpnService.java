@@ -357,6 +357,12 @@ public class NetWatchVpnService extends VpnService {
         // not something that reads like a traceroute hop list.
         if (isPrivateOrLocalDestination(ip)) return;
 
+        // Port 53 = the DNS lookup itself (to 8.8.8.8 / 1.1.1.1), not a real server the
+        // app is talking to — it's how the app FOUND the real server. Skip it so the log
+        // only lists actual destinations (the resolved hostname will show up separately
+        // once the app connects to it on its real port).
+        if (port == 53) return;
+
         // Best-effort: identify which app's UID owns this connection. Requires API 29+ and
         // only works while THIS app is the active VpnService — exactly our situation here.
         // Some OEM builds still refuse to resolve it; callers must treat -1 as "unknown".
