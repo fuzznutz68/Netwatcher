@@ -68,13 +68,12 @@ public class TrafficMonitorService extends Service {
     // around). Instead we rely on NetWatchVpnService (a VpnService that sees the raw
     // packet stream regardless of UID isolation) and resolve each connection's owning
     // app via ConnectivityManager.getConnectionOwnerUid(), attached as a "uid" extra
-    // on its LocalBroadcast. If that resolution itself is ever unavailable (older
-    // Android, some OEM restriction) we gracefully fall back to showing all captured
-    // traffic instead of a permanently empty list.
+    // on its LocalBroadcast. Connections whose owner can't be confirmed are DROPPED,
+    // never shown — accuracy over completeness, so another app's traffic never leaks
+    // into this app's log.
     private BroadcastReceiver vpnHostReceiver;
     private int     unresolvedUidStreak = 0;
-    private boolean deviceWideFallback  = false;
-    private static final int UID_RESOLVE_FALLBACK_THRESHOLD = 6; // consecutive unresolved events
+    private static final int UID_RESOLVE_FALLBACK_THRESHOLD = 6; // consecutive unresolved events before we tell the user
 
     // IPs already accepted into the enrichment pipeline (post UID-match), to avoid
     // re-processing the same destination repeatedly.
@@ -82,6 +81,12 @@ public class TrafficMonitorService extends Service {
 
     private long lastTx = TrafficStats.UNSUPPORTED;
     private long lastRx = TrafficStats.UNSUPPORTED;
+    // TrafficStats getUidTxBytes/getUidRxBytes return cumulative totals since the
+    // device booted, not "since monitoring started". We baseline against the first
+    // poll of each session so the TX/RX totals shown reflect just this session,
+    // not the app's entire lifetime usage (which could look alarmingly large).
+    private long baselineTx = -1;
+    private long baselineRx = -1;
 
     private final Handler         handler = new Handler(Looper.getMainLooper());
     private final ExecutorService ioExec  = Executors.newFixedThreadPool(6);
@@ -132,8 +137,9 @@ public class TrafficMonitorService extends Service {
         activeIpsFromVpn.clear();
         lastTx = TrafficStats.UNSUPPORTED;
         lastRx = TrafficStats.UNSUPPORTED;
+        baselineTx = -1;
+        baselineRx = -1;
         unresolvedUidStreak = 0;
-        deviceWideFallback  = false;
         running = true;
 
         registerVpnHostReceiver();
@@ -144,7 +150,14 @@ public class TrafficMonitorService extends Service {
 
     /** Real host discovery now comes from NetWatchVpnService's raw packet capture
      *  (MainActivity ensures it's running with VPN consent already granted), matched
-     *  to the selected app's UID via ConnectivityManager.getConnectionOwnerUid(). */
+     *  to the selected app's UID via ConnectivityManager.getConnectionOwnerUid().
+     *
+     *  Strict by design: if the owner UID can't be resolved for a given connection
+     *  (happens more often on UDP/QUIC flows than TCP), we DROP it rather than
+     *  guess — showing another app's traffic under the wrong tab is worse than
+     *  occasionally missing one of the selected app's own connections. We only
+     *  surface a one-time heads-up if resolution is failing so often that the log
+     *  would otherwise look empty. */
     private void registerVpnHostReceiver() {
         if (vpnHostReceiver != null) return;
         vpnHostReceiver = new BroadcastReceiver() {
@@ -153,32 +166,24 @@ public class TrafficMonitorService extends Service {
                 String ipPort = intent.getStringExtra("ipPort");
                 if (ipPort == null || ipPort.isEmpty()) return;
 
-                boolean accept;
-                if (deviceWideFallback) {
-                    accept = true;
-                } else if (targetUid == -1) {
-                    accept = true; // whole-device mode, no app selected to scope to
-                } else if (uid == targetUid) {
-                    accept = true;
-                    unresolvedUidStreak = 0;
-                } else if (uid != -1) {
-                    // Resolved, but belongs to a different app — correctly filtered out.
-                    accept = false;
-                    unresolvedUidStreak = 0;
-                } else {
-                    // Owner UID could not be resolved on this device.
-                    accept = false;
-                    unresolvedUidStreak++;
-                    if (unresolvedUidStreak >= UID_RESOLVE_FALLBACK_THRESHOLD) {
-                        deviceWideFallback = true;
-                        Log.w(TAG, "Connection-owner UID could not be resolved for "
-                                + UID_RESOLVE_FALLBACK_THRESHOLD + " consecutive connections — "
-                                + "falling back to device-wide capture");
-                        sendFallbackNotice();
-                        accept = true; // this event itself: show it too, not just future ones
+                if (targetUid != -1) {
+                    if (uid != targetUid) {
+                        // Either resolved to a different app, or resolution failed (-1).
+                        // Either way: do not show it under this app's monitoring session.
+                        if (uid == -1) {
+                            unresolvedUidStreak++;
+                            if (unresolvedUidStreak == UID_RESOLVE_FALLBACK_THRESHOLD) {
+                                Log.w(TAG, "Connection-owner UID unresolved for "
+                                        + UID_RESOLVE_FALLBACK_THRESHOLD + " connections — "
+                                        + "some of " + targetPkg + "'s hosts may not appear");
+                                sendFallbackNotice();
+                            }
+                        }
+                        return;
                     }
+                    unresolvedUidStreak = 0;
                 }
-                if (!accept) return;
+                // targetUid == -1 means whole-device mode (no specific app selected) — show all.
 
                 String ip = ipPort.contains(":") ? ipPort.substring(0, ipPort.lastIndexOf(':')) : ipPort;
                 if (ip.isEmpty() || ip.startsWith("127.") || ip.equals("::1")) return;
@@ -377,8 +382,17 @@ public class TrafficMonitorService extends Service {
         }
         lastTx = tx; lastRx = rx;
 
+        // Baseline against the first valid poll of this session so totals shown are
+        // "since I hit Start", not the app's cumulative lifetime usage since boot.
+        long displayTx = tx, displayRx = rx;
+        if (tx != TrafficStats.UNSUPPORTED) {
+            if (baselineTx < 0) { baselineTx = tx; baselineRx = rx; }
+            displayTx = Math.max(0, tx - baselineTx);
+            displayRx = Math.max(0, rx - baselineRx);
+        }
+
         // Stats-only broadcast so byte counters always update
-        sendStatsBroadcast(tx, rx, txRate, rxRate, "");
+        sendStatsBroadcast(displayTx, displayRx, txRate, rxRate, "");
     }
 
     /** Broadcast a single IP using the best available info (host + geo) */

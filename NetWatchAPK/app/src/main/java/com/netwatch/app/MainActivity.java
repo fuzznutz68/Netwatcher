@@ -991,30 +991,20 @@ public class MainActivity extends Activity {
         notice.setLayoutParams(nlp);
 
         TextView icon = new TextView(this);
-        icon.setText("ℹ️  " + (isRussian ? "Фильтр по приложению недоступен" : "Per-App Filtering Unavailable"));
+        icon.setText("ℹ️  " + (isRussian ? "Некоторые соединения скрыты" : "Some Connections Hidden"));
         icon.setTextSize(13); icon.setTextColor(Color.parseColor("#00E5FF"));
         icon.setTypeface(null, android.graphics.Typeface.BOLD);
         notice.addView(icon);
 
         TextView msg = new TextView(this);
         msg.setText(isRussian
-            ? "Это устройство скрывает сетевые соединения других приложений. Показан трафик всего устройства. Оповещения о неизвестных хостах отключены на это сеанс, так как они больше не относятся только к выбранному приложению."
-            : "This device hides other apps' network connections, so all device traffic is shown instead of just the selected app. The unknown-host alert has been muted for this session since it's no longer scoped to one app.");
+            ? "Система Android не смогла подтвердить, что некоторые соединения принадлежат именно этому приложению, поэтому они скрыты — показаны только подтверждённые хосты этого приложения."
+            : "Android couldn't confirm which app owned some connections, so they're hidden rather than shown — only hosts confirmed to belong to this app are listed.");
         msg.setTextSize(12); msg.setTextColor(Color.parseColor("#90A4AE"));
         msg.setPadding(0, dp(4), 0, 0);
         notice.addView(msg);
 
         hostLogContainer.addView(notice, 0);
-
-        // Auto-mute the unknown-host alert for this session only — it would otherwise
-        // fire constantly for domains contacted by apps other than the one you picked.
-        if (alertsEnabled) {
-            alertsEnabled = false;
-            alertSwitch.setChecked(false);
-            showToast(isRussian
-                ? "🔕 Оповещения отключены (фильтр по приложению недоступен)"
-                : "🔕 Unknown-host alerts muted (per-app filtering unavailable)");
-        }
     }
 
     private void showWebViewNotice() {
