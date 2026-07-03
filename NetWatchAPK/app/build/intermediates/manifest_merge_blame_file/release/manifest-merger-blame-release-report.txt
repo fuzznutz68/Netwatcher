@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.netwatch.net"
-4    android:versionCode="61"
-5    android:versionName="2.4.8" >
+4    android:versionCode="62"
+5    android:versionName="2.5.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="30"
@@ -35,184 +35,187 @@
 19    <uses-permission android:name="android.permission.VIBRATE" />
 19-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:5-66
 19-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:14:22-63
-20
-21    <permission
-21-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
-22        android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-22-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
-23        android:protectionLevel="signature" />
-23-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
-24
-25    <uses-permission android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-25-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
-25-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
-26
-27    <application
-27-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:16:5-71:19
-28        android:allowBackup="true"
-28-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:17:9-35
-29        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-29-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
-30        android:extractNativeLibs="true"
-30-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:24:9-41
-31        android:icon="@drawable/ic_launcher"
-31-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:18:9-45
-32        android:label="@string/app_name"
-32-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:19:9-41
-33        android:roundIcon="@drawable/ic_launcher"
-33-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:20:9-50
-34        android:supportsRtl="true"
-34-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:21:9-35
-35        android:theme="@style/AppTheme"
-35-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:22:9-40
-36        android:usesCleartextTraffic="true" >
-36-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:23:9-44
-37        <activity
-37-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:26:9-36:20
-38            android:name="com.netwatch.app.MainActivity"
-38-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:27:13-41
-39            android:exported="true"
-39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:28:13-36
-40            android:label="@string/app_name"
-40-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:29:13-45
-41            android:screenOrientation="unspecified"
-41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-52
-42            android:windowSoftInputMode="adjustResize" >
-42-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:31:13-55
-43            <intent-filter>
-43-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:13-35:29
-44                <action android:name="android.intent.action.MAIN" />
-44-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:33:17-69
-44-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:33:25-66
-45
-46                <category android:name="android.intent.category.LAUNCHER" />
-46-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:17-77
-46-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:27-74
-47            </intent-filter>
-48        </activity>
-49
-50        <service
-50-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:38:9-41:56
-51            android:name="com.netwatch.app.TrafficMonitorService"
-51-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:39:13-50
-52            android:exported="false"
-52-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:40:13-37
-53            android:foregroundServiceType="dataSync" />
-53-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:41:13-53
-54        <service
-54-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:43:9-46:56
-55            android:name="com.netwatch.app.DeviceMonitorService"
-55-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:44:13-49
-56            android:exported="false"
-56-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:45:13-37
-57            android:foregroundServiceType="dataSync" />
-57-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:46:13-53
-58        <service
-58-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:48:9-59:19
-59            android:name="com.netwatch.app.NetWatchVpnService"
-59-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:49:13-47
-60            android:exported="true"
-60-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:50:13-36
-61            android:foregroundServiceType="specialUse"
-61-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:51:13-55
-62            android:permission="android.permission.BIND_VPN_SERVICE" >
-62-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:52:13-69
-63            <intent-filter>
-63-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:53:13-55:29
-64                <action android:name="android.net.VpnService" />
-64-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:54:17-65
-64-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:54:25-62
-65            </intent-filter>
-66
-67            <property
-67-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:56:13-58:84
-68                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-68-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:57:17-76
-69                android:value="Network traffic monitoring for security analysis" />
-69-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:58:17-81
-70        </service>
-71
-72        <provider
-73            android:name="androidx.core.content.FileProvider"
-73-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:62:13-62
-74            android:authorities="com.netwatch.net.provider"
-74-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:63:13-60
-75            android:exported="false"
-75-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:64:13-37
-76            android:grantUriPermissions="true" >
-76-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:65:13-47
-77            <meta-data
-77-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:66:13-68:63
-78                android:name="android.support.FILE_PROVIDER_PATHS"
-78-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:67:17-67
-79                android:resource="@xml/file_provider_paths" />
-79-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:68:17-60
-80        </provider>
-81        <provider
-81-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
-82            android:name="androidx.startup.InitializationProvider"
-82-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
-83            android:authorities="com.netwatch.net.androidx-startup"
-83-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
-84            android:exported="false" >
-84-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
-85            <meta-data
-85-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
-86                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-86-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
-87                android:value="androidx.startup" />
-87-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
-88            <meta-data
-88-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:29:13-31:52
-89                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-89-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:30:17-78
-90                android:value="androidx.startup" />
-90-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:31:17-49
-91            <meta-data
-91-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
-92                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-92-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
-93                android:value="androidx.startup" />
-93-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
-94        </provider>
-95
-96        <receiver
-96-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
-97            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-97-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
-98            android:directBootAware="false"
-98-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
-99            android:enabled="true"
-99-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
-100            android:exported="true"
-100-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
-101            android:permission="android.permission.DUMP" >
-101-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
-102            <intent-filter>
-102-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
-103                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-103-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
-103-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
-104            </intent-filter>
-105            <intent-filter>
-105-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
-106                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-106-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
-106-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
-107            </intent-filter>
-108            <intent-filter>
-108-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
-109                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-109-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
-109-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
-110            </intent-filter>
-111            <intent-filter>
-111-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
-112                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-112-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
-112-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
-113            </intent-filter>
-114        </receiver>
-115    </application>
-116
-117</manifest>
+20    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+20-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:15:5-16:47
+20-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:15:22-75
+21
+22    <permission
+22-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+23        android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.netwatch.net.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+27
+28    <application
+28-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:18:5-73:19
+29        android:allowBackup="true"
+29-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:19:9-35
+30        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+30-->[androidx.core:core:1.9.0] /root/.gradle/caches/transforms-3/a309491863f1cad1388d82071cb60f8c/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+31        android:extractNativeLibs="true"
+31-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:26:9-41
+32        android:icon="@drawable/ic_launcher"
+32-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:20:9-45
+33        android:label="@string/app_name"
+33-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:21:9-41
+34        android:roundIcon="@drawable/ic_launcher"
+34-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:22:9-50
+35        android:supportsRtl="true"
+35-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:23:9-35
+36        android:theme="@style/AppTheme"
+36-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:24:9-40
+37        android:usesCleartextTraffic="true" >
+37-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:25:9-44
+38        <activity
+38-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:28:9-38:20
+39            android:name="com.netwatch.app.MainActivity"
+39-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:29:13-41
+40            android:exported="true"
+40-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:30:13-36
+41            android:label="@string/app_name"
+41-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:31:13-45
+42            android:screenOrientation="unspecified"
+42-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:32:13-52
+43            android:windowSoftInputMode="adjustResize" >
+43-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:33:13-55
+44            <intent-filter>
+44-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:34:13-37:29
+45                <action android:name="android.intent.action.MAIN" />
+45-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:35:17-69
+45-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:35:25-66
+46
+47                <category android:name="android.intent.category.LAUNCHER" />
+47-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:36:17-77
+47-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:36:27-74
+48            </intent-filter>
+49        </activity>
+50
+51        <service
+51-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:40:9-43:56
+52            android:name="com.netwatch.app.TrafficMonitorService"
+52-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:41:13-50
+53            android:exported="false"
+53-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:42:13-37
+54            android:foregroundServiceType="dataSync" />
+54-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:43:13-53
+55        <service
+55-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:45:9-48:56
+56            android:name="com.netwatch.app.DeviceMonitorService"
+56-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:46:13-49
+57            android:exported="false"
+57-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:47:13-37
+58            android:foregroundServiceType="dataSync" />
+58-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:48:13-53
+59        <service
+59-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:50:9-61:19
+60            android:name="com.netwatch.app.NetWatchVpnService"
+60-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:51:13-47
+61            android:exported="true"
+61-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:52:13-36
+62            android:foregroundServiceType="specialUse"
+62-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:53:13-55
+63            android:permission="android.permission.BIND_VPN_SERVICE" >
+63-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:54:13-69
+64            <intent-filter>
+64-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:55:13-57:29
+65                <action android:name="android.net.VpnService" />
+65-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:56:17-65
+65-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:56:25-62
+66            </intent-filter>
+67
+68            <property
+68-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:58:13-60:84
+69                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+69-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:59:17-76
+70                android:value="Network traffic monitoring for security analysis" />
+70-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:60:17-81
+71        </service>
+72
+73        <provider
+74            android:name="androidx.core.content.FileProvider"
+74-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:64:13-62
+75            android:authorities="com.netwatch.net.provider"
+75-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:65:13-60
+76            android:exported="false"
+76-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:66:13-37
+77            android:grantUriPermissions="true" >
+77-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:67:13-47
+78            <meta-data
+78-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:68:13-70:63
+79                android:name="android.support.FILE_PROVIDER_PATHS"
+79-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:69:17-67
+80                android:resource="@xml/file_provider_paths" />
+80-->/app/NetWatchAPK/app/src/main/AndroidManifest.xml:70:17-60
+81        </provider>
+82        <provider
+82-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+83            android:name="androidx.startup.InitializationProvider"
+83-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+84            android:authorities="com.netwatch.net.androidx-startup"
+84-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+85            android:exported="false" >
+85-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+86            <meta-data
+86-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+87                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+87-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+88                android:value="androidx.startup" />
+88-->[androidx.emoji2:emoji2:1.2.0] /root/.gradle/caches/transforms-3/6db5aa862a49de8667f2a7b9b0bf2022/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+89            <meta-data
+89-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:29:13-31:52
+90                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+90-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:30:17-78
+91                android:value="androidx.startup" />
+91-->[androidx.lifecycle:lifecycle-process:2.6.1] /root/.gradle/caches/transforms-3/adfd241d31aa0dc8d9176e9f5dfaa47e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:31:17-49
+92            <meta-data
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+93                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+94                android:value="androidx.startup" />
+94-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+95        </provider>
+96
+97        <receiver
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+98            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+99            android:directBootAware="false"
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+100            android:enabled="true"
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+101            android:exported="true"
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+102            android:permission="android.permission.DUMP" >
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+103            <intent-filter>
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+104                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+105            </intent-filter>
+106            <intent-filter>
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+107                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+108            </intent-filter>
+109            <intent-filter>
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+110                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+111            </intent-filter>
+112            <intent-filter>
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+113                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] /root/.gradle/caches/transforms-3/0db8f035745ab68a2782efc838399652/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+114            </intent-filter>
+115        </receiver>
+116    </application>
+117
+118</manifest>
