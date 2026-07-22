@@ -1,6 +1,5 @@
 package com.netwatch.app;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -70,10 +69,11 @@ import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.core.view.ViewCompat;
+import androidx.activity.EdgeToEdge;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
 
-public class MainActivity extends Activity {
+public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     private static final String DOMAIN_INTEL_URL  = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
     private static final int    NOTIF_PERM_CODE   = 1002;
@@ -167,6 +167,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
 

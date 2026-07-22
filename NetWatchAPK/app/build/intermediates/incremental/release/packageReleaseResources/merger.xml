@@ -7,9 +7,7 @@
         <item name="android:textColorPrimary">#E0E8F0</item>
         <item name="android:editTextColor">#E0E8F0</item>
         <item name="android:textColorHint">#3A4A5A</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style></file><file name="file_provider_paths" path="/app/NetWatchAPK/app/src/main/res/xml/file_provider_paths.xml" qualifiers="" type="xml"/><file path="/app/NetWatchAPK/app/src/main/res/values/styles.xml" qualifiers=""><style name="AppTheme" parent="Theme.AppCompat.NoActionBar">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 15 (API 35): opt into edge-to-edge properly -->
+    <!-- Android 15+ (API 35+): edge-to-edge handled via EdgeToEdge.enable() in code -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">#00E5FF</item>
         <item name="colorPrimaryDark">#0A0E17</item>
@@ -9,9 +9,7 @@
         <item name="android:textColorPrimary">#E0E8F0</item>
         <item name="android:editTextColor">#E0E8F0</item>
         <item name="android:textColorHint">#3A4A5A</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
