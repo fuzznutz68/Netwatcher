@@ -10,7 +10,7 @@
     <Version>1.0.0</Version>
     <Company>NetWatch</Company>
     <Product>NetWatch Desktop</Product>
-    <Description>Domain Intelligence & Network Info for Windows 11</Description>
+    <Description>Domain Intelligence &amp; Network Info for Windows 11</Description>
   </PropertyGroup>
 
 </Project>
