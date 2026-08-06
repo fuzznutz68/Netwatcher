@@ -202,6 +202,7 @@
 
             <!-- Pages -->
             <ScrollViewer Grid.Row="1" Style="{StaticResource ScrollViewerStyle}" VerticalScrollBarVisibility="Auto">
+              <Grid>
 
                 <!-- ════════════ DOMAIN INTEL PAGE ════════════ -->
                 <StackPanel x:Name="PageDomain" Margin="16,12">
@@ -243,6 +244,7 @@
                     <StackPanel x:Name="MyInfoResults" />
                 </StackPanel>
 
+              </Grid>
             </ScrollViewer>
         </Grid>
     </Grid>
