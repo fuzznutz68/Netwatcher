@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>NetWatch</AssemblyName>
+    <RootNamespace>NetWatch</RootNamespace>
+    <Version>1.0.0</Version>
+    <Company>NetWatch</Company>
+    <Product>NetWatch Desktop</Product>
+    <Description>Domain Intelligence & Network Info for Windows 11</Description>
+  </PropertyGroup>
+
+</Project>
