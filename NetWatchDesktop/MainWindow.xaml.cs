@@ -331,7 +331,6 @@ namespace NetWatch
         // ═════════════════════════════════════════════════════════════════════
 
         private readonly Dictionary<string, TextBlock> _checkerStatusViews = new();
-        private bool _checkerBuilt = false;
 
         private void BuildCheckerUI()
         {
@@ -356,7 +355,7 @@ namespace NetWatch
                         Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
                         CornerRadius = new CornerRadius(4),
                         Padding = new Thickness(10, 6, 10, 6),
-                        Margin = new Thickness(0, 2),
+                        Margin = new Thickness(0, 2, 0, 2),
                         Cursor = Cursors.Hand
                     };
                     var rowChild = new DockPanel { LastChildFill = true };
@@ -390,7 +389,6 @@ namespace NetWatch
                     _checkerStatusViews[host] = statusTb;
                 }
             }
-            _checkerBuilt = true;
         }
 
         private void RunAllChecks_Click(object sender, RoutedEventArgs e)
@@ -451,7 +449,7 @@ namespace NetWatch
                 Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
                 CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(10, 6, 10, 6),
-                Margin = new Thickness(0, 2)
+                Margin = new Thickness(0, 2, 0, 2)
             };
             var dp = new DockPanel { LastChildFill = true };
             var labelTb = new TextBlock
@@ -617,8 +615,8 @@ namespace NetWatch
                     {
                         Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
                         CornerRadius = new CornerRadius(6),
-                        Padding = new Thickness(12, 10),
-                        Margin = new Thickness(0, 4)
+                        Padding = new Thickness(12, 10, 12, 10),
+                        Margin = new Thickness(0, 4, 0, 4)
                     };
                     var sp = new StackPanel();
                     sp.Children.Add(new TextBlock
@@ -662,8 +660,8 @@ namespace NetWatch
             {
                 Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
                 CornerRadius = new CornerRadius(6),
-                Padding = new Thickness(12, 10),
-                Margin = new Thickness(0, 4)
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 4, 0, 4)
             };
             var sp = new StackPanel();
             sp.Children.Add(new TextBlock
