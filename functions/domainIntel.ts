@@ -1,5 +1,5 @@
-// NetWatch - Domain Intelligence v2 (public, no auth required)
-// Enhanced: crt.sh + brute-force + CDN detection + live/dead split
+// NetWatch - Domain Intelligence v3 (public, no auth required)
+// Enhanced: crt.sh + brute-force + CDN detection + cross-domain discovery + deep PTR
 
 const CDN_CNAME_PATTERNS: Record<string, string> = {
   'cloudflare': 'Cloudflare',
@@ -83,6 +83,16 @@ function detectCdn(cname: string, ips: string[]): string | null {
   return null;
 }
 
+// Extract the registrable domain (e.g. "api.paypal.com" -> "paypal.com")
+function getRegistrableDomain(host: string): string {
+  const parts = host.split('.');
+  if (parts.length <= 2) return host;
+  const multiTlds = ['co.uk', 'co.jp', 'com.au', 'com.br', 'co.kr', 'com.cn', 'com.tw', 'com.hk', 'com.sg', 'co.in', 'com.mx', 'co.za'];
+  const lastTwo = parts.slice(-2).join('.');
+  if (multiTlds.includes(lastTwo)) return parts.slice(-3).join('.');
+  return parts.slice(-2).join('.');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
@@ -90,7 +100,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { domain } = body;
+    const { domain, deep } = body;
     if (!domain) return Response.json({ error: 'Domain is required' }, { status: 400 });
 
     const cleanDomain = domain
@@ -99,15 +109,20 @@ Deno.serve(async (req) => {
       .toLowerCase()
       .trim();
 
+    const isDeep = deep === true || deep === 'true';
+
     const results: any = {
       domain: cleanDomain,
       timestamp: new Date().toISOString(),
+      deep: isDeep,
       ipv4: [],
       ipv6: [],
       cname: null,
       cdn: null,
       subdomains: [],
       sharedHostDomains: [],
+      crossDomains: [],
+      certNames: [],
       errors: []
     };
 
@@ -137,14 +152,16 @@ Deno.serve(async (req) => {
       if (recs.length > 0) results.cname = recs[0].data.replace(/\.$/, '');
     } catch (_) {}
 
-    // Root CDN detection
     results.cdn = detectCdn(results.cname || '', results.ipv4);
 
     // ── 2. crt.sh certificate transparency ──────────────────────────────────
     const subSet = new Set<string>();
+    const crossDomainSet = new Set<string>();
+    const certNameSet = new Set<string>();
+
     try {
       const r = await fetch(
-        `https://crt.sh/?q=%.${cleanDomain}&output=json`,
+        `https://crt.sh/?q=%25.${cleanDomain}&output=json`,
         { signal: AbortSignal.timeout(20000) }
       );
       if (r.ok) {
@@ -158,14 +175,29 @@ Deno.serve(async (req) => {
             ];
             for (const raw of names) {
               const n = raw.trim().toLowerCase().replace(/^\*\./, '');
-              if (n.endsWith('.' + cleanDomain) && n !== cleanDomain && !n.includes(' ') && !n.includes('@')) {
+              if (!n || n.includes(' ') || n.includes('@')) continue;
+              certNameSet.add(n);
+
+              if (n.endsWith('.' + cleanDomain) && n !== cleanDomain) {
                 subSet.add(n);
+              }
+
+              // Cross-domain: cert SANs referencing different root domains
+              const regDomain = getRegistrableDomain(n);
+              if (regDomain !== cleanDomain && regDomain !== getRegistrableDomain(cleanDomain)) {
+                const queryLabels = cleanDomain.split('.').slice(-2)[0];
+                const regLabels = regDomain.split('.').slice(-2)[0];
+                if (queryLabels && regLabels && (regLabels.includes(queryLabels) || queryLabels.includes(regLabels))) {
+                  crossDomainSet.add(regDomain);
+                }
               }
             }
           }
         }
       }
     } catch (e: any) { results.errors.push('crt.sh: ' + e.message); }
+
+    results.certNames = Array.from(certNameSet).slice(0, 100);
 
     // ── 3. DNS brute-force common prefixes ───────────────────────────────────
     const commonPrefixes = [
@@ -187,9 +219,28 @@ Deno.serve(async (req) => {
       'git', 'gitlab', 'github', 'ci', 'jenkins', 'build',
       'grafana', 'kibana', 'elastic', 'logs',
       'ns1', 'ns2', 'ns3', 'dns', 'dns1', 'dns2',
+      // Additional prefixes for deep scan
+      'checkout', 'payment', 'payments', 'billing', 'invoice', 'subscription',
+      'sdk', 'hooks', 'webhooks', 'callback', 'redirect',
+      'i', 'css', 'js', 'fonts', 'static1', 'static2',
+      'edge', 'origin', 'backend', 'server', 'node', 'worker',
+      'proxy', 'gateway', 'router', 'lb', 'loadbalancer',
+      'sandbox', 'demo', 'trial', 'free', 'plus', 'pro', 'enterprise',
+      'internal', 'private', 'public', 'ext', 'external',
+      'go', 'link', 'links', 'short', 's', 'r',
+      'widget', 'embed', 'iframe', 'frame',
+      'notifications', 'push', 'fcm', 'apns', 'firebase',
+      'collector', 'ingest', 'event', 'events', 'telemetry',
+      'config', 'settings', 'env', 'metadata',
+      'health', 'ready', 'alive', 'ping',
+      'swagger', 'openapi', 'api-docs',
+      'gql', 'query',
+      'stream', 'streaming', 'live', 'rtmp', 'hls',
+      'storage', 'bucket', 's3', 'blob',
+      'ml', 'ai', 'model', 'inference', 'predict',
     ];
 
-    const bruteResults = await Promise.allSettled(
+    await Promise.allSettled(
       commonPrefixes.map(async (prefix) => {
         const fqdn = `${prefix}.${cleanDomain}`;
         try {
@@ -204,7 +255,7 @@ Deno.serve(async (req) => {
     const BATCH = 20;
     const subdomainResults: any[] = [];
 
-    for (let i = 0; i < Math.min(allSubs.length, 150); i += BATCH) {
+    for (let i = 0; i < Math.min(allSubs.length, 200); i += BATCH) {
       const batch = allSubs.slice(i, i + BATCH);
       const resolved = await Promise.allSettled(
         batch.map(async (sub) => {
@@ -232,7 +283,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Sort: live first, then alphabetical
     subdomainResults.sort((a, b) => {
       if (a.live !== b.live) return a.live ? -1 : 1;
       return a.name.localeCompare(b.name);
@@ -242,19 +292,82 @@ Deno.serve(async (req) => {
     results.totalDiscovered = allSubs.length;
     results.liveCount = subdomainResults.filter(s => s.live).length;
 
-    // ── 5. PTR / Shared-host ─────────────────────────────────────────────────
+    // ── 5. Cross-domain discovery ────────────────────────────────────────────
+    if (crossDomainSet.size > 0) {
+      const crossResults: any[] = [];
+      const crossArr = Array.from(crossDomainSet).slice(0, 10);
+      const crossResolved = await Promise.allSettled(
+        crossArr.map(async (cd) => {
+          try {
+            const recs = await fetchDns(cd, 'A');
+            const ips = [...new Set(recs.map((r: any) => r.data as string))];
+            const cnameRecs = await fetchDns(cd, 'CNAME').catch(() => [] as any[]);
+            const cname = cnameRecs.length > 0 ? cnameRecs[0].data.replace(/\.$/, '') : null;
+            const cdn = detectCdn(cname || '', ips);
+            return { domain: cd, ips, cname, cdn, live: ips.length > 0 };
+          } catch (_) {
+            return { domain: cd, ips: [], cname: null, cdn: null, live: false };
+          }
+        })
+      );
+      for (const r of crossResolved) {
+        if (r.status === 'fulfilled') crossResults.push(r.value);
+      }
+      results.crossDomains = crossResults;
+    }
+
+    // ── 6. PTR / Shared-host (deep: check ALL resolved IPs) ───────────────────
     const ptrDomains = new Set<string>();
-    await Promise.allSettled(results.ipv4.slice(0, 3).map(async (ip: string) => {
+    const ipsToCheck = isDeep
+      ? [...new Set([
+          ...results.ipv4,
+          ...subdomainResults.filter(s => s.live).flatMap(s => s.ips).filter(ip => /^\d+\.\d+\.\d+\.\d+$/.test(ip))
+        ])].slice(0, 10)
+      : results.ipv4.slice(0, 3);
+
+    await Promise.allSettled(ipsToCheck.map(async (ip: string) => {
       try {
         const reversed = ip.split('.').reverse().join('.') + '.in-addr.arpa';
         const recs = await fetchDns(reversed, 'PTR');
         for (const r of recs) {
           const ptr = r.data.replace(/\.$/, '').toLowerCase();
-          if (ptr && ptr !== cleanDomain) ptrDomains.add(ptr);
+          if (ptr && ptr !== cleanDomain) {
+            ptrDomains.add(ptr);
+            const ptrReg = getRegistrableDomain(ptr);
+            if (ptrReg !== cleanDomain && ptrReg !== getRegistrableDomain(cleanDomain)) {
+              const queryLabel = cleanDomain.split('.').slice(-2)[0];
+              const ptrLabel = ptrReg.split('.').slice(-2)[0];
+              if (ptrLabel && queryLabel && (ptrLabel.includes(queryLabel) || queryLabel.includes(ptrLabel))) {
+                crossDomainSet.add(ptrReg);
+              }
+            }
+          }
         }
       } catch (_) {}
     }));
-    results.sharedHostDomains = Array.from(ptrDomains).slice(0, 20);
+    results.sharedHostDomains = Array.from(ptrDomains).slice(0, 30);
+
+    // Update crossDomains if PTR revealed more
+    if (isDeep && crossDomainSet.size > (results.crossDomains?.length || 0)) {
+      const existing = new Set((results.crossDomains || []).map((c: any) => c.domain));
+      const newOnes = Array.from(crossDomainSet).filter(d => !existing.has(d)).slice(0, 5);
+      if (newOnes.length > 0) {
+        const newResolved = await Promise.allSettled(
+          newOnes.map(async (cd) => {
+            try {
+              const recs = await fetchDns(cd, 'A');
+              const ips = [...new Set(recs.map((r: any) => r.data as string))];
+              return { domain: cd, ips, cname: null, cdn: detectCdn('', ips), live: ips.length > 0 };
+            } catch (_) {
+              return { domain: cd, ips: [], cname: null, cdn: null, live: false };
+            }
+          })
+        );
+        for (const r of newResolved) {
+          if (r.status === 'fulfilled') results.crossDomains.push(r.value);
+        }
+      }
+    }
 
     return Response.json(results, {
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }

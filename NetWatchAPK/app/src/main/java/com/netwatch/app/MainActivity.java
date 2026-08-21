@@ -1474,12 +1474,21 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     }
 
     private void runDomainScan(String domain) {
+        runDomainScan(domain, false);
+    }
+
+    private void runDomainScan(String domain, boolean deep) {
         resultsContainer.removeAllViews();
-        statusText.setText(isRussian ? "⏳  Сканирование " + domain + " …" : "⏳  Scanning " + domain + " …");
+        statusText.setText(isRussian
+            ? (deep ? "🔬  Глубокое сканирование " + domain + " …" : "⏳  Сканирование " + domain + " …")
+            : (deep ? "🔬  Deep scanning " + domain + " …" : "⏳  Scanning " + domain + " …"));
         lookupBtn.setEnabled(false);
 
         executor.execute(() -> {
-            String intelJson = postJson(DOMAIN_INTEL_URL,  "{\"domain\":\""+ domain + "\"}");
+            String payload = deep
+                ? "{\"domain\":\"" + domain + "\",\"deep\":true}"
+                : "{\"domain\":\"" + domain + "\"}";
+            String intelJson = postJson(DOMAIN_INTEL_URL, payload);
             mainHandler.post(() -> {
                 lookupBtn.setEnabled(true);
                 if (intelJson == null) {
@@ -1492,9 +1501,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         int total2 = tmp.optInt("totalDiscovered", 0);
                         String cdn2 = tmp.optString("cdn","");
                         String cdnSuffix = (!cdn2.isEmpty() && !cdn2.equals("null")) ? "  •  CDN: " + cdn2 : "";
+                        int crossCount = tmp.optJSONArray("crossDomains") != null ? tmp.optJSONArray("crossDomains").length() : 0;
+                        String crossSuffix = crossCount > 0
+                            ? (isRussian ? "  •  " + crossCount + " кросс-доменов" : "  •  " + crossCount + " cross-domains")
+                            : "";
                         statusText.setText(isRussian
-                            ? "✅  " + domain + "  •  " + live2 + " живых / " + total2 + " субдоменов" + cdnSuffix
-                            : "✅  " + domain + "  •  " + live2 + " live / " + total2 + " subdomains" + cdnSuffix);
+                            ? "✅  " + domain + "  •  " + live2 + " живых / " + total2 + " субдоменов" + cdnSuffix + crossSuffix
+                            : "✅  " + domain + "  •  " + live2 + " live / " + total2 + " subdomains" + cdnSuffix + crossSuffix);
                     } catch (Exception _e) {
                         statusText.setText(isRussian ? "✅  Сканирование завершено: " + domain : "✅  Scan complete for " + domain);
                     }
@@ -1621,9 +1634,25 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT));
 
+                    // Deep Scan button
+                    TextView deepBtn = new TextView(MainActivity.this);
+                    deepBtn.setText(isRussian ? "  [🔬 Глубокий поиск]" : "  [🔬 Deep Scan]");
+                    deepBtn.setTextColor(0xFFFFB300);
+                    deepBtn.setTextSize(11);
+                    deepBtn.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+                    deepBtn.setPadding(dp(4), dp(2), dp(4), dp(2));
+                    row.addView(deepBtn, new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+
                     row.setOnClickListener(v -> {
                         domainInput.setText(domain);
                         runDomainScan(domain);
+                    });
+
+                    deepBtn.setOnClickListener(v -> {
+                        domainInput.setText(domain);
+                        runDomainScan(domain, true);
                     });
 
                     resultsContainer.addView(row);
@@ -1712,11 +1741,144 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 } else addCard("🕵️  Shared-Host", "None found", "#546E7A");
             }
 
+            // Cross-domain discovery (from cert SANs + PTR)
+            if (intel != null) {
+                JSONArray cross = intel.optJSONArray("crossDomains");
+                if (cross != null && cross.length() > 0) {
+                    LinearLayout card = makeCardContainer();
+                    TextView title = new TextView(MainActivity.this);
+                    title.setText("🔗  CROSS-DOMAIN DISCOVERY  (" + cross.length() + ")");
+                    title.setTextSize(11); title.setTextColor(Color.parseColor("#FFB300"));
+                    title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
+                    card.addView(title);
+
+                    for (int i = 0; i < cross.length(); i++) {
+                        JSONObject cd = cross.getJSONObject(i);
+                        String cdDomain = cd.optString("domain", "");
+                        JSONArray cdIps = cd.optJSONArray("ips");
+                        String cdCdn = cd.optString("cdn", "");
+                        boolean cdLive = cd.optBoolean("live", false);
+
+                        LinearLayout cdRow = new LinearLayout(MainActivity.this);
+                        cdRow.setOrientation(LinearLayout.HORIZONTAL);
+                        cdRow.setPadding(0, dp(4), 0, 0);
+
+                        TextView cdName = new TextView(MainActivity.this);
+                        cdName.setText((cdLive ? "🟢  " : "⚫  ") + cdDomain);
+                        cdName.setTextSize(13);
+                        cdName.setTextColor(cdLive ? Color.parseColor("#80DEEA") : Color.parseColor("#546E7A"));
+                        cdName.setTypeface(Typeface.MONOSPACE);
+                        cdName.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                        cdRow.addView(cdName);
+
+                        if (cdCdn != null && !cdCdn.isEmpty() && !cdCdn.equals("null")) {
+                            TextView cdnBadge = new TextView(MainActivity.this);
+                            cdnBadge.setText("  " + cdCdn);
+                            cdnBadge.setTextSize(10);
+                            cdnBadge.setTextColor(Color.parseColor("#FFB300"));
+                            cdnBadge.setTypeface(null, Typeface.BOLD);
+                            cdRow.addView(cdnBadge);
+                        }
+                        card.addView(cdRow);
+
+                        if (cdIps != null && cdIps.length() > 0) {
+                            StringBuilder ipSb = new StringBuilder("   ");
+                            for (int j = 0; j < cdIps.length(); j++) {
+                                if (j > 0) ipSb.append("  |  ");
+                                ipSb.append(cdIps.optString(j));
+                            }
+                            TextView ipView = new TextView(MainActivity.this);
+                            ipView.setText(ipSb.toString());
+                            ipView.setTextSize(11);
+                            ipView.setTextColor(Color.parseColor("#78909C"));
+                            ipView.setTypeface(Typeface.MONOSPACE);
+                            ipView.setPadding(0, dp(2), 0, 0);
+                            card.addView(ipView);
+                        }
+
+                        // Make cross-domain tappable to scan it
+                        final String cdDom = cdDomain;
+                        cdRow.setClickable(true);
+                        cdRow.setOnClickListener(v -> {
+                            domainInput.setText(cdDom);
+                            runDomainScan(cdDom, true);
+                        });
+
+                        if (i < cross.length() - 1) addDivider(card);
+                    }
+                    resultsContainer.addView(card);
+                }
+            }
+
+            // Certificate names from crt.sh
+            if (intel != null) {
+                JSONArray certNames = intel.optJSONArray("certNames");
+                if (certNames != null && certNames.length() > 0) {
+                    LinearLayout card = makeCardContainer();
+                    TextView title = new TextView(MainActivity.this);
+                    title.setText("📜  CERTIFICATE TRANSPARENCY  (" + certNames.length() + ")");
+                    title.setTextSize(11); title.setTextColor(Color.parseColor("#CE93D8"));
+                    title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
+                    card.addView(title);
+
+                    // Show first 30 cert names in a compact list
+                    int showCount = Math.min(certNames.length(), 30);
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < showCount; i++) {
+                        sb.append("▸  ").append(certNames.optString(i)).append("\n");
+                    }
+                    if (certNames.length() > 30) {
+                        sb.append("\n  ... +").append(certNames.length() - 30).append(" more");
+                    }
+                    TextView certView = new TextView(MainActivity.this);
+                    certView.setText(sb.toString().trim());
+                    certView.setTextSize(11);
+                    certView.setTextColor(Color.parseColor("#9E9E9E"));
+                    certView.setTypeface(Typeface.MONOSPACE);
+                    card.addView(certView);
+                    resultsContainer.addView(card);
+                }
+            }
+
 
 
         } catch (Exception e) {
             addCard("⚠  Parse Error", e.getMessage(), "#EF9A9A");
         }
+
+        // Add Deep Scan button at the bottom of results
+        final String dsDomain = domain;
+        LinearLayout deepCard = new LinearLayout(this);
+        deepCard.setOrientation(LinearLayout.HORIZONTAL);
+        deepCard.setBackgroundResource(R.drawable.card_background);
+        deepCard.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        dlp.topMargin = dp(8);
+        deepCard.setLayoutParams(dlp);
+        deepCard.setClickable(true);
+
+        TextView deepLabel = new TextView(this);
+        deepLabel.setText(isRussian ? "🔬  Глубокое сканирование " + dsDomain : "🔬  Deep Scan " + dsDomain);
+        deepLabel.setTextColor(0xFFFFB300);
+        deepLabel.setTextSize(13);
+        deepLabel.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        deepCard.addView(deepLabel, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+        TextView deepHint = new TextView(this);
+        deepHint.setText(isRussian ? "  [сертификаты + субдомены + PTR →]" : "  [certs + subs + PTR →]");
+        deepHint.setTextColor(0xFF546E7A);
+        deepHint.setTextSize(11);
+        deepHint.setTypeface(Typeface.MONOSPACE);
+        deepCard.addView(deepHint, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        deepCard.setOnClickListener(v -> runDomainScan(dsDomain, true));
+        resultsContainer.addView(deepCard);
     }
 
     // ── Card helpers ─────────────────────────────────────────────────────────
