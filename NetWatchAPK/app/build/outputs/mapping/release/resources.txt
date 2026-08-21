@@ -499,6 +499,7 @@ exports
 inProgressLabel
 yyyyMMdd_HHmmss
 nativeCreateFromTypefaceWithExactStyle
+crossDomains
 android.intent.extra.shortcut.ICON_RE...
 _isTerminated
 tint
@@ -1470,6 +1471,7 @@ CheckBox
 guideline
 http
 app:layout_constraintHeight_percent
+certNames
 GONE
 strokeWidth
 ACTION_CLEAR_FOCUS

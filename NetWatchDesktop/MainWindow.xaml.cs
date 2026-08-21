@@ -178,14 +178,18 @@ namespace NetWatch
             await RunDomainScan(domain);
         }
 
-        private async Task RunDomainScan(string domain)
+        private async Task RunDomainScan(string domain) => await RunDomainScan(domain, false);
+
+        private async Task RunDomainScan(string domain, bool deep)
         {
-            DomainStatus.Text = $"⏳ Scanning {domain}…";
+            DomainStatus.Text = deep ? $"🔬 Deep scanning {domain}…" : $"⏳ Scanning {domain}…";
             DomainResults.Children.Clear();
 
             try
             {
-                var payload = JsonSerializer.Serialize(new { domain });
+                var payload = deep
+                    ? JsonSerializer.Serialize(new { domain, deep = true })
+                    : JsonSerializer.Serialize(new { domain });
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await Http.PostAsync(DOMAIN_INTEL_URL, content);
                 var json = await response.Content.ReadAsStringAsync();
@@ -306,12 +310,34 @@ namespace NetWatch
                     VerticalAlignment = VerticalAlignment.Center
                 });
 
+                // Deep Scan button
+                var deepBtn = new TextBlock
+                {
+                    Text = "  [🔬 Deep Scan]",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xB3, 0x00)),
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Cursor = Cursors.Hand,
+                    Tag = domain
+                };
+
+                sp.Children.Add(deepBtn);
+
                 row.Child = sp;
                 row.MouseLeftButtonUp += async (s, e) =>
                 {
                     string d = (string)((Border)s).Tag;
                     DomainInput.Text = d;
                     await RunDomainScan(d);
+                };
+
+                deepBtn.MouseLeftButtonUp += async (s, e) =>
+                {
+                    string d = (string)((TextBlock)s).Tag;
+                    DomainInput.Text = d;
+                    await RunDomainScan(d, true);
                 };
 
                 DomainResults.Children.Add(row);
@@ -405,13 +431,88 @@ namespace NetWatch
                 else
                     AddCard(DomainResults, "🕵️ Shared-Host", "None found", "#546E7A");
 
+                // Cross-domain discovery (from cert SANs + PTR)
+                if (root.TryGetProperty("crossDomains", out var cross) && cross.GetArrayLength() > 0)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var c in cross.EnumerateArray())
+                    {
+                        string cdDomain = c.TryGetProperty("domain", out var d) ? d.GetString() ?? "" : "";
+                        bool cdLive = c.TryGetProperty("live", out var l) && l.GetBoolean();
+                        string cdCdn = c.TryGetProperty("cdn", out var cd) ? cd.GetString() ?? "" : "";
+
+                        sb.AppendLine($"{(cdLive ? "🟢" : "⚫")}  {cdDomain}");
+                        if (c.TryGetProperty("ips", out var cdIps) && cdIps.GetArrayLength() > 0)
+                        {
+                            var ips = new List<string>();
+                            foreach (var ip in cdIps.EnumerateArray())
+                                ips.Add(ip.GetString() ?? "");
+                            sb.AppendLine($"   {string.Join("  |  ", ips)}");
+                        }
+                        if (!string.IsNullOrEmpty(cdCdn) && cdCdn != "null")
+                            sb.AppendLine($"   CDN: {cdCdn}");
+                        sb.AppendLine();
+                    }
+                    AddCard(DomainResults, $"🔗 Cross-Domain Discovery ({cross.GetArrayLength()})", sb.ToString().TrimEnd(), "#FFB300");
+                }
+
+                // Certificate Transparency names
+                if (root.TryGetProperty("certNames", out var certNames) && certNames.GetArrayLength() > 0)
+                {
+                    var sb = new StringBuilder();
+                    int showCount = Math.Min(certNames.GetArrayLength(), 30);
+                    for (int i = 0; i < showCount; i++)
+                        sb.AppendLine($"▸  {certNames[i].GetString()}");
+                    if (certNames.GetArrayLength() > 30)
+                        sb.AppendLine($"\n  ... +{certNames.GetArrayLength() - 30} more");
+                    AddCard(DomainResults, $"📜 Certificate Transparency ({certNames.GetArrayLength()})", sb.ToString().TrimEnd(), "#CE93D8");
+                }
+
                 // Status line
                 int liveCount = root.TryGetProperty("liveCount", out var lc) ? lc.GetInt32() : 0;
                 int totalCount = root.TryGetProperty("totalDiscovered", out var tc) ? tc.GetInt32() : 0;
                 string cdnSuffix = "";
                 if (root.TryGetProperty("cdn", out var cdn2) && !string.IsNullOrEmpty(cdn2.GetString()) && cdn2.GetString() != "null")
                     cdnSuffix = $"  •  CDN: {cdn2.GetString()}";
-                DomainStatus.Text = $"✅  {domain}  •  {liveCount} live / {totalCount} subdomains{cdnSuffix}";
+                int crossCount = root.TryGetProperty("crossDomains", out var cc) && cc.GetArrayLength() > 0 ? cc.GetArrayLength() : 0;
+                string crossSuffix = crossCount > 0 ? $"  •  {crossCount} cross-domains" : "";
+                DomainStatus.Text = $"✅  {domain}  •  {liveCount} live / {totalCount} subdomains{cdnSuffix}{crossSuffix}";
+
+                // Deep Scan button at bottom of results
+                var deepCard = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(12, 10, 12, 10),
+                    Margin = new Thickness(0, 8, 0, 0),
+                    Cursor = Cursors.Hand,
+                    Tag = domain
+                };
+                var deepSp = new StackPanel { Orientation = Orientation.Horizontal };
+                deepSp.Children.Add(new TextBlock
+                {
+                    Text = $"🔬  Deep Scan {domain}",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xB3, 0x00)),
+                    FontSize = 13,
+                    FontWeight = FontWeights.Bold,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+                deepSp.Children.Add(new TextBlock
+                {
+                    Text = "  [certs + subs + PTR →]",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x54, 0x6E, 0x7A)),
+                    FontSize = 11,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+                deepCard.Child = deepSp;
+                deepCard.MouseLeftButtonUp += async (s, e) =>
+                {
+                    string d = (string)((Border)s).Tag;
+                    await RunDomainScan(d, true);
+                };
+                DomainResults.Children.Add(deepCard);
             }
             catch (Exception ex)
             {
