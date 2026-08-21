@@ -1454,17 +1454,32 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     // ── Domain Intel (Tab 1) ─────────────────────────────────────────────────
 
+    private static final String[] COMMON_TLDS = {
+        ".com", ".net", ".org", ".io", ".co", ".dev", ".app", ".ai",
+        ".tech", ".cloud", ".info", ".biz", ".online", ".site",
+        ".store", ".xyz", ".me", ".tv", ".gg", ".sh"
+    };
+
     private void performLookup() {
         String raw = domainInput.getText().toString().trim();
         if (raw.isEmpty()) { showToast(isRussian ? "Введите домен" : "Enter a domain"); return; }
-        String domain = raw.replaceAll("(?i)https?://", "").replaceAll("/.*", "").toLowerCase().trim();
+        String clean = raw.replaceAll("(?i)https?://", "").replaceAll("/.*", "").toLowerCase().trim();
 
+        // Smart search: if no dot, try common TLDs
+        if (!clean.contains(".")) {
+            discoverTlds(clean);
+            return;
+        }
+        runDomainScan(clean);
+    }
+
+    private void runDomainScan(String domain) {
         resultsContainer.removeAllViews();
         statusText.setText(isRussian ? "⏳  Сканирование " + domain + " …" : "⏳  Scanning " + domain + " …");
         lookupBtn.setEnabled(false);
 
         executor.execute(() -> {
-            String intelJson = postJson(DOMAIN_INTEL_URL,  "{\"domain\":\"" + domain + "\"}");
+            String intelJson = postJson(DOMAIN_INTEL_URL,  "{\"domain\":\""+ domain + "\"}");
             mainHandler.post(() -> {
                 lookupBtn.setEnabled(true);
                 if (intelJson == null) {
@@ -1487,6 +1502,132 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 lastIntelJsonForExport = intelJson != null ? intelJson : "";
                 lastProbeJsonForExport = "";
                 buildReport(domain, intelJson, null);
+            });
+        });
+    }
+
+    /** Smart TLD discovery: probe common suffixes for a bare domain name. */
+    private void discoverTlds(final String baseName) {
+        resultsContainer.removeAllViews();
+        statusText.setText(isRussian ? "🔍  Поиск TLD для " + baseName + " …" : "🔍  Searching TLDs for " + baseName + " …");
+        lookupBtn.setEnabled(false);
+
+        // Show "probing" card
+        addCard("🔍 " + (isRussian ? "Поиск доменов" : "TLD Discovery"),
+                (isRussian ? "Проверка " : "Probing ") + COMMON_TLDS.length + (isRussian ? " суффиксов для " : " common suffixes for ") + baseName + "…",
+                "#00E5FF");
+
+        executor.execute(() -> {
+            final java.util.List<String[]> found = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+            java.util.List<Thread> threads = new java.util.ArrayList<>();
+
+            for (final String tld : COMMON_TLDS) {
+                final String candidate = baseName + tld;
+                Thread t = new Thread(() -> {
+                    try {
+                        java.net.InetAddress addr = java.net.InetAddress.getByName(candidate);
+                        if (addr != null) {
+                            found.add(new String[]{candidate, addr.getHostAddress()});
+                        }
+                    } catch (Exception ignored) { /* doesn't resolve */ }
+                });
+                threads.add(t);
+                t.start();
+            }
+
+            // Wait for all threads
+            for (Thread t : threads) {
+                try { t.join(); } catch (Exception ignored) {}
+            }
+
+            // Sort: by TLD priority order
+            java.util.List<String[]> sorted = new java.util.ArrayList<>(found);
+            java.util.Collections.sort(sorted, (a, b) -> {
+                String aTld = a[0].substring(baseName.length());
+                String bTld = b[0].substring(baseName.length());
+                int aIdx = -1, bIdx = -1;
+                for (int i = 0; i < COMMON_TLDS.length; i++) {
+                    if (COMMON_TLDS[i].equals(aTld)) aIdx = i;
+                    if (COMMON_TLDS[i].equals(bTld)) bIdx = i;
+                }
+                return Integer.compare(Math.max(aIdx, 0), Math.max(bIdx, 0));
+            });
+
+            mainHandler.post(() -> {
+                lookupBtn.setEnabled(true);
+                resultsContainer.removeAllViews();
+
+                if (sorted.isEmpty()) {
+                    statusText.setText(isRussian ? "❌  Домены не найдены для " + baseName : "❌  No domains found for " + baseName);
+                    addCard("❌ " + (isRussian ? "Нет результатов" : "No Results"),
+                            (isRussian ? "Ни один TLD не разрешён для " : "No TLDs resolved for ") + baseName +
+                            (isRussian ? "\nВведите полный домен, например " : "\nTry entering the full domain, e.g. ") + baseName + ".com",
+                            "#EF9A9A");
+                    return;
+                }
+
+                statusText.setText(isRussian
+                    ? "✅  Найдено " + sorted.size() + " доменов для " + baseName + " — нажмите для сканирования"
+                    : "✅  Found " + sorted.size() + " domains for " + baseName + " — tap to scan");
+
+                // Header
+                TextView header = new TextView(MainActivity.this);
+                header.setText("DISCOVERED DOMAINS FOR \"" + baseName.toUpperCase() + "\"");
+                header.setTextColor(0xFF00E5FF);
+                header.setTextSize(13);
+                header.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+                header.setPadding(0, dp(4), 0, dp(8));
+                resultsContainer.addView(header);
+
+                for (final String[] entry : sorted) {
+                    String domain = entry[0];
+                    String ip = entry[1];
+
+                    LinearLayout row = new LinearLayout(MainActivity.this);
+                    row.setOrientation(LinearLayout.HORIZONTAL);
+                    row.setBackgroundResource(R.drawable.card_background);
+                    row.setPadding(dp(12), dp(10), dp(12), dp(10));
+                    LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    rp.bottomMargin = dp(4);
+                    row.setLayoutParams(rp);
+                    row.setClickable(true);
+
+                    TextView domainTv = new TextView(MainActivity.this);
+                    domainTv.setText(domain);
+                    domainTv.setTextColor(0xFF00E5FF);
+                    domainTv.setTextSize(14);
+                    domainTv.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+                    row.addView(domainTv, new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+
+                    TextView ipTv = new TextView(MainActivity.this);
+                    ipTv.setText("  →  " + ip);
+                    ipTv.setTextColor(0xFF78909C);
+                    ipTv.setTextSize(12);
+                    ipTv.setTypeface(Typeface.MONOSPACE);
+                    row.addView(ipTv, new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+                    TextView hintTv = new TextView(MainActivity.this);
+                    hintTv.setText(isRussian ? "  [нажмите →]" : "  [tap to scan →]");
+                    hintTv.setTextColor(0xFF546E7A);
+                    hintTv.setTextSize(11);
+                    hintTv.setTypeface(Typeface.MONOSPACE);
+                    row.addView(hintTv, new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+
+                    row.setOnClickListener(v -> {
+                        domainInput.setText(domain);
+                        runDomainScan(domain);
+                    });
+
+                    resultsContainer.addView(row);
+                }
             });
         });
     }

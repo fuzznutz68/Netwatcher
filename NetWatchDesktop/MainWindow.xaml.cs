@@ -20,6 +20,13 @@ namespace NetWatch
         private const string DOMAIN_INTEL_URL = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
         private const string IP_WHOIS_URL     = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
 
+        // ── TLD discovery for smart domain search ──────────────────────────
+        private static readonly string[] CommonTlds = {
+            ".com", ".net", ".org", ".io", ".co", ".dev", ".app", ".ai",
+            ".tech", ".cloud", ".info", ".biz", ".online", ".site",
+            ".store", ".xyz", ".me", ".tv", ".gg", ".sh"
+        };
+
         private static readonly HttpClient Http = new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(20)
@@ -159,8 +166,20 @@ namespace NetWatch
             // Strip protocol
             raw = System.Text.RegularExpressions.Regex.Replace(raw, @"^https?://", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             raw = raw.Split('/')[0].ToLowerInvariant().Trim();
-            string domain = raw;
 
+            // Smart search: if no dot, try common TLDs
+            if (!raw.Contains("."))
+            {
+                await DiscoverTlds(raw);
+                return;
+            }
+
+            string domain = raw;
+            await RunDomainScan(domain);
+        }
+
+        private async Task RunDomainScan(string domain)
+        {
             DomainStatus.Text = $"⏳ Scanning {domain}…";
             DomainResults.Children.Clear();
 
@@ -170,11 +189,132 @@ namespace NetWatch
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await Http.PostAsync(DOMAIN_INTEL_URL, content);
                 var json = await response.Content.ReadAsStringAsync();
-                BuildDomainReport(domain, json);
+                await BuildDomainReport(domain, json);
             }
             catch (Exception ex)
             {
                 DomainStatus.Text = $"❌ Error: {ex.Message}";
+            }
+        }
+
+        // ── TLD Discovery: probe common suffixes when user enters a bare name ─
+        private async Task DiscoverTlds(string baseName)
+        {
+            DomainStatus.Text = $"🔍 Searching TLDs for \"{baseName}\"…";
+            DomainResults.Children.Clear();
+
+            AddCard(DomainResults, "🔍 TLD Discovery",
+                $"Probing {CommonTlds.Length} common suffixes for \"{baseName}\"…\nDomains that resolve will appear below.", "#00E5FF");
+
+            var found = new List<(string domain, string ip)>();
+            var tasks = new List<Task>();
+
+            foreach (string tld in CommonTlds)
+            {
+                string candidate = baseName + tld;
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        var addrs = await Dns.GetHostAddressesAsync(candidate);
+                        if (addrs.Length > 0)
+                        {
+                            string ip = addrs[0].ToString();
+                            lock (found)
+                            {
+                                found.Add((candidate, ip));
+                            }
+                        }
+                    }
+                    catch { /* domain doesn't resolve */ }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+
+            // Sort found domains: .com first, then alphabetical
+            found.Sort((a, b) =>
+            {
+                int aPri = Array.IndexOf(CommonTlds, a.domain.Substring(baseName.Length));
+                int bPri = Array.IndexOf(CommonTlds, b.domain.Substring(baseName.Length));
+                return aPri.CompareTo(bPri);
+            });
+
+            // Remove the "probing" card
+            DomainResults.Children.Clear();
+
+            if (found.Count == 0)
+            {
+                DomainStatus.Text = $"❌ No domains found for \"{baseName}\"";
+                AddCard(DomainResults, "❌ No Results",
+                    $"No TLDs resolved for \"{baseName}\".\nTry entering the full domain (e.g. {baseName}.com).", "#EF5350");
+                return;
+            }
+
+            DomainStatus.Text = $"✅ Found {found.Count} domain{(found.Count == 1 ? "" : "s")} for \"{baseName}\" — click to scan";
+
+            var header = new TextBlock
+            {
+                Text = $"DISCOVERED DOMAINS FOR \"{baseName.ToUpper()}"",
+                Foreground = (SolidColorBrush)FindResource("AccentBrush"),
+                FontSize = 12,
+                FontWeight = FontWeights.Bold,
+                FontFamily = new FontFamily("Consolas"),
+                Margin = new Thickness(0, 0, 0, 6)
+            };
+            DomainResults.Children.Add(header);
+
+            foreach (var (domain, ip) in found)
+            {
+                var row = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x11, 0x17)),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(10, 8, 10, 8),
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Cursor = Cursors.Hand,
+                    Tag = domain
+                };
+
+                var sp = new StackPanel { Orientation = Orientation.Horizontal };
+
+                sp.Children.Add(new TextBlock
+                {
+                    Text = domain,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0xFF)),
+                    FontSize = 13,
+                    FontWeight = FontWeights.Bold,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+
+                sp.Children.Add(new TextBlock
+                {
+                    Text = $"  →  {ip}",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x78, 0x90, 0x9C)),
+                    FontSize = 11,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+
+                sp.Children.Add(new TextBlock
+                {
+                    Text = "  [click to scan →]",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x54, 0x6E, 0x7A)),
+                    FontSize = 10,
+                    FontFamily = new FontFamily("Consolas"),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+
+                row.Child = sp;
+                row.MouseLeftButtonUp += async (s, e) =>
+                {
+                    string d = (string)((Border)s).Tag;
+                    DomainInput.Text = d;
+                    await RunDomainScan(d);
+                };
+
+                DomainResults.Children.Add(row);
             }
         }
 

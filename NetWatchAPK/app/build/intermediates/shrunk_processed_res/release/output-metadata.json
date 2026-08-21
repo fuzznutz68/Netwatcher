@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 65,
-      "versionName": "2.5.3",
+      "versionCode": 66,
+      "versionName": "2.6.0",
       "outputFile": "resources-release-stripped.ap_"
     }
   ],
