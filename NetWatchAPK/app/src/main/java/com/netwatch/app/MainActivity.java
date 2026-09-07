@@ -2658,51 +2658,62 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     private void toolTraceroute(String host) {
         toolPrint("#00e5ff", "$ traceroute " + host);
-        toolPrint("#546e7a", isRussian ? "  (через ping с ростом TTL — без root)" : "  (via ping with increasing TTL — rootless)");
+        toolPrint("#546e7a", isRussian ? "  (через ping с ростом TTL — без root, 3 попытки/прыжок)" : "  (via ping with increasing TTL — rootless, 3 probes/hop)");
         java.util.regex.Pattern ipPattern =
             java.util.regex.Pattern.compile("\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b");
         boolean reached = false, sawHopData = false;
+        int silentHops = 0;
+
         for (int ttl = 1; ttl <= 30 && toolsRunning && !reached; ttl++) {
-            final java.util.List<String> lines = new java.util.ArrayList<>();
-            runPingCapture(host, 1, ttl, lines::add);
-
-            // DNS failure / invalid host — report and bail out immediately
-            for (String l : lines) {
-                String ll = l.toLowerCase(Locale.US);
-                if (ll.contains("unknown host") || ll.contains("bad address")
-                        || ll.contains("name or service") || ll.contains("not known")) {
-                    toolPrint("#ef9a9a", l.trim());
-                    toolPrint("#ef9a9a", isRussian
-                        ? "— хост не разрешается в IP; TRACE невозможен"
-                        : "— host does not resolve to an IP; cannot trace");
-                    return;
-                }
-            }
-
             String hopIp = null, timeMs = null, reason = null, unknownLine = null;
-            for (String l : lines) {
-                String t = l.trim();
-                if (t.isEmpty() || t.startsWith("PING") || t.contains("ping statistics")
-                        || t.contains("packets transmitted") || t.contains("rtt")) continue;
-                if (l.contains("bytes from")) {                       // destination answered
-                    int s = l.indexOf("bytes from ") + 11;
-                    int e = l.indexOf(' ', s);
-                    int c = l.indexOf(':', s);
-                    int end = (e == -1) ? c : (c == -1 ? e : Math.min(e, c));
-                    hopIp = l.substring(s, end == -1 ? l.length() : end);
-                    int ti = l.indexOf("time=");
-                    if (ti != -1) timeMs = l.substring(ti + 5).split(" ")[0];
-                    reached = true;
-                    break;
-                } else if (l.startsWith("From ") || l.contains("exceeded")
-                        || l.contains("Unreachable") || l.contains("unreachable")) {
-                    // TTL-exceeded / unreachable — extract the first IPv4 in the line
-                    java.util.regex.Matcher m = ipPattern.matcher(l);
-                    if (m.find()) hopIp = m.group(1);
-                    if (l.contains("exceeded"))            reason = "TTL exceeded";
-                    else if (l.contains("nreachable"))     reason = "unreachable";
-                } else if (unknownLine == null) {
-                    unknownLine = t;                                    // unclassified — diagnostics
+            boolean dnsFailed = false;
+
+            // Real traceroute tools send several probes per hop because intermediate
+            // routers frequently rate-limit or drop the ICMP "TTL exceeded" reply —
+            // very common on carrier/mobile networks. One dropped probe shouldn't
+            // blank out an entire hop, so retry up to 3x before giving up on it.
+            for (int attempt = 0; attempt < 3 && toolsRunning && hopIp == null; attempt++) {
+                final java.util.List<String> lines = new java.util.ArrayList<>();
+                runPingCapture(host, 1, ttl, lines::add);
+
+                for (String l : lines) {
+                    String ll = l.toLowerCase(Locale.US);
+                    if (ll.contains("unknown host") || ll.contains("bad address")
+                            || ll.contains("name or service") || ll.contains("not known")) {
+                        toolPrint("#ef9a9a", l.trim());
+                        toolPrint("#ef9a9a", isRussian
+                            ? "— хост не разрешается в IP; TRACE невозможен"
+                            : "— host does not resolve to an IP; cannot trace");
+                        dnsFailed = true;
+                        break;
+                    }
+                }
+                if (dnsFailed) return;
+
+                for (String l : lines) {
+                    String t = l.trim();
+                    if (t.isEmpty() || t.startsWith("PING") || t.contains("ping statistics")
+                            || t.contains("packets transmitted") || t.contains("rtt")) continue;
+                    if (l.contains("bytes from")) {                       // destination answered
+                        int s = l.indexOf("bytes from ") + 11;
+                        int e = l.indexOf(' ', s);
+                        int c = l.indexOf(':', s);
+                        int end2 = (e == -1) ? c : (c == -1 ? e : Math.min(e, c));
+                        hopIp = l.substring(s, end2 == -1 ? l.length() : end2);
+                        int ti = l.indexOf("time=");
+                        if (ti != -1) timeMs = l.substring(ti + 5).split(" ")[0];
+                        reached = true;
+                        break;
+                    } else if (l.startsWith("From ") || l.contains("exceeded")
+                            || l.contains("Unreachable") || l.contains("unreachable")) {
+                        java.util.regex.Matcher m = ipPattern.matcher(l);
+                        if (m.find()) hopIp = m.group(1);
+                        if (l.contains("exceeded"))        reason = "TTL exceeded";
+                        else if (l.contains("nreachable")) reason = "unreachable";
+                        break;
+                    } else if (unknownLine == null) {
+                        unknownLine = t;
+                    }
                 }
             }
 
@@ -2711,21 +2722,24 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 toolPrint("#00e5ff", isRussian ? "  ✅ цель достигнута" : "  ✅ destination reached");
             } else if (hopIp != null) {
                 sawHopData = true;
+                silentHops = 0;
                 toolPrint("#e0e8f0", String.format(Locale.US, "%2d  %-40s %s", ttl, hopIp, reason == null ? "" : reason));
             } else {
+                silentHops++;
                 if (ttl == 1 && unknownLine != null)
                     toolPrint("#546e7a", "  raw: " + unknownLine);     // show what ping really said
                 toolPrint("#546e7a", String.format(Locale.US, "%2d  * * *", ttl));
             }
         }
+
         if (toolsRunning && !reached) {
             if (!sawHopData) {
                 toolPrint("#ffd740", isRussian
-                    ? "⚠ маршрутизаторы не сообщают о превышении TTL"
-                    : "⚠ routers are not reporting TTL-exceeded errors");
+                    ? "⚠ маршрутизаторы не отвечают ни на одну из 3 попыток на каждом прыжке"
+                    : "⚠ routers gave no reply on any of the 3 probes per hop");
                 toolPrint("#546e7a", isRussian
-                    ? "  (прошивка не передаёт ICMP-ошибки непривилегированному ping)"
-                    : "  (firmware doesn't surface ICMP errors to unprivileged ping)");
+                    ? "  (сеть фильтрует ICMP TTL-exceeded — типично для мобильных/carrier-NAT сетей)"
+                    : "  (network is filtering ICMP TTL-exceeded — common on mobile/carrier-NAT networks)");
             } else {
                 toolPrint("#ef9a9a", isRussian
                     ? "— цель не достигнута за 30 прыжков"
