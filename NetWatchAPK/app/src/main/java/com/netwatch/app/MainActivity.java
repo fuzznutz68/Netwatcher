@@ -80,7 +80,17 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     // ── Tabs ────────────────────────────────────────────────────────────────
     private View   tab1, tab2;
-    private View   tab5, tab6;
+    private View   tab5, tab6, tab7;
+
+    // ── Tab 7 — Network Tools ────────────────────────────────────────────────
+    private static final int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3;
+    private int     toolMode = TOOL_PING;
+    private boolean toolsRunning = false;
+    private Process toolsProc = null;
+    private Button  tabToolsBtn, toolPingBtn, toolTraceBtn, toolPortBtn, toolDnsBtn, toolsRunBtn, toolsStopBtn;
+    private EditText toolsHostInput, toolsPortInput;
+    private TextView toolsTitleText, toolsStatusText, toolsConsoleText;
+    private android.widget.ScrollView toolsScrollView;
 
     // ── Speed-test server table [label, url, type] ──────────────────────────
     private static final String[][] SPEED_SERVERS = {
@@ -204,8 +214,12 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         tabDeviceBtn  = findViewById(R.id.tabDeviceBtn);
         tab5          = findViewById(R.id.tab5);
         tab6          = findViewById(R.id.tab6);
+        tab7          = findViewById(R.id.tab7);
+        tabToolsBtn   = findViewById(R.id.tabToolsBtn);
         if (tabSpeedBtn  != null) tabSpeedBtn.setOnClickListener(v  -> switchTab(4));
         if (tabDeviceBtn != null) tabDeviceBtn.setOnClickListener(v -> switchTab(5));
+        if (tabToolsBtn  != null) tabToolsBtn.setOnClickListener(v -> switchTab(6));
+        initToolsTab();
 
         // ── Top-right menu button ────────────────────────────────────────────
         TextView menuBtn = findViewById(R.id.menuBtn);
@@ -544,6 +558,31 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Tap Export to save as CSV. Tap Stop to close the tunnel.");
                 }
                 return true;
+            } else if (id == R.id.menu_instructions_tools) {
+                if (isRussian) {
+                    showInfoDialog("🛠 Сетевые инструменты — Справка",
+                        "Базовые сетевые утилиты прямо в NetWatch.\n\n" +
+                        "Инструменты:\n" +
+                        "  • PING — проверка доступности хоста (4 пакета ICMP)\n" +
+                        "  • TRACE — трассировка маршрута (до 30 прыжков, без root)\n" +
+                        "  • PORT — проверка TCP-порта (открыт/закрыт)\n" +
+                        "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n\n" +
+                        "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
+                        "Для PORT укажите порт (или введите host:port).\n" +
+                        "Кнопка СТОП прерывает выполнение.");
+                } else {
+                    showInfoDialog("🛠 Network Tools — Help",
+                        "Basic network utilities right inside NetWatch.\n\n" +
+                        "Tools:\n" +
+                        "  • PING — check host reachability (4 ICMP echoes)\n" +
+                        "  • TRACE — trace the route (up to 30 hops, rootless)\n" +
+                        "  • PORT — check if a TCP port is open or closed\n" +
+                        "  • DNS — look up A / AAAA / CNAME / TXT records\n\n" +
+                        "Enter a host or IP, pick a tool, tap RUN.\n" +
+                        "For PORT, enter the port (or use host:port syntax).\n" +
+                        "Tap STOP to interrupt a running tool.");
+                }
+                return true;
             } else if (id == R.id.menu_history) {
                 showConnectionHistory();
                 return true;
@@ -647,6 +686,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             ? "Измерьте скорость загрузки, выгрузки и задержку до выбранного сервера."
             : "Measure your download speed, upload speed, and latency to a selected server.");
         if (tabDeviceBtn != null) tabDeviceBtn.setText(isRussian ? "📱 Устройство" : "📱 Device");
+        if (tabToolsBtn  != null) tabToolsBtn.setText(isRussian ? "🛠 Инструменты" : "🛠 Tools");
+        if (toolsTitleText != null) setToolMode(toolMode); // re-apply localized tool strings
     }
 
     // ── Refresh All UI Strings on Language Change ────────────────────────────
@@ -2452,6 +2493,281 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         // ── Helpers ──────────────────────────────────────────────────────────────
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // TAB 7 — NETWORK TOOLS (Ping / Traceroute / Port Check / DNS Lookup)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private interface PingSink { void line(String l); }
+
+    private void initToolsTab() {
+        if (tab7 == null) return; // layout without tools tab (older layouts)
+        toolsTitleText   = findViewById(R.id.toolsTitleText);
+        toolsStatusText  = findViewById(R.id.toolsStatusText);
+        toolPingBtn      = findViewById(R.id.toolPingBtn);
+        toolTraceBtn     = findViewById(R.id.toolTraceBtn);
+        toolPortBtn      = findViewById(R.id.toolPortBtn);
+        toolDnsBtn       = findViewById(R.id.toolDnsBtn);
+        toolsHostInput   = findViewById(R.id.toolsHostInput);
+        toolsPortInput   = findViewById(R.id.toolsPortInput);
+        toolsRunBtn      = findViewById(R.id.toolsRunBtn);
+        toolsStopBtn     = findViewById(R.id.toolsStopBtn);
+        toolsConsoleText = findViewById(R.id.toolsConsoleText);
+        toolsScrollView  = findViewById(R.id.toolsScrollView);
+
+        toolPingBtn.setOnClickListener(v  -> setToolMode(TOOL_PING));
+        toolTraceBtn.setOnClickListener(v -> setToolMode(TOOL_TRACE));
+        toolPortBtn.setOnClickListener(v  -> setToolMode(TOOL_PORT));
+        toolDnsBtn.setOnClickListener(v   -> setToolMode(TOOL_DNS));
+        toolsRunBtn.setOnClickListener(v -> runNetworkTool());
+        toolsStopBtn.setOnClickListener(v -> stopNetworkTool());
+
+        setToolMode(TOOL_PING);
+        toolsConsoleText.setText("");
+        toolPrint("#546e7a", "netwatch tools v2.8.0");
+        toolPrint("#00e5ff", isRussian
+            ? "выберите инструмент и введите хост"
+            : "select a tool, enter a host, tap RUN");
+    }
+
+    private void setToolMode(int m) {
+        toolMode = m;
+        // Highlight the active mode button (cyan) — terminal style
+        styleToolBtn(toolPingBtn,  m == TOOL_PING);
+        styleToolBtn(toolTraceBtn, m == TOOL_TRACE);
+        styleToolBtn(toolPortBtn,  m == TOOL_PORT);
+        styleToolBtn(toolDnsBtn,   m == TOOL_DNS);
+        // Port field only relevant for the PORT tool
+        toolsPortInput.setVisibility(m == TOOL_PORT ? View.VISIBLE : View.GONE);
+        toolsHostInput.setHint(isRussian ? "хост или IP (напр. google.com)" : "host or IP (e.g. google.com)");
+        toolsPortInput.setHint(isRussian ? "порт" : "port");
+        toolsTitleText.setText(isRussian ? "🛠 Сетевые инструменты" : "🛠 Network Tools");
+        toolsRunBtn.setText(isRussian ? "▶  ПУСК" : "▶  RUN");
+        toolsStopBtn.setText(isRussian ? "■  СТОП" : "■  STOP");
+    }
+
+    private void styleToolBtn(Button b, boolean active) {
+        b.setBackgroundColor(active ? Color.parseColor("#123a4a") : Color.parseColor("#0d1117"));
+        b.setTextColor(active ? Color.parseColor("#00e5ff") : Color.parseColor("#e0e8f0"));
+    }
+
+    private void runNetworkTool() {
+        if (toolsRunning) return;
+        String host = toolsHostInput.getText().toString().trim();
+        if (host.isEmpty()) {
+            showToast(isRussian ? "Введите хост или IP" : "Enter a host or IP first");
+            return;
+        }
+        if (host.startsWith("http://"))  host = host.substring(7);
+        if (host.startsWith("https://")) host = host.substring(8);
+        if (host.contains("/")) host = host.substring(0, host.indexOf('/'));
+        final String fHost = host;
+
+        int port = -1;
+        if (toolMode == TOOL_PORT) {
+            String ps = toolsPortInput.getText().toString().trim();
+            if (ps.isEmpty() && fHost.contains(":")) {           // allow "host:port" in the host field
+                int ci = fHost.indexOf(':');
+                ps = fHost.substring(ci + 1);
+                host = fHost.substring(0, ci);
+            }
+            try { port = Integer.parseInt(ps); } catch (Exception e) { port = -1; }
+            if (port < 1 || port > 65535) {
+                showToast(isRussian ? "Неверный порт (1–65535)" : "Invalid port (1–65535)");
+                return;
+            }
+        }
+        final int fPort  = port;
+        final String hostFinal = (toolMode == TOOL_PORT && host != fHost) ? host : fHost;
+
+        toolsRunning = true;
+        toolsRunBtn.setEnabled(false);
+        toolsStopBtn.setVisibility(View.VISIBLE);
+        toolsStatusText.setText(isRussian ? "⏳ Выполняется…" : "⏳ Running…");
+        toolsConsoleText.setText("");
+
+        final int mode = toolMode;
+        executor.execute(() -> {
+            try {
+                if      (mode == TOOL_PING)  toolPing(hostFinal);
+                else if (mode == TOOL_TRACE) toolTraceroute(hostFinal);
+                else if (mode == TOOL_PORT)  toolPortCheck(hostFinal, fPort);
+                else                         toolDnsLookup(hostFinal);
+            } catch (Exception e) {
+                toolPrint("#ef9a9a", "error: " + e.getMessage());
+            }
+            mainHandler.post(() -> {
+                toolsRunning = false;
+                toolsProc = null;
+                toolsRunBtn.setEnabled(true);
+                toolsStopBtn.setVisibility(View.GONE);
+                toolsStatusText.setText(isRussian ? "⚫ Готово" : "⚫ Done");
+            });
+        });
+    }
+
+    private void stopNetworkTool() {
+        toolsRunning = false;
+        if (toolsProc != null) { toolsProc.destroy(); toolsProc = null; }
+        toolPrint("#ffd740", isRussian ? "^ остановлено пользователем" : "^ stopped by user");
+        toolsStatusText.setText(isRussian ? "⚫ Остановлено" : "⚫ Stopped");
+    }
+
+    /** Runs the system (toybox) ping binary, feeding every output line to sink.
+     *  Returns the process exit code, or -1 if the process could not start. */
+    private int runPingCapture(String host, int count, int ttl, PingSink sink) {
+        try {
+            java.util.List<String> cmd = new java.util.ArrayList<>();
+            cmd.add("ping");
+            if (ttl > 0) { cmd.add("-t"); cmd.add(String.valueOf(ttl)); }
+            cmd.add("-c"); cmd.add(String.valueOf(count));
+            cmd.add("-W"); cmd.add("2");
+            cmd.add(host);
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            pb.redirectErrorStream(true);
+            toolsProc = pb.start();
+            java.io.BufferedReader r = new java.io.BufferedReader(
+                new java.io.InputStreamReader(toolsProc.getInputStream()));
+            String l;
+            while (toolsRunning && (l = r.readLine()) != null) {
+                if (sink != null) sink.line(l);
+            }
+            int rc;
+            try { rc = toolsProc.waitFor(); } catch (InterruptedException ie) { rc = -1; }
+            toolsProc = null;
+            return rc;
+        } catch (Exception e) {
+            toolsProc = null;
+            return -1;
+        }
+    }
+
+    private void toolPing(String host) {
+        toolPrint("#00e5ff", "$ ping -c 4 " + host);
+        final boolean[] gotReply = {false};
+        runPingCapture(host, 4, 0, l -> {
+            if (l.trim().isEmpty()) return;
+            if (l.contains("bytes from")) { gotReply[0] = true; toolPrint("#00ff88", l); }
+            else if (l.contains("packet loss") || l.contains("rtt") || l.contains("min/avg/max"))
+                toolPrint("#00e5ff", l);
+            else if (l.startsWith("PING")) toolPrint("#546e7a", l);
+            else toolPrint("#e0e8f0", l);
+        });
+        if (!gotReply[0])
+            toolPrint("#ef9a9a", isRussian ? "— ответов не получено (хост недоступен?)" : "— no replies (host unreachable?)");
+    }
+
+    private void toolTraceroute(String host) {
+        toolPrint("#00e5ff", "$ traceroute " + host);
+        toolPrint("#546e7a", isRussian ? "  (через ping с ростом TTL — без root)" : "  (via ping with increasing TTL — rootless)");
+        boolean reached = false;
+        for (int ttl = 1; ttl <= 30 && toolsRunning && !reached; ttl++) {
+            final java.util.List<String> lines = new java.util.ArrayList<>();
+            runPingCapture(host, 1, ttl, lines::add);
+            String hopIp = null, timeMs = null, reason = null;
+            for (String l : lines) {
+                if (l.contains("bytes from")) {                       // destination answered
+                    int s = l.indexOf("bytes from ") + 11;
+                    int e = l.indexOf(' ', s);
+                    int c = l.indexOf(':', s);
+                    int end = (e == -1) ? c : (c == -1 ? e : Math.min(e, c));
+                    hopIp = l.substring(s, end == -1 ? l.length() : end);
+                    int t = l.indexOf("time=");
+                    if (t != -1) timeMs = l.substring(t + 5).split(" ")[0];
+                    reached = true;
+                    break;
+                } else if (l.startsWith("From ")) {                   // TTL exceeded / unreachable
+                    String[] tok = l.split("\\s+");
+                    if (tok.length >= 2) {
+                        hopIp = tok[1].endsWith(":") ? tok[1].substring(0, tok[1].length() - 1) : tok[1];
+                        if (l.contains("Time to live exceeded"))   reason = "TTL exceeded";
+                        else if (l.contains("Unreachable"))         reason = "unreachable";
+                    }
+                }
+            }
+            if (reached) {
+                toolPrint("#00ff88", String.format(Locale.US, "%2d  %-40s %s ms", ttl, hopIp, timeMs == null ? "?" : timeMs));
+                toolPrint("#00e5ff", isRussian ? "  ✅ цель достигнута" : "  ✅ destination reached");
+            } else if (hopIp != null) {
+                toolPrint("#e0e8f0", String.format(Locale.US, "%2d  %-40s %s", ttl, hopIp, reason == null ? "" : reason));
+            } else {
+                toolPrint("#546e7a", String.format(Locale.US, "%2d  * * *", ttl));
+            }
+        }
+        if (!reached && toolsRunning)
+            toolPrint("#ef9a9a", isRussian ? "  — цель не достигнута за 30 прыжков" : "  — no response within 30 hops");
+    }
+
+    private void toolPortCheck(String host, int port) {
+        toolPrint("#00e5ff", "$ nc -zv " + host + " " + port);
+        try {
+            java.net.InetAddress addr = java.net.InetAddress.getByName(host);
+            toolPrint("#546e7a", "resolved: " + addr.getHostAddress());
+            long t0 = System.currentTimeMillis();
+            java.net.Socket s = new java.net.Socket();
+            try {
+                s.connect(new java.net.InetSocketAddress(addr, port), 3000);
+                long ms = System.currentTimeMillis() - t0;
+                toolPrint("#00ff88", "OPEN   " + host + ":" + port + "  (" + ms + " ms)");
+            } finally { s.close(); }
+        } catch (java.net.SocketTimeoutException ste) {
+            toolPrint("#ef9a9a", "CLOSED " + host + ":" + port + "  (timeout)");
+        } catch (java.io.IOException ioe) {
+            toolPrint("#ef9a9a", "CLOSED " + host + ":" + port + "  (" + ioe.getMessage() + ")");
+        }
+    }
+
+    private void toolDnsLookup(String host) {
+        toolPrint("#00e5ff", "$ dig " + host + " A AAAA CNAME TXT");
+        String[][] typeMap = { {"A","1"}, {"AAAA","28"}, {"CNAME","5"}, {"TXT","16"} };
+        boolean any = false;
+        for (String[] t : typeMap) {
+            if (!toolsRunning) break;
+            try {
+                java.net.URL u = new java.net.URL("https://dns.google/resolve?name=" +
+                    java.net.URLEncoder.encode(host, "UTF-8") + "&type=" + t[0]);
+                java.net.HttpURLConnection c = (java.net.HttpURLConnection) u.openConnection();
+                c.setConnectTimeout(5000);
+                c.setReadTimeout(8000);
+                c.setRequestProperty("User-Agent", "Mozilla/5.0");
+                if (c.getResponseCode() == 200) {
+                    java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                    byte[] b = new byte[4096]; int n;
+                    java.io.InputStream is = c.getInputStream();
+                    while ((n = is.read(b)) != -1) bos.write(b, 0, n);
+                    is.close();
+                    org.json.JSONObject r = new org.json.JSONObject(bos.toString("UTF-8"));
+                    org.json.JSONArray ans = r.optJSONArray("Answer");
+                    if (ans != null && ans.length() > 0) {
+                        for (int i = 0; i < ans.length(); i++) {
+                            org.json.JSONObject a = ans.getJSONObject(i);
+                            if (String.valueOf(a.optInt("type", 0)).equals(t[1]) || t[0].equals("TXT")) {
+                                toolPrint("#00ff88", String.format(Locale.US, "%-6s %s", t[0], a.optString("data", "")));
+                                any = true;
+                            }
+                        }
+                    }
+                }
+                c.disconnect();
+            } catch (Exception e) {
+                toolPrint("#ef9a9a", t[0] + " lookup failed: " + e.getMessage());
+            }
+        }
+        if (!any && toolsRunning)
+            toolPrint("#ffd740", isRussian ? "записи не найдены" : "no records found");
+    }
+
+    /** Appends one colored line to the tools console (thread-safe). */
+    private void toolPrint(final String color, final String text) {
+        mainHandler.post(() -> {
+            if (toolsConsoleText == null) return;
+            android.text.SpannableString ss = new android.text.SpannableString(text + "\n");
+            ss.setSpan(new android.text.style.ForegroundColorSpan(Color.parseColor(color)), 0, ss.length(), 0);
+            toolsConsoleText.append(ss);
+            if (toolsScrollView != null)
+                toolsScrollView.post(() -> toolsScrollView.fullScroll(android.view.View.FOCUS_DOWN));
+        });
+    }
+
     private void switchTab(int index) {
         tab1.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         tab2.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
@@ -2459,6 +2775,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         tab4.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
         if (tab5 != null) tab5.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
         if (tab6 != null) tab6.setVisibility(index == 5 ? View.VISIBLE : View.GONE);
+        if (tab7 != null) tab7.setVisibility(index == 6 ? View.VISIBLE : View.GONE);
         if (index == 3 && myInfoContainer.getChildCount() == 0) lookupMyInfo();
         if (index == 4) initSpeedTab();
         if (index == 5) initDeviceTab();
@@ -2467,6 +2784,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         tabCheckerBtn.setSelected(index == 2);
         if (tabSpeedBtn != null)  tabSpeedBtn.setSelected(index == 4);
         if (tabDeviceBtn != null) tabDeviceBtn.setSelected(index == 5);
+        if (tabToolsBtn != null)  tabToolsBtn.setSelected(index == 6);
         // Re-apply last known stats so TX/RX panels are never blank on tab entry
         if (index == 1 && lastKnownTx >= 0) {
             txTotalText.setText("TX  " + formatBytes(lastKnownTx));

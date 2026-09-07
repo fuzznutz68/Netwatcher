@@ -20,6 +20,9 @@
         android:id="@+id/menu_instructions_device"
         android:title="📖 Device Monitor — Help"/>
     <item
+        android:id="@+id/menu_instructions_tools"
+        android:title="📖 Network Tools — Help"/>
+    <item
         android:id="@+id/menu_history"
         android:title="🕓 Connection History"/>
     <item
