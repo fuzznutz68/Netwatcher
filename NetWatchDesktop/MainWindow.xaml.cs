@@ -193,7 +193,7 @@ namespace NetWatch
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await Http.PostAsync(DOMAIN_INTEL_URL, content);
                 var json = await response.Content.ReadAsStringAsync();
-                await BuildDomainReport(domain, json);
+                BuildDomainReport(domain, json);
             }
             catch (Exception ex)
             {
@@ -259,7 +259,7 @@ namespace NetWatch
 
             var header = new TextBlock
             {
-                Text = $"DISCOVERED DOMAINS FOR \"{baseName.ToUpper()}"",
+                Text = $"DISCOVERED DOMAINS FOR [{baseName.ToUpper()}]",
                 Foreground = (SolidColorBrush)FindResource("AccentBrush"),
                 FontSize = 12,
                 FontWeight = FontWeights.Bold,
@@ -375,7 +375,7 @@ namespace NetWatch
                             var geo = geoDoc.RootElement;
                             string org = geo.TryGetProperty("org", out var o) ? o.GetString() ?? "" : "";
                             string city = geo.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
-                            string country = geo.TryGetProperty("country", out var cc) ? cc.GetString() ?? "" : "";
+                            string country = geo.TryGetProperty("country", out var ccGeo) ? ccGeo.GetString() ?? "" : "";
                             string countryFull = GetCountryName(country);
                             string flag = GetFlagEmoji(country);
                             if (!string.IsNullOrEmpty(countryFull))
@@ -456,6 +456,51 @@ namespace NetWatch
                     AddCard(DomainResults, $"🔗 Cross-Domain Discovery ({cross.GetArrayLength()})", sb.ToString().TrimEnd(), "#FFB300");
                 }
 
+                // Page-Embedded Hosts (hidden dependencies found in live page content)
+                if (root.TryGetProperty("pageHosts", out var pageHosts) && pageHosts.GetArrayLength() > 0)
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendLine("External domains embedded in the live page:");
+                    sb.AppendLine();
+                    foreach (var ph in pageHosts.EnumerateArray())
+                    {
+                        string phDomain = ph.TryGetProperty("domain", out var d) ? d.GetString() ?? "" : "";
+                        bool phLive = ph.TryGetProperty("live", out var l) && l.GetBoolean();
+                        string phSource = ph.TryGetProperty("source", out var s) ? s.GetString() ?? "inline" : "inline";
+                        string phCdn = ph.TryGetProperty("cdn", out var cd) ? cd.GetString() ?? "" : "";
+
+                        string srcLabel = phSource switch
+                        {
+                            "script" => "script",
+                            "iframe" => "iframe",
+                            "form" => "form",
+                            "stylesheet" => "stylesheet",
+                            "img" => "image",
+                            _ => "embedded"
+                        };
+
+                        sb.AppendLine($"{(phLive ? "🟢" : "⚫")}  {phDomain}   [{srcLabel}]{(!string.IsNullOrEmpty(phCdn) && phCdn != "null" ? $"   [{phCdn}]" : "")}");
+                        if (ph.TryGetProperty("ips", out var phIps) && phIps.GetArrayLength() > 0)
+                        {
+                            var ips = new List<string>();
+                            int shown = 0;
+                            foreach (var ip in phIps.EnumerateArray())
+                            {
+                                if (shown >= 3) break;
+                                if (System.Text.RegularExpressions.Regex.IsMatch(ip.GetString() ?? "", @"^\d+\.\d+\.\d+\.\d+$"))
+                                {
+                                    ips.Add(ip.GetString() ?? "");
+                                    shown++;
+                                }
+                            }
+                            if (ips.Count > 0)
+                                sb.AppendLine($"   {string.Join("  |  ", ips)}");
+                        }
+                        sb.AppendLine();
+                    }
+                    AddCard(DomainResults, $"🧩 Hidden Page Dependencies ({pageHosts.GetArrayLength()})", sb.ToString().TrimEnd(), "#69F0AE");
+                }
+
                 // Certificate Transparency names
                 if (root.TryGetProperty("certNames", out var certNames) && certNames.GetArrayLength() > 0)
                 {
@@ -476,7 +521,9 @@ namespace NetWatch
                     cdnSuffix = $"  •  CDN: {cdn2.GetString()}";
                 int crossCount = root.TryGetProperty("crossDomains", out var cc) && cc.GetArrayLength() > 0 ? cc.GetArrayLength() : 0;
                 string crossSuffix = crossCount > 0 ? $"  •  {crossCount} cross-domains" : "";
-                DomainStatus.Text = $"✅  {domain}  •  {liveCount} live / {totalCount} subdomains{cdnSuffix}{crossSuffix}";
+                int pageHostCount = root.TryGetProperty("pageHosts", out var phc) && phc.GetArrayLength() > 0 ? phc.GetArrayLength() : 0;
+                string pageSuffix = pageHostCount > 0 ? $"  •  {pageHostCount} hidden deps" : "";
+                DomainStatus.Text = $"✅  {domain}  •  {liveCount} live / {totalCount} subdomains{cdnSuffix}{crossSuffix}{pageSuffix}";
 
                 // Deep Scan button at bottom of results
                 var deepCard = new Border
@@ -810,7 +857,7 @@ namespace NetWatch
                 string isp     = geo.TryGetProperty("org", out var o) ? o.GetString() ?? "" : "";
                 string city    = geo.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
                 string region  = geo.TryGetProperty("region", out var r) ? r.GetString() ?? "" : "";
-                string country = geo.TryGetProperty("country", out var cc) ? cc.GetString() ?? "" : "";
+                string country = geo.TryGetProperty("country", out var ccGeo) ? ccGeo.GetString() ?? "" : "";
                 string zip     = geo.TryGetProperty("postal", out var p) ? p.GetString() ?? "" : "";
                 string tz      = geo.TryGetProperty("timezone", out var t) ? t.GetString() ?? "" : "";
                 string loc     = geo.TryGetProperty("loc", out var l) ? l.GetString() ?? "" : "";
