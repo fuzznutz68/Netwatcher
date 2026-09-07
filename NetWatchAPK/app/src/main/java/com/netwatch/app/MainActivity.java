@@ -83,11 +83,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private View   tab5, tab6, tab7;
 
     // ── Tab 7 — Network Tools ────────────────────────────────────────────────
-    private static final int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3;
+    private static final int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3, TOOL_LAN = 4;
     private int     toolMode = TOOL_PING;
     private boolean toolsRunning = false;
     private Process toolsProc = null;
-    private Button  tabToolsBtn, toolPingBtn, toolTraceBtn, toolPortBtn, toolDnsBtn, toolsRunBtn, toolsStopBtn;
+    // LAN scanner: IEEE OUI vendor database, loaded lazily from assets (prefix hex -> org)
+    private java.util.HashMap<String, String> ouiDb = null;
+    private Button  tabToolsBtn, toolPingBtn, toolTraceBtn, toolPortBtn, toolDnsBtn, toolLanBtn, toolsRunBtn, toolsStopBtn;
     private EditText toolsHostInput, toolsPortInput;
     private TextView toolsTitleText, toolsStatusText, toolsConsoleText;
     private android.widget.ScrollView toolsScrollView;
@@ -566,7 +568,11 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • PING — проверка доступности хоста (4 пакета ICMP)\n" +
                         "  • TRACE — трассировка маршрута (до 30 прыжков, без root)\n" +
                         "  • PORT — проверка TCP-порта (открыт/закрыт)\n" +
-                        "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n\n" +
+                        "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n" +
+                        "  • LAN — сканер локальной сети (ARP + ping sweep, без root)\n\n" +
+                        "LAN: находит устройства в вашей Wi-Fi сети, определяет\n" +
+                        "производителя по MAC (база IEEE), выделяет шлюз и неизвестные\n" +
+                        "устройства. Для чистого результата остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
                         "Кнопка СТОП прерывает выполнение.");
@@ -577,7 +583,12 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • PING — check host reachability (4 ICMP echoes)\n" +
                         "  • TRACE — trace the route (up to 30 hops, rootless)\n" +
                         "  • PORT — check if a TCP port is open or closed\n" +
-                        "  • DNS — look up A / AAAA / CNAME / TXT records\n\n" +
+                        "  • DNS — look up A / AAAA / CNAME / TXT records\n" +
+                        "  • LAN — scan your local network (ARP + ping sweep, rootless)\n\n" +
+                        "LAN: discovers devices on your Wi-Fi network, resolves the\n" +
+                        "manufacturer from the MAC address (IEEE database), flags the\n" +
+                        "gateway and highlights unknown devices. Stop monitoring (VPN)\n" +
+                        "first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
                         "Tap STOP to interrupt a running tool.");
@@ -2507,6 +2518,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toolTraceBtn     = findViewById(R.id.toolTraceBtn);
         toolPortBtn      = findViewById(R.id.toolPortBtn);
         toolDnsBtn       = findViewById(R.id.toolDnsBtn);
+        toolLanBtn       = findViewById(R.id.toolLanBtn);
         toolsHostInput   = findViewById(R.id.toolsHostInput);
         toolsPortInput   = findViewById(R.id.toolsPortInput);
         toolsRunBtn      = findViewById(R.id.toolsRunBtn);
@@ -2518,12 +2530,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toolTraceBtn.setOnClickListener(v -> setToolMode(TOOL_TRACE));
         toolPortBtn.setOnClickListener(v  -> setToolMode(TOOL_PORT));
         toolDnsBtn.setOnClickListener(v   -> setToolMode(TOOL_DNS));
+        toolLanBtn.setOnClickListener(v   -> setToolMode(TOOL_LAN));
         toolsRunBtn.setOnClickListener(v -> runNetworkTool());
         toolsStopBtn.setOnClickListener(v -> stopNetworkTool());
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.8.0");
+        toolPrint("#546e7a", "netwatch tools v2.9.0");
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
@@ -2536,8 +2549,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         styleToolBtn(toolTraceBtn, m == TOOL_TRACE);
         styleToolBtn(toolPortBtn,  m == TOOL_PORT);
         styleToolBtn(toolDnsBtn,   m == TOOL_DNS);
-        // Port field only relevant for the PORT tool
+        styleToolBtn(toolLanBtn,    m == TOOL_LAN);
+        // Port field only relevant for the PORT tool; host input hidden for LAN scans
         toolsPortInput.setVisibility(m == TOOL_PORT ? View.VISIBLE : View.GONE);
+        toolsHostInput.setVisibility(m == TOOL_LAN ? View.INVISIBLE : View.VISIBLE);
         toolsHostInput.setHint(isRussian ? "хост или IP (напр. google.com)" : "host or IP (e.g. google.com)");
         toolsPortInput.setHint(isRussian ? "порт" : "port");
         toolsTitleText.setText(isRussian ? "🛠 Сетевые инструменты" : "🛠 Network Tools");
@@ -2552,6 +2567,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     private void runNetworkTool() {
         if (toolsRunning) return;
+        if (toolMode == TOOL_LAN) { startLanScan(); return; }
         String host = toolsHostInput.getText().toString().trim();
         if (host.isEmpty()) {
             showToast(isRussian ? "Введите хост или IP" : "Enter a host or IP first");
@@ -2591,6 +2607,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 if      (mode == TOOL_PING)  toolPing(hostFinal);
                 else if (mode == TOOL_TRACE) toolTraceroute(hostFinal);
                 else if (mode == TOOL_PORT)  toolPortCheck(hostFinal, fPort);
+                else if (mode == TOOL_LAN)    { /* handled above */ }
                 else                         toolDnsLookup(hostFinal);
             } catch (Exception e) {
                 toolPrint("#ef9a9a", "error: " + e.getMessage());
@@ -2639,6 +2656,276 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             toolsProc = null;
             return -1;
         }
+    }
+
+
+    // ────────────────────────────────────────────────────────────────────────
+    // LAN SCANNER — rootless local network discovery
+    // Phase 1: instant pass over the kernel ARP cache (/proc/net/arp)
+    // Phase 2: concurrent ping sweep of the local subnet (system ping binary)
+    // Phase 3: merge + resolve vendors from the embedded IEEE OUI database
+    // ────────────────────────────────────────────────────────────────────────
+
+    private void startLanScan() {
+        if (toolsRunning) return;
+        toolsRunning = true;
+        toolsRunBtn.setEnabled(false);
+        toolsStopBtn.setVisibility(View.VISIBLE);
+        toolsStatusText.setText(isRussian ? "⏳ Выполняется…" : "⏳ Running…");
+        toolsConsoleText.setText("");
+        executor.execute(() -> {
+            try {
+                toolLanScan();
+            } catch (Exception e) {
+                toolPrint("#ef9a9a", "error: " + e.getMessage());
+            }
+            mainHandler.post(() -> {
+                toolsRunning = false;
+                toolsRunBtn.setEnabled(true);
+                toolsStopBtn.setVisibility(View.GONE);
+                toolsStatusText.setText(isRussian ? "⚫ Готово" : "⚫ Done");
+            });
+        });
+    }
+
+    /** Own IPv4 + prefix length of the active Wi-Fi/Ethernet interface. */
+    private String[] lanLocalNet() {
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> nis = java.net.NetworkInterface.getNetworkInterfaces();
+            while (nis != null && nis.hasMoreElements()) {
+                java.net.NetworkInterface ni = nis.nextElement();
+                if (ni.isLoopback() || !ni.isUp()) continue;
+                String name = ni.getName().toLowerCase(Locale.US);
+                if (name.startsWith("tun") || name.startsWith("ppp") || name.startsWith("tap")) continue;
+                for (java.net.InterfaceAddress ia : ni.getInterfaceAddresses()) {
+                    java.net.InetAddress a = ia.getAddress();
+                    if (!(a instanceof java.net.Inet4Address) || a.isLoopbackAddress()) continue;
+                    if (ia.getBroadcast() == null) continue;   // real LAN interface has a broadcast address
+                    return new String[]{ a.getHostAddress(), String.valueOf(ia.getNetworkPrefixLength()) };
+                }
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    /** Default gateway from the system routing table (public API, no root). */
+    private String lanGateway() {
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            android.net.Network net = cm.getActiveNetwork();
+            if (net == null) return null;
+            for (android.net.RouteInfo r : cm.getLinkProperties(net).getRoutes()) {
+                if (r.isDefaultRoute()) {
+                    java.net.InetAddress gw = r.getGateway();
+                    if (gw != null) return gw.getHostAddress();
+                }
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    /** Parses /proc/net/arp -> map ip -> mac (complete entries only). Empty on restricted devices. */
+    private java.util.HashMap<String, String> lanReadArp() {
+        java.util.HashMap<String, String> out = new java.util.HashMap<>();
+        try (java.io.BufferedReader r = new java.io.BufferedReader(
+                new java.io.FileReader("/proc/net/arp"))) {
+            String l; boolean first = true;
+            while ((l = r.readLine()) != null) {
+                if (first) { first = false; continue; }        // header: IP hw flags ...
+                String[] p = l.trim().split("\\s+");
+                if (p.length >= 4 && "0x2".equals(p[3]))       // ATF_COM — complete/validated
+                    out.put(p[0], p[3 + 1].toLowerCase(Locale.US));
+            }
+        } catch (Exception ignored) { }
+        return out;
+    }
+
+    /** Loads the full IEEE MA-L OUI registry (~40k entries) from assets, once. */
+    private void lanLoadOui() {
+        if (ouiDb != null) return;
+        java.util.HashMap<String, String> db = new java.util.HashMap<>(42000);
+        try (java.io.BufferedReader r = new java.io.BufferedReader(
+                new java.io.InputStreamReader(getAssets().open("oui.txt"), "UTF-8"))) {
+            String l;
+            while ((l = r.readLine()) != null) {
+                int sp = l.indexOf(' ');
+                if (sp > 0) db.put(l.substring(0, sp), l.substring(sp + 1));
+            }
+        } catch (Exception ignored) { }
+        ouiDb = db;
+    }
+
+    private String lanVendor(String mac) {
+        if (mac == null || mac.length() < 8) return null;
+        lanLoadOui();
+        return ouiDb.get(mac.replace(":", "").substring(0, 6).toUpperCase(Locale.US));
+    }
+
+    /** One quick system-ping probe — returns true if the host answered.
+     *  Spawns its own Process so the concurrent sweep doesn't touch toolsProc. */
+    private boolean lanPingAlive(String ip) {
+        try {
+            Process p = new ProcessBuilder("ping", "-c", "1", "-W", "1", ip).start();
+            java.io.BufferedReader r = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream()));
+            String l; boolean alive = false;
+            while ((l = r.readLine()) != null) {
+                if (l.contains("bytes from")) { alive = true; }
+            }
+            try { p.waitFor(); } catch (InterruptedException ignored) { }
+            p.destroy();
+            return alive;
+        } catch (Exception e) { return false; }
+    }
+
+    private long lanIpToLong(String ip) {
+        String[] q = ip.split("\\.");
+        try {
+            return (Long.parseLong(q[0]) << 24) | (Long.parseLong(q[1]) << 16)
+                 | (Long.parseLong(q[2]) << 8) | Long.parseLong(q[3]);
+        } catch (Exception e) { return 0; }
+    }
+
+    private String lanIpFromLong(long v) {
+        return String.format(Locale.US, "%d.%d.%d.%d",
+                (v >> 24) & 255, (v >> 16) & 255, (v >> 8) & 255, v & 255);
+    }
+
+    private void toolLanScan() {
+        toolPrint("#00e5ff", "$ lan-scan" + (isRussian ? "  (ARP + ping sweep, без root)" : "  (ARP + ping sweep, rootless)"));
+
+        // VPN tunnel active? — traffic may bypass the LAN, ARP may be empty
+        if (trafficVpnEngineActive || deviceMonRunning) {
+            toolPrint("#ffd740", isRussian
+                ? "! мониторинг (VPN) активен — часть устройств может не отобразиться; остановите мониторинг для чистого скана"
+                : "! monitoring (VPN) is active — some devices may not appear; stop monitoring for a clean scan");
+        }
+
+        // Own network
+        String[] netInfo = lanLocalNet();
+        if (netInfo == null) {
+            toolPrint("#ef9a9a", isRussian
+                ? "— локальная сеть не найдена (подключитесь к Wi-Fi и повторите)"
+                : "— no local network found (connect to Wi-Fi and retry)");
+            return;
+        }
+        String ownIp = netInfo[0];
+        int prefix = 24;
+        try { prefix = Integer.parseInt(netInfo[1]); } catch (Exception ignored) { }
+        if (prefix < 8) prefix = 8;
+        long net = lanIpToLong(ownIp) & (0xFFFFFFFFL << (32 - prefix)) & 0xFFFFFFFFL;
+        int size = 1 << (32 - prefix);
+
+        String gateway = lanGateway();
+        if (isRussian) {
+            toolPrint("#546e7a", "  интерфейс: " + ownIp + "/" + prefix +
+                (gateway != null ? ("   шлюз: " + gateway) : "") + "   это устройство: " + ownIp);
+        } else {
+            toolPrint("#546e7a", "  interface: " + ownIp + "/" + prefix +
+                (gateway != null ? ("   gateway: " + gateway) : "") + "   this device: " + ownIp);
+        }
+
+        // Sweep range: full /24-or-smaller subnet; for larger nets sweep 256 around own IP
+        long sweepStart, sweepEnd;
+        boolean truncated = false;
+        if (size <= 256) {
+            sweepStart = net + 1;
+            sweepEnd   = net + size - 1;
+        } else {
+            sweepStart = (lanIpToLong(ownIp) & 0xFFFFFF00L) + 1;   // own /24 neighborhood
+            sweepEnd   = (lanIpToLong(ownIp) & 0xFFFFFF00L) + 254;
+            truncated  = true;
+            toolPrint("#ffd740", isRussian
+                ? "! подсеть больше /24 — сканируются ближайшие 256 адресов"
+                : "! subnet larger than /24 — sweeping the nearest 256 addresses");
+        }
+
+        // Phase 1 — ARP cache (instant partial results)
+        java.util.HashMap<String, String> arp = lanReadArp();
+        if (!arp.isEmpty()) {
+            toolPrint("#546e7a", isRussian
+                ? "чтение ARP-кэша… найдено: " + arp.size()
+                : "reading ARP cache… found: " + arp.size());
+            for (java.util.Map.Entry<String, String> e : arp.entrySet()) {
+                if (lanIpToLong(e.getKey()) >= sweepStart && lanIpToLong(e.getKey()) <= sweepEnd) {
+                    toolPrint("#00ff88", "  [arp]  " + e.getKey() + "  " + e.getValue());
+                }
+            }
+        } else {
+            toolPrint("#546e7a", isRussian
+                ? "ARP-кэш пуст или недоступен — полагаемся на ping sweep"
+                : "ARP cache empty or unreadable — relying on ping sweep");
+        }
+
+        // Phase 2 — concurrent ping sweep
+        int count = (int) (sweepEnd - sweepStart + 1);
+        java.util.Set<String> alive = java.util.Collections.synchronizedSet(new java.util.LinkedHashSet<>());
+        alive.addAll(arp.keySet());
+        toolPrint("#546e7a", isRussian
+            ? ("ping sweep " + lanIpFromLong(sweepStart) + " … " + lanIpFromLong(sweepEnd) + "  (" + count + " адресов)")
+            : ("ping sweep " + lanIpFromLong(sweepStart) + " … " + lanIpFromLong(sweepEnd) + "  (" + count + " hosts)"));
+        long t0 = System.currentTimeMillis();
+
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(24);
+        java.util.List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+        for (long v = sweepStart; v <= sweepEnd; v++) {
+            final String ip = lanIpFromLong(v);
+            if (!toolsRunning) break;
+            if (ip.equals(ownIp)) continue;
+            futures.add(pool.submit(() -> {
+                if (!toolsRunning) return;
+                if (lanPingAlive(ip) && alive.add(ip)) {
+                    String mac = arp.get(ip);
+                    toolPrint("#00ff88", "  [ping] " + ip + "  " + (mac != null ? mac : "…"));
+                }
+            }));
+        }
+        for (java.util.concurrent.Future<?> fu : futures) { try { fu.get(); } catch (Exception ignored) { } }
+        pool.shutdownNow();
+
+        if (!toolsRunning) {
+            toolPrint("#ffd740", isRussian ? "^ остановлено пользователем" : "^ stopped by user");
+            return;
+        }
+
+        // Phase 3 — merge, resolve vendors, print the final table
+        toolPrint("#00e5ff", isRussian ? "\nНАЙДЕННЫЕ УСТРОЙСТВА" : "\nDISCOVERED DEVICES");
+        arp.putAll(lanReadArp());  // final ARP refresh catches late replies
+
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        for (String ip : alive) {
+            if (ip.equals(ownIp)) continue;
+            String mac = arp.get(ip);
+            rows.add(new String[]{ ip, mac, lanVendor(mac) });
+        }
+        java.util.Collections.sort(rows, (a, b) -> Long.compare(lanIpToLong(a[0]), lanIpToLong(b[0])));
+
+        int unknown = 0;
+        for (String[] r : rows) {
+            boolean isGw = r[0].equals(gateway);
+            String macS  = r[1] != null ? r[1] : "—";
+            String vendS = r[2] != null ? r[2] : (isRussian ? "НЕИЗВЕСТНО" : "UNKNOWN");
+            String flag  = isGw ? "  ← GATEWAY" : "";
+            String line  = String.format(Locale.US, "  %-15s %-17s %-24s%s", r[0], macS, vendS, flag);
+            if (isGw)              toolPrint("#00ff88", line);
+            else if (r[2] == null) { toolPrint("#ffd740", line); unknown++; }
+            else                   toolPrint("#e0e8f0", line);
+        }
+        if (rows.isEmpty())
+            toolPrint("#546e7a", isRussian ? "  (ничего не найдено)" : "  (nothing found)");
+
+        int secs = (int) ((System.currentTimeMillis() - t0) / 1000);
+        toolPrint("#00e5ff", String.format(Locale.US, (isRussian
+                ? "— устройств: %d   неизвестных: %d   время: %d сек"
+                : "— devices: %d   unknown: %d   elapsed: %ds"), rows.size(), unknown, secs));
+        if (unknown > 0)
+            toolPrint("#ffd740", isRussian
+                ? "жёлтым — устройства, производителя которых нет в базе IEEE"
+                : "yellow rows = devices whose vendor is not in the IEEE database");
+        toolPrint("#546e7a", isRussian
+            ? "подсказка: переключитесь на PORT, чтобы проверить порты любого найденного хоста"
+            : "hint: switch to PORT to probe ports on any discovered host");
     }
 
     private void toolPing(String host) {

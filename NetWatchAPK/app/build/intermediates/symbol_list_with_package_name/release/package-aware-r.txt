@@ -3640,6 +3640,7 @@ id titleDividerNoCustom
 id title_template
 id toggle
 id toolDnsBtn
+id toolLanBtn
 id toolPingBtn
 id toolPortBtn
 id toolTraceBtn

@@ -83,6 +83,7 @@ id tabSpeedBtn
 id tabToolsBtn
 id tabTrafficBtn
 id toolDnsBtn
+id toolLanBtn
 id toolPingBtn
 id toolPortBtn
 id toolTraceBtn

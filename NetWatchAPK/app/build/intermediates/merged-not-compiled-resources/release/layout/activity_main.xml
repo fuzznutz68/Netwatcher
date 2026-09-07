@@ -885,7 +885,18 @@
                 android:background="@drawable/input_background"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
+                android:layout_marginRight="6dp"
                 android:text="DNS"
+                android:layout_weight="1"/>
+            <Button
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#e0e8f0"
+                android:id="@+id/toolLanBtn"
+                android:background="@drawable/input_background"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="LAN"
                 android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
