@@ -99,6 +99,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         {"🇺🇸 US Seattle (Ookla Ziply)",          "http://speedtest1-sttlwawb.as20055.net:8080", "ookla"},
         {"🇺🇸 US Atlanta (Ookla Point)",          "http://speedtest14.point-broadband.com:8080", "ookla"},
         {"🇷🇺 Russia     (Selectel Moscow)",       "http://speedtest.selectel.ru",                "linode"},
+        {"🇷🇺 Russia     (Yandex Internetometer)",  "https://yandex.com/internet",                 "yandex"},
         {"🌍 Global      (Cloudflare)",            "https://speed.cloudflare.com",                "cloudflare"},
     };
 
@@ -2946,6 +2947,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         String label   = SPEED_SERVERS[idx][0].trim();
         boolean isCf   = "cloudflare".equals(type);
         boolean isOkla = "ookla".equals(type);
+        boolean isYx   = "yandex".equals(type);
 
         speedRunning = true;
         speedRunBtn.setEnabled(false);
@@ -2957,10 +2959,43 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         speedResultsContainer.setVisibility(android.view.View.GONE);
 
         executor.execute(() -> {
+            // ── Yandex Internetometer: resolve dynamic probe URLs ────────
+            // Yandex's probes live on rotating CDN hosts; the app fetches a
+            // fresh probe config from the internetometer API first.
+            String yxProbeDl = null, yxProbeUl = null;
+            if (isYx) {
+                try {
+                    String api = url + "/api/v0/get-probes?nocache=" + System.currentTimeMillis() + "&from=internetometr";
+                    java.net.HttpURLConnection pc = (java.net.HttpURLConnection) new java.net.URL(api).openConnection();
+                    pc.setConnectTimeout(5000);
+                    pc.setReadTimeout(8000);
+                    pc.setRequestProperty("User-Agent", "Mozilla/5.0");
+                    if (pc.getResponseCode() == 200) {
+                        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                        byte[] pb = new byte[8192]; int pn;
+                        java.io.InputStream pis = pc.getInputStream();
+                        while ((pn = pis.read(pb)) != -1) bos.write(pb, 0, pn);
+                        pis.close();
+                        org.json.JSONObject cfg = new org.json.JSONObject(bos.toString("UTF-8"));
+                        org.json.JSONArray dl = cfg.getJSONObject("download").getJSONArray("probes");
+                        for (int i = 0; i < dl.length() && yxProbeDl == null; i++) {
+                            String u2 = dl.getJSONObject(i).optString("url", "");
+                            if (u2.contains("/probes/50mb")) yxProbeDl = u2;
+                        }
+                        if (yxProbeDl == null && dl.length() > 0)
+                            yxProbeDl = dl.getJSONObject(0).optString("url", "");
+                        org.json.JSONArray up = cfg.getJSONObject("upload").getJSONArray("probes");
+                        if (up.length() > 0) yxProbeUl = up.getJSONObject(0).optString("url", "");
+                    }
+                    pc.disconnect();
+                } catch (Exception ignored) { }
+            }
+
             // ── Latency ──────────────────────────────────────────────────
             long latMs = Long.MAX_VALUE;
             try {
-                java.net.URL u = new java.net.URL(url);
+                // For Yandex, measure latency to the actual CDN probe host
+                java.net.URL u = new java.net.URL(yxProbeDl != null ? yxProbeDl : url);
                 String host = u.getHost();
                 int port = u.getPort() > 0 ? u.getPort() : url.startsWith("https") ? 443 : 80;
                 for (int i = 0; i < 3; i++) {
@@ -2981,7 +3016,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             double dlMbps = -1;
             try {
                 String dlUrl;
-                if (isCf)        dlUrl = url + "/__down?bytes=10485760";
+                if (isYx)        dlUrl = yxProbeDl; // dynamic 50MB probe URL
+                else if (isCf)   dlUrl = url + "/__down?bytes=10485760";
                 else if (isOkla) dlUrl = url + "/download?size=10485760";
                 else             dlUrl = url + "/garbage.php?ckSize=10";
 
@@ -3011,7 +3047,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             double ulMbps = -1;
             try {
                 String ulUrl;
-                if (isCf)        ulUrl = url + "/__up";
+                if (isYx)        ulUrl = yxProbeUl; // dynamic upload probe URL
+                else if (isCf)   ulUrl = url + "/__up";
                 else if (isOkla) ulUrl = url + "/upload";
                 else             ulUrl = url + "/empty.php";
 
@@ -3038,11 +3075,14 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
             final double finalDl = dlMbps;
             final double finalUl = ulMbps;
+            final boolean yxFail = isYx && (yxProbeDl == null || yxProbeUl == null);
 
             mainHandler.post(() -> {
                 speedRunning = false;
                 speedRunBtn.setEnabled(true);
-                speedStatusText.setText((isRussian ? "✅ Тест завершён — " : "✅ Test complete — ") + label);
+                speedStatusText.setText(yxFail
+                    ? (isRussian ? "⚠ Не удалось получить тестовые серверы Яндекса" : "⚠ Could not resolve Yandex probe servers")
+                    : (isRussian ? "✅ Тест завершён — " : "✅ Test complete — ") + label);
                 speedPingText.setText(finalLat >= 0 ? finalLat + " ms" : (isRussian ? "недоступен" : "unreachable"));
                 speedDownText.setText(finalDl >= 0 ? String.format(java.util.Locale.US, "%.2f Mbps", finalDl) : (isRussian ? "нет данных" : "N/A"));
                 speedUpText.setText(finalUl >= 0 ? String.format(java.util.Locale.US, "%.2f Mbps", finalUl) : (isRussian ? "нет данных" : "N/A"));
