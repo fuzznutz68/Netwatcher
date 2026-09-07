@@ -123,6 +123,7 @@ Deno.serve(async (req) => {
       sharedHostDomains: [],
       crossDomains: [],
       certNames: [],
+      pageHosts: [],
       errors: []
     };
 
@@ -291,6 +292,120 @@ Deno.serve(async (req) => {
     results.subdomains = subdomainResults;
     results.totalDiscovered = allSubs.length;
     results.liveCount = subdomainResults.filter(s => s.live).length;
+
+    // ── 4b. Page-Embedded Host Discovery (hidden dependencies) ────────────────
+    // Fetches the live site and extracts every external hostname referenced in
+    // scripts, stylesheets, images, iframes, form actions and inline JS.
+    // This is the ONLY way to find domains like ttua.nu that share no DNS,
+    // certificate or name similarity with the primary domain.
+    try {
+      const UAs = { 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
+      };
+      
+      const htmlPages = await Promise.allSettled([
+        fetch(`https://${cleanDomain}/`, { headers: UAs, redirect: 'follow', signal: AbortSignal.timeout(9000) }),
+        fetch(`https://www.${cleanDomain}/`, { headers: UAs, redirect: 'follow', signal: AbortSignal.timeout(9000) }),
+      ]);
+      
+      let html = '';
+      for (const p of htmlPages) {
+        if (p.status === 'fulfilled' && p.value.ok) {
+          try { html += await p.value.text(); } catch (_) {}
+        }
+      }
+      html = html.slice(0, 1500000); // safety cap
+
+      if (html.length > 0) {
+        const queryReg = getRegistrableDomain(cleanDomain);
+        const hostSource = new Map<string, string>(); // host -> source type (first match wins)
+        const sourcePriority = ['script', 'iframe', 'form', 'stylesheet', 'img', 'inline'];
+        
+        const classify = (host: string, src: string) => {
+          if (!host || host.includes(' ') || host.includes('@')) return;
+          // Skip the query domain itself and its subdomains
+          if (host === cleanDomain || host.endsWith('.' + cleanDomain)) return;
+          if (getRegistrableDomain(host) === queryReg) return;
+          // Skip pure IPs and localhost
+          if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || host === 'localhost') return;
+          if (!host.includes('.') || host.length > 253) return;
+          const existing = hostSource.get(host);
+          if (existing && sourcePriority.indexOf(existing) <= sourcePriority.indexOf(src)) return;
+          hostSource.set(host, src);
+        };
+
+        const extractHost = (u: string): string | null => {
+          if (!u) return null;
+          const m = u.match(/^(?:https?:)?\/\/([^\/?#'"]+)/);
+          if (!m) return null;
+          return m[1].toLowerCase().split(':')[0].replace(/\.$/, '');
+        };
+
+        // script src= (including trackers, tag managers, analytics)
+        let re = /<script[^>]+src=["']([^"']+)["']/gi; let m;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'script');
+        // iframe src=
+        re = /<iframe[^>]+src=["']([^"']+)["']/gi;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'iframe');
+        // form action=
+        re = /<form[^>]+action=["']([^"']+)["']/gi;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'form');
+        // link href= (stylesheets, preconnect, preloads)
+        re = /<link[^>]+href=["']([^"']+)["']/gi;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'stylesheet');
+        // img src=
+        re = /<img[^>]+src=["']([^"']+)["']/gi;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'img');
+        // meta refresh + og tags
+        re = /<meta[^>]+(?:url|content)=["']([^"']*https?[^"']*)["']/gi;
+        while ((m = re.exec(html))) classify(extractHost(m[1]) || '', 'iframe');
+        // Generic https:// URLs anywhere (inline JS, JSON blobs, srcset)
+        re = /(?:https?:)?\/\/([a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,})(?:[\/"'?#:]|$)/gi;
+        while ((m = re.exec(html))) classify(m[1].toLowerCase(), 'inline');
+
+        // Resolve the top external hosts (max 15, scripts first)
+        const sortedHosts = Array.from(hostSource.entries())
+          .sort((a, b) => {
+            const pi = sourcePriority.indexOf(a[1]), pj = sourcePriority.indexOf(b[1]);
+            if (pi !== pj) return pi - pj;
+            return a[0].localeCompare(b[0]);
+          })
+          .slice(0, 15);
+
+        const pageResolved = await Promise.allSettled(
+          sortedHosts.map(async ([host, src]) => {
+            try {
+              const [aRecs, cnameRecs] = await Promise.allSettled([
+                fetchDns(host, 'A'),
+                fetchDns(host, 'CNAME'),
+              ]);
+              const ips: string[] = aRecs.status === 'fulfilled'
+                ? [...new Set(aRecs.value.map((r: any) => r.data as string))]
+                : [];
+              const cname = cnameRecs.status === 'fulfilled' && cnameRecs.value.length > 0
+                ? cnameRecs.value[0].data.replace(/\.$/, '')
+                : null;
+              const cdn = detectCdn(cname || '', ips);
+              return { domain: host, source: src, ips, cname, cdn, live: ips.length > 0 };
+            } catch (_) {
+              return { domain: host, source: src, ips: [], cname: null, cdn: null, live: false };
+            }
+          })
+        );
+        for (const r of pageResolved) {
+          if (r.status === 'fulfilled') results.pageHosts.push(r.value);
+        }
+        // live first, then scripts first
+        results.pageHosts.sort((a: any, b: any) => {
+          if (a.live !== b.live) return a.live ? -1 : 1;
+          const pi = sourcePriority.indexOf(a.source), pj = sourcePriority.indexOf(b.source);
+          if (pi !== pj) return pi - pj;
+          return a.domain.localeCompare(b.domain);
+        });
+      }
+    } catch (e: any) { results.errors.push('pageEmbed: ' + e.message); }
 
     // ── 5. Cross-domain discovery ────────────────────────────────────────────
     if (crossDomainSet.size > 0) {

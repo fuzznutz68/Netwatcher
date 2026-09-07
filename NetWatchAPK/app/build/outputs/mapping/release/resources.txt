@@ -1307,6 +1307,7 @@ layout_marginRight
 autoSizeMinTextSize
 tecno
 snapkit.com
+img
 device_policy
 target_name
 android.text.EmojiConsistency
@@ -1539,6 +1540,7 @@ IP
 android.content.res.ThemedResourceCache
 nothing
 DIAGNOSTIC_REF_PROFILE_EXISTS
+script
 Variant
 StateListDrawableCompat
 subtitle
@@ -1738,6 +1740,7 @@ paddingEnd
 setExpireIn
 .right
 android.permission.USE_FINGERPRINT
+iframe
 PROTECTED
 timestamp
 ACTION_SELECT
@@ -2022,6 +2025,7 @@ vibrator
 android.intent.action.PROCESS_TEXT
 Anchor
 PopupWindowCompatApi21
+inline
 _v
 mIsChildViewEnabled
 confirmLabel
@@ -2208,6 +2212,7 @@ workerCtl
 TOP_TO_BOTTOM
 contentInsetStart
 location_sharing
+form
 obj
 gstatic.com
 TREAT_AS_VIEW_TREE_APPEARED
@@ -2233,6 +2238,7 @@ output
 yMMMMEEEEd
 FullyDrawnReporter.kt
 sizePercent
+pageHosts
 on_surface
 android:changeImageTransform:bounds
 java.lang.Character
@@ -2606,6 +2612,7 @@ android:changeBounds:clip
 getTextDirectionHeuristic
 HARD_LIGHT
 phase
+stylesheet
 android:savedDialogState
 ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
 wifi

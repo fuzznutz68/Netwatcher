@@ -1505,9 +1505,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         String crossSuffix = crossCount > 0
                             ? (isRussian ? "  •  " + crossCount + " кросс-доменов" : "  •  " + crossCount + " cross-domains")
                             : "";
+                        int pageHostCount = tmp.optJSONArray("pageHosts") != null ? tmp.optJSONArray("pageHosts").length() : 0;
+                        String pageSuffix = pageHostCount > 0
+                            ? (isRussian ? "  •  " + pageHostCount + " скрытых зависимостей" : "  •  " + pageHostCount + " hidden deps")
+                            : "";
                         statusText.setText(isRussian
-                            ? "✅  " + domain + "  •  " + live2 + " живых / " + total2 + " субдоменов" + cdnSuffix + crossSuffix
-                            : "✅  " + domain + "  •  " + live2 + " live / " + total2 + " subdomains" + cdnSuffix + crossSuffix);
+                            ? "✅  " + domain + "  •  " + live2 + " живых / " + total2 + " субдоменов" + cdnSuffix + crossSuffix + pageSuffix
+                            : "✅  " + domain + "  •  " + live2 + " live / " + total2 + " subdomains" + cdnSuffix + crossSuffix + pageSuffix);
                     } catch (Exception _e) {
                         statusText.setText(isRussian ? "✅  Сканирование завершено: " + domain : "✅  Scan complete for " + domain);
                     }
@@ -1805,6 +1809,105 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         });
 
                         if (i < cross.length() - 1) addDivider(card);
+                    }
+                    resultsContainer.addView(card);
+                }
+            }
+
+            // Page-Embedded Hosts (hidden dependencies found in live page content)
+            if (intel != null) {
+                JSONArray pageHosts = intel.optJSONArray("pageHosts");
+                if (pageHosts != null && pageHosts.length() > 0) {
+                    LinearLayout card = makeCardContainer();
+                    TextView title = new TextView(MainActivity.this);
+                    title.setText(isRussian
+                        ? "🧩  СКРЫТЫЕ ЗАВИСИМОСТИ  (" + pageHosts.length() + ")"
+                        : "🧩  HIDDEN PAGE DEPENDENCIES  (" + pageHosts.length() + ")");
+                    title.setTextSize(11); title.setTextColor(Color.parseColor("#69F0AE"));
+                    title.setTypeface(null, Typeface.BOLD); title.setPadding(0,0,0,dp(6));
+                    card.addView(title);
+
+                    TextView subtitle = new TextView(MainActivity.this);
+                    subtitle.setText(isRussian
+                        ? "Внешние домены, встроенные в код сайта"
+                        : "External domains embedded in the live page (scripts, forms, assets)");
+                    subtitle.setTextSize(10);
+                    subtitle.setTextColor(Color.parseColor("#546E7A"));
+                    subtitle.setPadding(0, 0, 0, dp(6));
+                    card.addView(subtitle);
+
+                    for (int i = 0; i < pageHosts.length(); i++) {
+                        JSONObject ph = pageHosts.getJSONObject(i);
+                        String phDomain = ph.optString("domain", "");
+                        String phSource = ph.optString("source", "inline");
+                        String phCdn = ph.optString("cdn", "");
+                        boolean phLive = ph.optBoolean("live", false);
+                        JSONArray phIps = ph.optJSONArray("ips");
+
+                        LinearLayout phRow = new LinearLayout(MainActivity.this);
+                        phRow.setOrientation(LinearLayout.HORIZONTAL);
+                        phRow.setPadding(0, dp(4), 0, 0);
+
+                        TextView phName = new TextView(MainActivity.this);
+                        phName.setText((phLive ? "🟢  " : "⚫  ") + phDomain);
+                        phName.setTextSize(13);
+                        phName.setTextColor(phLive ? Color.parseColor("#80DEEA") : Color.parseColor("#546E7A"));
+                        phName.setTypeface(Typeface.MONOSPACE);
+                        phName.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                        phRow.addView(phName);
+
+                        // source badge
+                        String srcLabel;
+                        switch (phSource) {
+                            case "script":     srcLabel = isRussian ? "  скрипт"    : "  script";     break;
+                            case "iframe":     srcLabel = isRussian ? "  iframe"     : "  iframe";     break;
+                            case "form":       srcLabel = isRussian ? "  форма"      : "  form";       break;
+                            case "stylesheet": srcLabel = isRussian ? "  стиль"      : "  stylesheet"; break;
+                            case "img":        srcLabel = isRussian ? "  картинка"   : "  image";      break;
+                            default:           srcLabel = isRussian ? "  встроено"   : "  embedded";   break;
+                        }
+                        TextView srcBadge = new TextView(MainActivity.this);
+                        srcBadge.setText(srcLabel);
+                        srcBadge.setTextSize(10);
+                        srcBadge.setTextColor(Color.parseColor("#69F0AE"));
+                        srcBadge.setTypeface(null, Typeface.BOLD);
+                        phRow.addView(srcBadge);
+
+                        if (phCdn != null && !phCdn.isEmpty() && !phCdn.equals("null")) {
+                            TextView cdnBadge = new TextView(MainActivity.this);
+                            cdnBadge.setText("  " + phCdn);
+                            cdnBadge.setTextSize(10);
+                            cdnBadge.setTextColor(Color.parseColor("#FFB300"));
+                            cdnBadge.setTypeface(null, Typeface.BOLD);
+                            phRow.addView(cdnBadge);
+                        }
+                        card.addView(phRow);
+
+                        if (phIps != null && phIps.length() > 0) {
+                            StringBuilder ipSb = new StringBuilder("   ");
+                            for (int j = 0; j < Math.min(phIps.length(), 3); j++) {
+                                if (j > 0) ipSb.append("  |  ");
+                                ipSb.append(phIps.optString(j));
+                            }
+                            if (phIps.length() > 3) ipSb.append("  |  +").append(phIps.length() - 3);
+                            TextView ipView = new TextView(MainActivity.this);
+                            ipView.setText(ipSb.toString());
+                            ipView.setTextSize(11);
+                            ipView.setTextColor(Color.parseColor("#78909C"));
+                            ipView.setTypeface(Typeface.MONOSPACE);
+                            ipView.setPadding(0, dp(2), 0, 0);
+                            card.addView(ipView);
+                        }
+
+                        // Tappable to scan it deeper
+                        final String phDom = phDomain;
+                        phRow.setClickable(true);
+                        phRow.setOnClickListener(v -> {
+                            domainInput.setText(phDom);
+                            runDomainScan(phDom, true);
+                        });
+
+                        if (i < pageHosts.length() - 1) addDivider(card);
                     }
                     resultsContainer.addView(card);
                 }
