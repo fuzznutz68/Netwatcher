@@ -570,9 +570,11 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • PORT — проверка TCP-порта (открыт/закрыт)\n" +
                         "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n" +
                         "  • LAN — сканер локальной сети (ARP + ping sweep, без root)\n\n" +
-                        "LAN: находит устройства в вашей Wi-Fi сети, определяет\n" +
-                        "производителя по MAC (база IEEE), выделяет шлюз и неизвестные\n" +
-                        "устройства. Для чистого результата остановите мониторинг (VPN).\n\n" +
+                        "LAN: находит устройства в вашей Wi-Fi сети и определяет их\n" +
+                        "имена через DNS/NetBIOS (MAC-адреса недоступны приложениям\n" +
+                        "на Android 10+ — ограничение ОС). Выделяет шлюз и устройства,\n" +
+                        "которые не удалось определить. Для чистого результата\n" +
+                        "остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
                         "Кнопка СТОП прерывает выполнение.");
@@ -585,10 +587,11 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • PORT — check if a TCP port is open or closed\n" +
                         "  • DNS — look up A / AAAA / CNAME / TXT records\n" +
                         "  • LAN — scan your local network (ARP + ping sweep, rootless)\n\n" +
-                        "LAN: discovers devices on your Wi-Fi network, resolves the\n" +
-                        "manufacturer from the MAC address (IEEE database), flags the\n" +
-                        "gateway and highlights unknown devices. Stop monitoring (VPN)\n" +
-                        "first for a clean scan.\n\n" +
+                        "LAN: discovers devices on your Wi-Fi network and identifies\n" +
+                        "them via hostname/NetBIOS lookups (MAC addresses are hidden\n" +
+                        "from apps on Android 10+ — an OS restriction). Flags the\n" +
+                        "gateway and any devices it could not identify. Stop monitoring\n" +
+                        "(VPN) first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
                         "Tap STOP to interrupt a running tool.");
@@ -2536,7 +2539,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.9.0");
+        toolPrint("#546e7a", "netwatch tools v2.9.1");
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
@@ -2762,6 +2765,102 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return ouiDb.get(mac.replace(":", "").substring(0, 6).toUpperCase(Locale.US));
     }
 
+    /** Reverse DNS lookup — many home routers (dnsmasq/Fritz!Box/OpenWrt-based) register
+     *  DHCP client hostnames with their own local resolver, so this often reveals the
+     *  device's real name even though MAC-address vendor lookup is blocked. Bounded to
+     *  700ms so a non-responding resolver can't stall the whole scan. */
+    private String lanReverseDns(String ip) {
+        try {
+            java.util.concurrent.FutureTask<String> ft = new java.util.concurrent.FutureTask<>(() -> {
+                java.net.InetAddress ia = java.net.InetAddress.getByName(ip);
+                String h = ia.getCanonicalHostName();
+                return (h != null && !h.equals(ip) && !h.isEmpty()) ? h : null;
+            });
+            Thread t = new Thread(ft); t.setDaemon(true); t.start();
+            return ft.get(700, java.util.concurrent.TimeUnit.MILLISECONDS);
+        } catch (Exception e) { return null; }
+    }
+
+    /** NetBIOS Node Status query (UDP 137, RFC 1002) — identifies Windows/Samba hosts by
+     *  their computer name even when they have no DNS entry. No root, no ARP needed:
+     *  it's a plain UDP packet the OS lets any app send. */
+    private byte[] lanBuildNbstatQuery() {
+        byte[] name = new byte[16];
+        name[0] = '*';                                   // wildcard node-status name
+        byte[] enc = new byte[32];
+        for (int i = 0; i < 16; i++) {                    // NetBIOS first-level ("half-ASCII") encoding
+            int b = name[i] & 0xFF;
+            enc[2 * i]     = (byte) ('A' + ((b >> 4) & 0xF));
+            enc[2 * i + 1] = (byte) ('A' + (b & 0xF));
+        }
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        out.write(0x13); out.write(0x37);   // transaction id
+        out.write(0x00); out.write(0x00);   // flags: standard query
+        out.write(0x00); out.write(0x01);   // questions = 1
+        out.write(0x00); out.write(0x00);   // answer RRs
+        out.write(0x00); out.write(0x00);   // authority RRs
+        out.write(0x00); out.write(0x00);   // additional RRs
+        out.write(32);                      // encoded name length
+        out.write(enc, 0, 32);
+        out.write(0x00);                    // name terminator
+        out.write(0x00); out.write(0x21);   // qtype = NBSTAT
+        out.write(0x00); out.write(0x01);   // qclass = IN
+        return out.toByteArray();
+    }
+
+    private String lanParseNbstatName(byte[] data, int len) {
+        try {
+            int off = 12;                                  // skip 12-byte header
+            if (off >= len) return null;
+            int b0 = data[off] & 0xFF;
+            if ((b0 & 0xC0) == 0xC0) off += 2;              // compressed name pointer
+            else off += 1 + b0 + 1;                         // length byte + encoded name + terminator
+            off += 2 + 2 + 4;                               // TYPE + CLASS + TTL
+            if (off + 2 > len) return null;
+            off += 2;                                       // RDLENGTH (value unused, bounds below protect us)
+            if (off >= len) return null;
+            int numNames = data[off] & 0xFF;
+            off += 1;
+            String fallback = null;
+            for (int i = 0; i < numNames && off + 18 <= len; i++) {
+                String nm = new String(data, off, 15, "US-ASCII").trim();
+                int suffix = data[off + 15] & 0xFF;
+                if (!nm.isEmpty() && fallback == null) fallback = nm;
+                if (!nm.isEmpty() && suffix == 0x00) return nm;   // <00> = workstation/unique name
+                off += 18;                                        // 15-byte name + 1 suffix + 2 flags
+            }
+            return fallback;
+        } catch (Exception e) { return null; }
+    }
+
+    private String lanNetbiosName(String ip) {
+        java.net.DatagramSocket sock = null;
+        try {
+            byte[] q = lanBuildNbstatQuery();
+            sock = new java.net.DatagramSocket();
+            sock.setSoTimeout(400);
+            java.net.InetAddress addr = java.net.InetAddress.getByName(ip);
+            sock.send(new java.net.DatagramPacket(q, q.length, addr, 137));
+            byte[] buf = new byte[1024];
+            java.net.DatagramPacket resp = new java.net.DatagramPacket(buf, buf.length);
+            sock.receive(resp);
+            return lanParseNbstatName(resp.getData(), resp.getLength());
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (sock != null) sock.close();
+        }
+    }
+
+    /** Best identifier available for a host: real hostname > NetBIOS name > MAC vendor > null. */
+    private String lanIdentify(String ip, String vendor) {
+        String host = lanReverseDns(ip);
+        if (host != null) return host;
+        String nb = lanNetbiosName(ip);
+        if (nb != null) return nb;
+        return vendor;
+    }
+
     /** One quick system-ping probe — returns true if the host answered.
      *  Spawns its own Process so the concurrent sweep doesn't touch toolsProc. */
     private boolean lanPingAlive(String ip) {
@@ -2856,6 +2955,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             toolPrint("#546e7a", isRussian
                 ? "ARP-кэш пуст или недоступен — полагаемся на ping sweep"
                 : "ARP cache empty or unreadable — relying on ping sweep");
+            toolPrint("#546e7a", isRussian
+                ? "  (начиная с Android 10 ОС скрывает MAC-адреса соседей от приложений — это ограничение системы, не ошибка; определяем имена через DNS/NetBIOS)"
+                : "  (since Android 10 the OS hides neighbor MAC addresses from apps — a system restriction, not a bug; identifying via DNS/NetBIOS instead)");
         }
 
         // Phase 2 — concurrent ping sweep
@@ -2901,13 +3003,34 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         }
         java.util.Collections.sort(rows, (a, b) -> Long.compare(lanIpToLong(a[0]), lanIpToLong(b[0])));
 
+        // Resolve a real identifier for each device: hostname (reverse DNS) > NetBIOS name
+        // > MAC vendor. This is what actually works on modern Android where ARP is hidden.
+        if (!rows.isEmpty()) {
+            toolPrint("#546e7a", isRussian ? "определение имён устройств…" : "resolving device names…");
+            java.util.concurrent.ExecutorService idPool = java.util.concurrent.Executors.newFixedThreadPool(8);
+            java.util.List<java.util.concurrent.Future<String>> idFutures = new java.util.ArrayList<>();
+            for (String[] r : rows) {
+                final String rip = r[0], rvendor = r[2];
+                idFutures.add(idPool.submit(() -> lanIdentify(rip, rvendor)));
+            }
+            for (int i = 0; i < rows.size(); i++) {
+                String id = null;
+                try { id = idFutures.get(i).get(1500, java.util.concurrent.TimeUnit.MILLISECONDS); } catch (Exception ignored) { }
+                rows.get(i)[2] = id;   // column 2 now holds the final display identifier
+            }
+            idPool.shutdownNow();
+        }
+
+        toolPrint("#546e7a", String.format(Locale.US, "  %-15s %-17s %-24s", "IP",
+                isRussian ? "MAC" : "MAC", isRussian ? "ИМЯ / ПРОИЗВОДИТЕЛЬ" : "NAME / VENDOR"));
+
         int unknown = 0;
         for (String[] r : rows) {
             boolean isGw = r[0].equals(gateway);
             String macS  = r[1] != null ? r[1] : "—";
-            String vendS = r[2] != null ? r[2] : (isRussian ? "НЕИЗВЕСТНО" : "UNKNOWN");
+            String idS   = r[2] != null ? r[2] : (isRussian ? "НЕИЗВЕСТНО" : "UNKNOWN");
             String flag  = isGw ? "  ← GATEWAY" : "";
-            String line  = String.format(Locale.US, "  %-15s %-17s %-24s%s", r[0], macS, vendS, flag);
+            String line  = String.format(Locale.US, "  %-15s %-17s %-24s%s", r[0], macS, idS, flag);
             if (isGw)              toolPrint("#00ff88", line);
             else if (r[2] == null) { toolPrint("#ffd740", line); unknown++; }
             else                   toolPrint("#e0e8f0", line);
@@ -2921,8 +3044,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 : "— devices: %d   unknown: %d   elapsed: %ds"), rows.size(), unknown, secs));
         if (unknown > 0)
             toolPrint("#ffd740", isRussian
-                ? "жёлтым — устройства, производителя которых нет в базе IEEE"
-                : "yellow rows = devices whose vendor is not in the IEEE database");
+                ? "жёлтым — не удалось определить имя (нет DNS/NetBIOS-имени и производитель неизвестен)"
+                : "yellow rows = no hostname, NetBIOS name, or known vendor found for that device");
         toolPrint("#546e7a", isRussian
             ? "подсказка: переключитесь на PORT, чтобы проверить порты любого найденного хоста"
             : "hint: switch to PORT to probe ports on any discovered host");
