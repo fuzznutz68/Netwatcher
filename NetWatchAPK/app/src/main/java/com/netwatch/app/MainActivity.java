@@ -571,10 +571,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n" +
                         "  • LAN — сканер локальной сети (ARP + ping sweep, без root)\n\n" +
                         "LAN: находит устройства в вашей Wi-Fi сети и определяет их\n" +
-                        "имена через DNS/NetBIOS (MAC-адреса недоступны приложениям\n" +
-                        "на Android 10+ — ограничение ОС). Выделяет шлюз и устройства,\n" +
-                        "которые не удалось определить. Для чистого результата\n" +
-                        "остановите мониторинг (VPN).\n\n" +
+                        "через UPnP/SSDP, DNS, NetBIOS и баннеры HTTP/FTP (MAC-адреса\n" +
+                        "недоступны приложениям на Android 10+ — ограничение ОС).\n" +
+                        "Выделяет шлюз и устройства, которые не удалось определить.\n" +
+                        "Для чистого результата остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
                         "Кнопка СТОП прерывает выполнение.");
@@ -588,10 +588,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • DNS — look up A / AAAA / CNAME / TXT records\n" +
                         "  • LAN — scan your local network (ARP + ping sweep, rootless)\n\n" +
                         "LAN: discovers devices on your Wi-Fi network and identifies\n" +
-                        "them via hostname/NetBIOS lookups (MAC addresses are hidden\n" +
-                        "from apps on Android 10+ — an OS restriction). Flags the\n" +
-                        "gateway and any devices it could not identify. Stop monitoring\n" +
-                        "(VPN) first for a clean scan.\n\n" +
+                        "them via UPnP/SSDP, DNS, NetBIOS, and HTTP/FTP banners (MAC\n" +
+                        "addresses are hidden from apps on Android 10+ — an OS\n" +
+                        "restriction). Flags the gateway and any devices it could not\n" +
+                        "identify. Stop monitoring (VPN) first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
                         "Tap STOP to interrupt a running tool.");
@@ -2539,7 +2539,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.9.1");
+        toolPrint("#546e7a", "netwatch tools v2.9.2");
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
@@ -2852,12 +2852,164 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         }
     }
 
-    /** Best identifier available for a host: real hostname > NetBIOS name > MAC vendor > null. */
-    private String lanIdentify(String ip, String vendor) {
+    /** UPnP/SSDP discovery — one multicast M-SEARCH, collecting unicast replies for a
+     *  fixed window. Devices that answer (routers, smart TVs, game consoles, DLNA/NAS
+     *  boxes, printers) advertise a LOCATION url pointing to their XML device descriptor;
+     *  we return ip -> that LOCATION url so friendly names can be fetched afterward. */
+    private java.util.Map<String, String> lanSsdpDiscover(long windowMs) {
+        java.util.Map<String, String> locations = new java.util.HashMap<>();
+        java.net.DatagramSocket sock = null;
+        try {
+            sock = new java.net.DatagramSocket();
+            sock.setSoTimeout(300);
+            byte[] msg = ("M-SEARCH * HTTP/1.1\r\n" +
+                    "HOST: 239.255.255.250:1900\r\n" +
+                    "MAN: \"ssdp:discover\"\r\n" +
+                    "MX: 2\r\n" +
+                    "ST: ssdp:all\r\n\r\n").getBytes("US-ASCII");
+            java.net.InetAddress mcast = java.net.InetAddress.getByName("239.255.255.250");
+            java.net.DatagramPacket req = new java.net.DatagramPacket(msg, msg.length, mcast, 1900);
+            sock.send(req);
+            sock.send(req);   // wifi is lossy — send twice
+            long end = System.currentTimeMillis() + windowMs;
+            byte[] buf = new byte[2048];
+            while (System.currentTimeMillis() < end) {
+                try {
+                    java.net.DatagramPacket resp = new java.net.DatagramPacket(buf, buf.length);
+                    sock.receive(resp);
+                    String text = new String(resp.getData(), 0, resp.getLength(), "US-ASCII");
+                    String ip = resp.getAddress().getHostAddress();
+                    for (String line : text.split("\r\n")) {
+                        if (line.toLowerCase(Locale.US).startsWith("location:")) {
+                            locations.put(ip, line.substring(line.indexOf(':') + 1).trim());
+                            break;
+                        }
+                    }
+                } catch (java.net.SocketTimeoutException ste) { /* keep polling until window ends */ }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (sock != null) sock.close();
+        }
+        return locations;
+    }
+
+    /** Fetches a UPnP device descriptor and pulls out <friendlyName> — e.g. "NETGEAR RAX50". */
+    private String lanFetchFriendlyName(String locationUrl) {
+        java.net.HttpURLConnection conn = null;
+        try {
+            conn = (java.net.HttpURLConnection) new java.net.URL(locationUrl).openConnection();
+            conn.setConnectTimeout(800);
+            conn.setReadTimeout(800);
+            conn.setRequestMethod("GET");
+            java.io.InputStream is = conn.getInputStream();
+            byte[] buf = new byte[4096];
+            int n = is.read(buf);
+            if (n <= 0) return null;
+            String xml = new String(buf, 0, n, "UTF-8");
+            int s = xml.indexOf("<friendlyName>");
+            if (s < 0) return null;
+            s += "<friendlyName>".length();
+            int e = xml.indexOf("</friendlyName>", s);
+            return (e > s) ? xml.substring(s, e).trim() : null;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    /** Grabs an HTTP banner from a device's own web UI (router login pages, camera
+     *  interfaces, printers, Apache default pages, etc.) — <title>, auth realm, or Server
+     *  header, in that order of usefulness. Tries 80 then 8080. */
+    private String lanHttpBanner(String ip) {
+        for (int port : new int[]{80, 8080}) {
+            java.net.Socket sock = null;
+            try {
+                sock = new java.net.Socket();
+                sock.connect(new java.net.InetSocketAddress(ip, port), 400);
+                sock.setSoTimeout(600);
+                sock.getOutputStream().write(("GET / HTTP/1.0\r\nHost: " + ip + "\r\nConnection: close\r\n\r\n")
+                        .getBytes("US-ASCII"));
+                sock.getOutputStream().flush();
+                java.io.BufferedReader r = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(sock.getInputStream()));
+                String line; String server = null, realm = null; boolean inHeaders = true;
+                StringBuilder body = new StringBuilder();
+                int n = 0;
+                while ((line = r.readLine()) != null && n++ < 80) {
+                    String ll = line.toLowerCase(Locale.US);
+                    if (inHeaders) {
+                        if (ll.startsWith("server:")) server = line.substring(line.indexOf(':') + 1).trim();
+                        if (ll.startsWith("www-authenticate:")) {
+                            int ri = ll.indexOf("realm=\"");
+                            if (ri >= 0) {
+                                int rs = ri + 7, re = line.indexOf('"', rs);
+                                if (re > rs) realm = line.substring(rs, re);
+                            }
+                        }
+                        if (line.isEmpty()) inHeaders = false;
+                    } else {
+                        body.append(line).append('\n');
+                        if (body.length() > 3000) break;
+                    }
+                }
+                String bl = body.toString().toLowerCase(Locale.US);
+                int ts = bl.indexOf("<title>");
+                if (ts >= 0) {
+                    int te = bl.indexOf("</title>", ts);
+                    if (te > ts) {
+                        String title = body.substring(ts + 7, te).trim();
+                        if (!title.isEmpty()) return title;
+                    }
+                }
+                if (realm != null)  return realm;
+                if (server != null) return server;
+            } catch (Exception ignored) {
+            } finally {
+                if (sock != null) try { sock.close(); } catch (Exception ignored) { }
+            }
+        }
+        return null;
+    }
+
+    /** Grabs an FTP welcome banner (port 21) — many NAS boxes, routers, and embedded
+     *  devices run an FTP daemon that announces itself right on connect. */
+    private String lanFtpBanner(String ip) {
+        java.net.Socket sock = null;
+        try {
+            sock = new java.net.Socket();
+            sock.connect(new java.net.InetSocketAddress(ip, 21), 400);
+            sock.setSoTimeout(600);
+            java.io.BufferedReader r = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(sock.getInputStream()));
+            String line = r.readLine();
+            if (line == null) return null;
+            String msg = line.replaceFirst("^\\d{3}[- ]", "").trim();
+            return msg.isEmpty() ? null : msg;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (sock != null) try { sock.close(); } catch (Exception ignored) { }
+        }
+    }
+
+    /** Best identifier available for a host, cheapest/most-reliable first:
+     *  UPnP friendly name > DNS hostname > NetBIOS name > HTTP banner > FTP banner > MAC vendor. */
+    private String lanIdentify(String ip, String vendor, java.util.Map<String, String> ssdpLocations) {
+        String loc = ssdpLocations.get(ip);
+        if (loc != null) {
+            String fn = lanFetchFriendlyName(loc);
+            if (fn != null) return fn;
+        }
         String host = lanReverseDns(ip);
         if (host != null) return host;
         String nb = lanNetbiosName(ip);
         if (nb != null) return nb;
+        String http = lanHttpBanner(ip);
+        if (http != null) return http;
+        String ftp = lanFtpBanner(ip);
+        if (ftp != null) return ftp;
         return vendor;
     }
 
@@ -3003,19 +3155,25 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         }
         java.util.Collections.sort(rows, (a, b) -> Long.compare(lanIpToLong(a[0]), lanIpToLong(b[0])));
 
-        // Resolve a real identifier for each device: hostname (reverse DNS) > NetBIOS name
-        // > MAC vendor. This is what actually works on modern Android where ARP is hidden.
+        // Resolve a real identifier for each device, cheapest/most-reliable checks first:
+        // UPnP friendly name > DNS hostname > NetBIOS name > HTTP banner > FTP banner > MAC vendor.
+        // This mirrors what desktop scanners (Advanced IP Scanner etc.) do that Android's ARP
+        // lockdown doesn't block — none of these need root.
         if (!rows.isEmpty()) {
-            toolPrint("#546e7a", isRussian ? "определение имён устройств…" : "resolving device names…");
+            toolPrint("#546e7a", isRussian ? "поиск UPnP/SSDP-устройств…" : "probing for UPnP/SSDP devices…");
+            java.util.Map<String, String> ssdpLocations = lanSsdpDiscover(2000);
+            toolPrint("#546e7a", isRussian
+                ? ("определение имён устройств (DNS/NetBIOS/HTTP/FTP)… найдено SSDP: " + ssdpLocations.size())
+                : ("identifying devices (DNS/NetBIOS/HTTP/FTP)… SSDP hits: " + ssdpLocations.size()));
             java.util.concurrent.ExecutorService idPool = java.util.concurrent.Executors.newFixedThreadPool(8);
             java.util.List<java.util.concurrent.Future<String>> idFutures = new java.util.ArrayList<>();
             for (String[] r : rows) {
                 final String rip = r[0], rvendor = r[2];
-                idFutures.add(idPool.submit(() -> lanIdentify(rip, rvendor)));
+                idFutures.add(idPool.submit(() -> lanIdentify(rip, rvendor, ssdpLocations)));
             }
             for (int i = 0; i < rows.size(); i++) {
                 String id = null;
-                try { id = idFutures.get(i).get(1500, java.util.concurrent.TimeUnit.MILLISECONDS); } catch (Exception ignored) { }
+                try { id = idFutures.get(i).get(6000, java.util.concurrent.TimeUnit.MILLISECONDS); } catch (Exception ignored) { }
                 rows.get(i)[2] = id;   // column 2 now holds the final display identifier
             }
             idPool.shutdownNow();

@@ -587,6 +587,7 @@ discord.gg
 android.view.accessibility.action.ARG...
 tx_rate
 session_
+GET
 .apk
 limitboundsto
 displayIntent
@@ -1730,6 +1731,7 @@ FragmentPagerAdapter
 autoSizeMaxTextSize
 twimg.com
 LinkedIn
+239.255.255.250
 android.remoteInputHistory
 neverCompleteToEnd
 pathMotionArc
@@ -2631,6 +2633,7 @@ type
 disqus.com
 smsto
 DEX_FILES
+server:
 appops
 cloudfront.net
 weather
@@ -2699,6 +2702,7 @@ strokeAlpha
 com.google.android.trichromelibrary
 URI_MASKABLE
 ON_CREATE
+location:
 INSTANCE_LOCK
 data
 android.intent.extra.shortcut.ID
