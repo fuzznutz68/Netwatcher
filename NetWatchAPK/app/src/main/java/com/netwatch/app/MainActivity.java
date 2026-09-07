@@ -183,6 +183,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         // Language preference
         SharedPreferences prefs0 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         isRussian = "ru".equals(prefs0.getString(PREF_LANG, "en"));
+        applyPerAppLocale(); // makes the system VPN consent dialog follow the app language
 
         // Tabs
         tabDomainBtn  = findViewById(R.id.tabDomainBtn);
@@ -587,6 +588,26 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         popup.show();
     }
 
+    // ── Per-app locale (system-level) ────────────────────────────────────────
+    // Registers the chosen language with Android's LocaleManager (API 33+).
+    // The system VPN consent dialog ("Connection Request") localizes itself
+    // to the requesting app's per-app locale, so this makes that dialog
+    // follow the in-app EN/RU language setting instead of the device default.
+    private void applyPerAppLocale() {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 33) {
+                android.app.LocaleManager lm = getSystemService(android.app.LocaleManager.class);
+                if (lm != null) {
+                    if (isRussian) {
+                        lm.setApplicationLocales(new android.os.LocaleList(new java.util.Locale("ru")));
+                    } else {
+                        lm.setApplicationLocales(android.os.LocaleList.getEmptyLocaleList());
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
     // ── Language picker dialog ────────────────────────────────────────────────
     private void showLanguageDialog() {
         String[] options = {"🇬🇧  English", "🇷🇺  Русский"};
@@ -601,6 +622,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         .edit()
                         .putString(PREF_LANG, isRussian ? "ru" : "en")
                         .apply();
+                    applyPerAppLocale();
                     refreshTabLabels();
                     refreshUiStrings();
                 }
