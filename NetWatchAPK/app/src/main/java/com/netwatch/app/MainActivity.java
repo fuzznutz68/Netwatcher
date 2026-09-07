@@ -2659,42 +2659,79 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private void toolTraceroute(String host) {
         toolPrint("#00e5ff", "$ traceroute " + host);
         toolPrint("#546e7a", isRussian ? "  (через ping с ростом TTL — без root)" : "  (via ping with increasing TTL — rootless)");
-        boolean reached = false;
+        java.util.regex.Pattern ipPattern =
+            java.util.regex.Pattern.compile("\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b");
+        boolean reached = false, sawHopData = false;
         for (int ttl = 1; ttl <= 30 && toolsRunning && !reached; ttl++) {
             final java.util.List<String> lines = new java.util.ArrayList<>();
             runPingCapture(host, 1, ttl, lines::add);
-            String hopIp = null, timeMs = null, reason = null;
+
+            // DNS failure / invalid host — report and bail out immediately
             for (String l : lines) {
+                String ll = l.toLowerCase(Locale.US);
+                if (ll.contains("unknown host") || ll.contains("bad address")
+                        || ll.contains("name or service") || ll.contains("not known")) {
+                    toolPrint("#ef9a9a", l.trim());
+                    toolPrint("#ef9a9a", isRussian
+                        ? "— хост не разрешается в IP; TRACE невозможен"
+                        : "— host does not resolve to an IP; cannot trace");
+                    return;
+                }
+            }
+
+            String hopIp = null, timeMs = null, reason = null, unknownLine = null;
+            for (String l : lines) {
+                String t = l.trim();
+                if (t.isEmpty() || t.startsWith("PING") || t.contains("ping statistics")
+                        || t.contains("packets transmitted") || t.contains("rtt")) continue;
                 if (l.contains("bytes from")) {                       // destination answered
                     int s = l.indexOf("bytes from ") + 11;
                     int e = l.indexOf(' ', s);
                     int c = l.indexOf(':', s);
                     int end = (e == -1) ? c : (c == -1 ? e : Math.min(e, c));
                     hopIp = l.substring(s, end == -1 ? l.length() : end);
-                    int t = l.indexOf("time=");
-                    if (t != -1) timeMs = l.substring(t + 5).split(" ")[0];
+                    int ti = l.indexOf("time=");
+                    if (ti != -1) timeMs = l.substring(ti + 5).split(" ")[0];
                     reached = true;
                     break;
-                } else if (l.startsWith("From ")) {                   // TTL exceeded / unreachable
-                    String[] tok = l.split("\\s+");
-                    if (tok.length >= 2) {
-                        hopIp = tok[1].endsWith(":") ? tok[1].substring(0, tok[1].length() - 1) : tok[1];
-                        if (l.contains("Time to live exceeded"))   reason = "TTL exceeded";
-                        else if (l.contains("Unreachable"))         reason = "unreachable";
-                    }
+                } else if (l.startsWith("From ") || l.contains("exceeded")
+                        || l.contains("Unreachable") || l.contains("unreachable")) {
+                    // TTL-exceeded / unreachable — extract the first IPv4 in the line
+                    java.util.regex.Matcher m = ipPattern.matcher(l);
+                    if (m.find()) hopIp = m.group(1);
+                    if (l.contains("exceeded"))            reason = "TTL exceeded";
+                    else if (l.contains("nreachable"))     reason = "unreachable";
+                } else if (unknownLine == null) {
+                    unknownLine = t;                                    // unclassified — diagnostics
                 }
             }
+
             if (reached) {
                 toolPrint("#00ff88", String.format(Locale.US, "%2d  %-40s %s ms", ttl, hopIp, timeMs == null ? "?" : timeMs));
                 toolPrint("#00e5ff", isRussian ? "  ✅ цель достигнута" : "  ✅ destination reached");
             } else if (hopIp != null) {
+                sawHopData = true;
                 toolPrint("#e0e8f0", String.format(Locale.US, "%2d  %-40s %s", ttl, hopIp, reason == null ? "" : reason));
             } else {
+                if (ttl == 1 && unknownLine != null)
+                    toolPrint("#546e7a", "  raw: " + unknownLine);     // show what ping really said
                 toolPrint("#546e7a", String.format(Locale.US, "%2d  * * *", ttl));
             }
         }
-        if (!reached && toolsRunning)
-            toolPrint("#ef9a9a", isRussian ? "  — цель не достигнута за 30 прыжков" : "  — no response within 30 hops");
+        if (toolsRunning && !reached) {
+            if (!sawHopData) {
+                toolPrint("#ffd740", isRussian
+                    ? "⚠ маршрутизаторы не сообщают о превышении TTL"
+                    : "⚠ routers are not reporting TTL-exceeded errors");
+                toolPrint("#546e7a", isRussian
+                    ? "  (прошивка не передаёт ICMP-ошибки непривилегированному ping)"
+                    : "  (firmware doesn't surface ICMP errors to unprivileged ping)");
+            } else {
+                toolPrint("#ef9a9a", isRussian
+                    ? "— цель не достигнута за 30 прыжков"
+                    : "— no response within 30 hops");
+            }
+        }
     }
 
     private void toolPortCheck(String host, int port) {
@@ -2718,42 +2755,84 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     private void toolDnsLookup(String host) {
         toolPrint("#00e5ff", "$ dig " + host + " A AAAA CNAME TXT");
-        String[][] typeMap = { {"A","1"}, {"AAAA","28"}, {"CNAME","5"}, {"TXT","16"} };
         boolean any = false;
-        for (String[] t : typeMap) {
+
+        // A / AAAA — via the device's own system resolver (the same one ping uses).
+        // Works on every network, no third-party endpoint involved.
+        try {
+            java.net.InetAddress[] all = java.net.InetAddress.getAllByName(host);
+            for (java.net.InetAddress a : all)
+                if (a instanceof java.net.Inet4Address) {
+                    toolPrint("#00ff88", String.format(Locale.US, "%-6s %s", "A", a.getHostAddress()));
+                    any = true;
+                }
+            for (java.net.InetAddress a : all)
+                if (a instanceof java.net.Inet6Address) {
+                    toolPrint("#00ff88", String.format(Locale.US, "%-6s %s", "AAAA", a.getHostAddress()));
+                    any = true;
+                }
+        } catch (Exception e) {
+            toolPrint("#ef9a9a", (isRussian ? "— ошибка разрешения имени: " : "— resolve failed: ") + e.getMessage());
+        }
+
+        // CNAME / TXT — DNS-over-HTTPS, best effort with provider fallback
+        boolean dohTried = false, dohOk = false;
+        String[][] dohTypes = { {"CNAME","5"}, {"TXT","16"} };
+        for (String[] t : dohTypes) {
             if (!toolsRunning) break;
             try {
-                java.net.URL u = new java.net.URL("https://dns.google/resolve?name=" +
-                    java.net.URLEncoder.encode(host, "UTF-8") + "&type=" + t[0]);
-                java.net.HttpURLConnection c = (java.net.HttpURLConnection) u.openConnection();
-                c.setConnectTimeout(5000);
-                c.setReadTimeout(8000);
-                c.setRequestProperty("User-Agent", "Mozilla/5.0");
-                if (c.getResponseCode() == 200) {
-                    java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
-                    byte[] b = new byte[4096]; int n;
-                    java.io.InputStream is = c.getInputStream();
-                    while ((n = is.read(b)) != -1) bos.write(b, 0, n);
-                    is.close();
-                    org.json.JSONObject r = new org.json.JSONObject(bos.toString("UTF-8"));
-                    org.json.JSONArray ans = r.optJSONArray("Answer");
-                    if (ans != null && ans.length() > 0) {
-                        for (int i = 0; i < ans.length(); i++) {
-                            org.json.JSONObject a = ans.getJSONObject(i);
-                            if (String.valueOf(a.optInt("type", 0)).equals(t[1]) || t[0].equals("TXT")) {
-                                toolPrint("#00ff88", String.format(Locale.US, "%-6s %s", t[0], a.optString("data", "")));
-                                any = true;
-                            }
-                        }
+                org.json.JSONArray ans = dohQuery(host, t[0]);
+                if (ans == null) { dohTried = true; continue; }
+                for (int i = 0; i < ans.length(); i++) {
+                    org.json.JSONObject a = ans.getJSONObject(i);
+                    if (String.valueOf(a.optInt("type", -1)).equals(t[1])) {
+                        toolPrint("#00ff88", String.format(Locale.US, "%-6s %s", t[0], a.optString("data", "")));
+                        any = true; dohOk = true;
                     }
                 }
-                c.disconnect();
-            } catch (Exception e) {
-                toolPrint("#ef9a9a", t[0] + " lookup failed: " + e.getMessage());
+            } catch (Exception ignored) {
+                dohTried = true;
             }
         }
+        if (!dohOk && dohTried)
+            toolPrint("#546e7a", isRussian
+                ? "CNAME/TXT: DoH-серверы недоступны в этой сети"
+                : "CNAME/TXT: DoH providers unreachable on this network");
         if (!any && toolsRunning)
             toolPrint("#ffd740", isRussian ? "записи не найдены" : "no records found");
+    }
+
+    /** DoH JSON query with provider fallback (dns.google → Cloudflare).
+     *  Returns the "Answer" array, or null if no provider responded. */
+    private org.json.JSONArray dohQuery(String host, String type) {
+        String[][] eps = {
+            { "https://dns.google/resolve?name=",            "" },                      // plain JSON
+            { "https://cloudflare-dns.com/dns-query?name=",   "application/dns-json" }   // needs Accept header
+        };
+        for (String[] ep : eps) {
+            java.net.HttpURLConnection c = null;
+            try {
+                java.net.URL u = new java.net.URL(ep[0] +
+                    java.net.URLEncoder.encode(host, "UTF-8") + "&type=" + type);
+                c = (java.net.HttpURLConnection) u.openConnection();
+                c.setConnectTimeout(4000);
+                c.setReadTimeout(6000);
+                c.setRequestProperty("User-Agent", "Mozilla/5.0");
+                if (!ep[1].isEmpty()) c.setRequestProperty("Accept", ep[1]);
+                if (c.getResponseCode() != 200) continue;
+                java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                byte[] b = new byte[4096]; int n;
+                java.io.InputStream is = c.getInputStream();
+                while ((n = is.read(b)) != -1) bos.write(b, 0, n);
+                is.close();
+                return new org.json.JSONObject(bos.toString("UTF-8")).optJSONArray("Answer");
+            } catch (Exception ignored) {
+                // try next provider
+            } finally {
+                if (c != null) c.disconnect();
+            }
+        }
+        return null;
     }
 
     /** Appends one colored line to the tools console (thread-safe). */
