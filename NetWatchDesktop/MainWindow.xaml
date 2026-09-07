@@ -25,7 +25,7 @@
 
         <Style x:Key="TabBtn" TargetType="Button">
             <Setter Property="Background"  Value="#0D1117"/>
-            <Setter Property="Foreground"  Value="#546E7A"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
             <Setter Property="BorderThickness" Value="0,0,0,2"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="FontSize"    Value="12"/>
@@ -46,7 +46,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#90A4AE"/>
+                    <Setter Property="Foreground" Value="#00E5FF"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Background" Value="#161B22"/>
@@ -55,8 +55,8 @@
         </Style>
 
         <Style x:Key="TabBtnActive" TargetType="Button" BasedOn="{StaticResource TabBtn}">
-            <Setter Property="Foreground"  Value="#00E5FF"/>
-            <Setter Property="BorderBrush" Value="#00E5FF"/>
+            <Setter Property="Foreground"  Value="#FFC107"/>
+            <Setter Property="BorderBrush" Value="#FFC107"/>
         </Style>
 
         <Style x:Key="CardPanel" TargetType="Border">
