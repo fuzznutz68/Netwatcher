@@ -96,6 +96,18 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="DangerBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background" Value="#EF5350"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF8A80"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#5D4037"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="InputBox" TargetType="TextBox">
             <Setter Property="Background"    Value="#0D1117"/>
             <Setter Property="Foreground"   Value="#E0E8F0"/>
@@ -197,6 +209,7 @@
                     <Button x:Name="TabDomainBtn"  Content="🌐 DOMAIN INTEL"   Style="{StaticResource TabBtnActive}" Width="170" Click="TabDomain_Click"/>
                     <Button x:Name="TabCheckerBtn" Content="✅ DOMAIN CHECKER" Style="{StaticResource TabBtn}"        Width="170" Click="TabChecker_Click"/>
                     <Button x:Name="TabMyInfoBtn"   Content="📡 MY INFO"        Style="{StaticResource TabBtn}"        Width="150" Click="TabMyInfo_Click"/>
+                    <Button x:Name="TabToolsBtn"    Content="🛠 NETWORK TOOLS"  Style="{StaticResource TabBtn}"        Width="160" Click="TabTools_Click"/>
                 </StackPanel>
             </Border>
 
@@ -242,6 +255,32 @@
                     <Button Content="Refresh" Style="{StaticResource ActionBtn}" HorizontalAlignment="Left" Margin="0,0,0,12" Click="RefreshMyInfo_Click"/>
 
                     <StackPanel x:Name="MyInfoResults" />
+                </StackPanel>
+
+                <!-- ════════════ NETWORK TOOLS PAGE ════════════ -->
+                <StackPanel x:Name="PageTools" Margin="16,12" Visibility="Collapsed">
+                    <TextBlock Text="Network Tools" Foreground="#00E5FF" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" FontFamily="Consolas"/>
+                    <TextBlock Text="Ping, Traceroute, Port Check, and DNS Lookup." Foreground="#546E7A" FontSize="11" Margin="0,0,0,12" FontFamily="Consolas"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button x:Name="ToolPingBtn"  Content="PING"  Style="{StaticResource TabBtnActive}" Width="90" Click="ToolMode_Click"/>
+                        <Button x:Name="ToolTraceBtn" Content="TRACE" Style="{StaticResource TabBtn}"        Width="90" Click="ToolMode_Click"/>
+                        <Button x:Name="ToolPortBtn"  Content="PORT"  Style="{StaticResource TabBtn}"        Width="90" Click="ToolMode_Click"/>
+                        <Button x:Name="ToolDnsBtn"    Content="DNS"   Style="{StaticResource TabBtn}"        Width="90" Click="ToolMode_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="ToolsHostInput" Style="{StaticResource InputBox}" Width="300" KeyDown="ToolsInput_KeyDown"/>
+                        <TextBox x:Name="ToolsPortInput" Style="{StaticResource InputBox}" Width="70" Margin="8,0,0,0" Visibility="Collapsed"/>
+                        <Button x:Name="ToolsRunBtn"  Content="RUN"  Style="{StaticResource ActionBtn}" Margin="8,0,0,0" Click="ToolsRun_Click"/>
+                        <Button x:Name="ToolsStopBtn" Content="STOP" Style="{StaticResource DangerBtn}"  Margin="8,0,0,0" Visibility="Collapsed" Click="ToolsStop_Click"/>
+                    </StackPanel>
+
+                    <Border Background="#0A0E17" BorderBrush="#1E2A3A" BorderThickness="1" CornerRadius="6" Padding="8" Height="380">
+                        <ScrollViewer x:Name="ToolsScroll" Style="{StaticResource ScrollViewerStyle}" VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="ToolsConsole" FontFamily="Consolas" FontSize="12" Foreground="#E0E8F0" TextWrapping="Wrap"/>
+                        </ScrollViewer>
+                    </Border>
                 </StackPanel>
 
               </Grid>

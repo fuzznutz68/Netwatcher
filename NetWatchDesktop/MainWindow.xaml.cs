@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -133,16 +134,350 @@ namespace NetWatch
         private void TabDomain_Click(object sender, RoutedEventArgs e)  => SwitchTab(0);
         private void TabChecker_Click(object sender, RoutedEventArgs e) => SwitchTab(1);
         private void TabMyInfo_Click(object sender, RoutedEventArgs e)   => SwitchTab(2);
+        private void TabTools_Click(object sender, RoutedEventArgs e)    => SwitchTab(3);
 
         private void SwitchTab(int tab)
         {
             TabDomainBtn.Style  = (Style)Resources[tab == 0 ? "TabBtnActive" : "TabBtn"];
             TabCheckerBtn.Style = (Style)Resources[tab == 1 ? "TabBtnActive" : "TabBtn"];
             TabMyInfoBtn.Style   = (Style)Resources[tab == 2 ? "TabBtnActive" : "TabBtn"];
+            TabToolsBtn.Style    = (Style)Resources[tab == 3 ? "TabBtnActive" : "TabBtn"];
 
             PageDomain.Visibility  = tab == 0 ? Visibility.Visible : Visibility.Collapsed;
             PageChecker.Visibility = tab == 1 ? Visibility.Visible : Visibility.Collapsed;
             PageMyInfo.Visibility   = tab == 2 ? Visibility.Visible : Visibility.Collapsed;
+            PageTools.Visibility     = tab == 3 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // NETWORK TOOLS (Ping / Traceroute / Port Check / DNS Lookup)
+        // ═════════════════════════════════════════════════════════════════════
+
+        private const int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3;
+        private int  _toolMode  = TOOL_PING;
+        private bool _toolRunning = false;
+        private System.Threading.CancellationTokenSource _toolCts = null;
+
+        private void ToolMode_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReferenceEquals(sender, ToolPingBtn))       _toolMode = TOOL_PING;
+            else if (ReferenceEquals(sender, ToolTraceBtn)) _toolMode = TOOL_TRACE;
+            else if (ReferenceEquals(sender, ToolPortBtn))  _toolMode = TOOL_PORT;
+            else                                            _toolMode = TOOL_DNS;
+
+            ToolPingBtn.Style  = (Style)Resources[_toolMode == TOOL_PING  ? "TabBtnActive" : "TabBtn"];
+            ToolTraceBtn.Style = (Style)Resources[_toolMode == TOOL_TRACE ? "TabBtnActive" : "TabBtn"];
+            ToolPortBtn.Style  = (Style)Resources[_toolMode == TOOL_PORT  ? "TabBtnActive" : "TabBtn"];
+            ToolDnsBtn.Style   = (Style)Resources[_toolMode == TOOL_DNS    ? "TabBtnActive" : "TabBtn"];
+            ToolsPortInput.Visibility = _toolMode == TOOL_PORT ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ToolsInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) ToolsRun_Click(sender, e);
+        }
+
+        private void ToolsRun_Click(object sender, RoutedEventArgs e)
+        {
+            if (_toolRunning) return;
+            string host = ToolsHostInput.Text.Trim();
+            if (host.StartsWith("http://"))  host = host.Substring(7);
+            if (host.StartsWith("https://")) host = host.Substring(8);
+            if (host.Contains("/")) host = host.Substring(0, host.IndexOf('/'));
+
+            if (string.IsNullOrEmpty(host))
+            {
+                ToolAppend("— enter a host or IP first", "#FFC107");
+                return;
+            }
+
+            int port = -1;
+            if (_toolMode == TOOL_PORT)
+            {
+                string ps = ToolsPortInput.Text.Trim();
+                if (ps.Length == 0 && host.Contains(":"))
+                {
+                    int ci = host.IndexOf(':');
+                    ps = host.Substring(ci + 1);
+                    host = host.Substring(0, ci);
+                }
+                if (!int.TryParse(ps, out port) || port < 1 || port > 65535)
+                {
+                    ToolAppend("— invalid port (1–65535)", "#FFC107");
+                    return;
+                }
+            }
+
+            _toolRunning = true;
+            _toolCts = new System.Threading.CancellationTokenSource();
+            ToolsRunBtn.IsEnabled = false;
+            ToolsStopBtn.Visibility = Visibility.Visible;
+            ToolsConsole.Inlines.Clear();
+            var token = _toolCts.Token;
+            string finalHost = host;
+            int finalPort = port;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if      (_toolMode == TOOL_PING)  await ToolPing(finalHost, token);
+                    else if (_toolMode == TOOL_TRACE) await ToolTrace(finalHost, token);
+                    else if (_toolMode == TOOL_PORT)  await ToolPortCheck(finalHost, finalPort, token);
+                    else                              await ToolDns(finalHost, token);
+                }
+                catch (Exception ex)
+                {
+                    ToolAppend("error: " + ex.Message, "#EF5350");
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    _toolRunning = false;
+                    _toolCts?.Dispose();
+                    _toolCts = null;
+                    ToolsRunBtn.IsEnabled = true;
+                    ToolsStopBtn.Visibility = Visibility.Collapsed;
+                });
+            });
+        }
+
+        private void ToolsStop_Click(object sender, RoutedEventArgs e)
+        {
+            try { _toolCts?.Cancel(); } catch { }
+            ToolAppend("^ stopped by user", "#FFC107");
+        }
+
+        private void ToolAppend(string text, string hexColor)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var color = (Color)ColorConverter.ConvertFromString(hexColor);
+                ToolsConsole.Inlines.Add(new System.Windows.Documents.Run(text + Environment.NewLine)
+                {
+                    Foreground = new SolidColorBrush(color)
+                });
+                ToolsScroll.ScrollToEnd();
+            });
+        }
+
+        // ── PING ──────────────────────────────────────────────────────────────
+        private async Task ToolPing(string host, System.Threading.CancellationToken ct)
+        {
+            ToolAppend("$ ping -n 4 " + host, "#00E5FF");
+            using var ping = new Ping();
+            int ok = 0;
+            var times = new List<double>();
+            for (int i = 0; i < 4; i++)
+            {
+                if (ct.IsCancellationRequested) return;
+                try
+                {
+                    var reply = await ping.SendPingAsync(host, 2000);
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        ok++;
+                        times.Add(reply.RoundtripTime);
+                        string ttl = reply.Options?.Ttl.ToString() ?? "?";
+                        ToolAppend($"reply from {reply.Address}: bytes=32 time={reply.RoundtripTime}ms TTL={ttl}", "#4CAF50");
+                    }
+                    else
+                    {
+                        ToolAppend("request failed: " + reply.Status, "#EF5350");
+                    }
+                }
+                catch (PingException pex)
+                {
+                    ToolAppend("ping failed: " + pex.GetBaseException().Message, "#EF5350");
+                    return;
+                }
+                if (i < 3) { try { await Task.Delay(300, ct); } catch { return; } }
+            }
+            if (ok > 0)
+            {
+                double min = times.Count > 0 ? times.Min() : 0, max = times.Count > 0 ? times.Max() : 0;
+                double avg = times.Count > 0 ? times.Average() : 0;
+                ToolAppend($"--- {host} ping statistics ---", "#546E7A");
+                ToolAppend($"{ok}/4 received, min/avg/max = {min}/{Math.Round(avg)}/{max} ms", "#00E5FF");
+            }
+            else
+            {
+                ToolAppend("— no replies (host unreachable?)", "#EF5350");
+            }
+        }
+
+        // ── TRACEROUTE ────────────────────────────────────────────────────────
+        // .NET's Ping class reports IPStatus.TtlExpired with the hop's address —
+        // a real traceroute, no output parsing needed (unlike the Android port).
+        // 3 probes per hop: intermediate routers often rate-limit ICMP errors.
+        private async Task ToolTrace(string host, System.Threading.CancellationToken ct)
+        {
+            ToolAppend("$ tracert " + host, "#00E5FF");
+            ToolAppend("  (ICMP with increasing TTL — 3 probes/hop)", "#546E7A");
+            using var ping = new Ping();
+            byte[] buf = new byte[32];
+            bool reached = false, sawHopData = false;
+
+            for (int ttl = 1; ttl <= 30 && !reached; ttl++)
+            {
+                if (ct.IsCancellationRequested) return;
+                IPAddress hopIp = null;
+                long ms = -1;
+                bool got = false;
+
+                for (int attempt = 0; attempt < 3 && !got; attempt++)
+                {
+                    if (ct.IsCancellationRequested) return;
+                    try
+                    {
+                        var reply = await ping.SendPingAsync(host, 2000, buf, new PingOptions(ttl, true));
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            hopIp = reply.Address; ms = reply.RoundtripTime; got = true; reached = true;
+                        }
+                        else if (reply.Status == IPStatus.TtlExpired)
+                        {
+                            hopIp = reply.Address; ms = reply.RoundtripTime; got = true;
+                        }
+                    }
+                    catch (PingException pex)
+                    {
+                        ToolAppend("trace failed: " + pex.GetBaseException().Message, "#EF5350");
+                        return;
+                    }
+                }
+
+                if (got)
+                {
+                    if (reached) sawHopData = true;
+                    else sawHopData = true;
+                    ToolAppend($"{ttl,2}  {hopIp,-42} {ms} ms", reached ? "#4CAF50" : "#E0E8F0");
+                }
+                else
+                {
+                    ToolAppend($"{ttl,2}  * * *", "#546E7A");
+                }
+            }
+
+            if (reached)          ToolAppend("  ✅ destination reached", "#00E5FF");
+            else if (!ct.IsCancellationRequested)
+            {
+                ToolAppend("  — no response within 30 hops", "#EF5350");
+                if (!sawHopData)
+                    ToolAppend("  (network is filtering ICMP TTL-exceeded replies)", "#546E7A");
+            }
+        }
+
+        // ── PORT CHECK ────────────────────────────────────────────────────────
+        private async Task ToolPortCheck(string host, int port, System.Threading.CancellationToken ct)
+        {
+            ToolAppend($"$ test {host}:{port}", "#00E5FF");
+            try
+            {
+                var addrs = await Dns.GetHostAddressesAsync(host);
+                ToolAppend("resolved: " + string.Join(", ", addrs.Select(a => a.ToString())), "#546E7A");
+            }
+            catch { /* non-fatal — connect attempt will surface the real error */ }
+
+            try
+            {
+                using var tcp = new System.Net.Sockets.TcpClient();
+                var connectTask = tcp.ConnectAsync(host, port, ct).AsTask();
+                var winner = await Task.WhenAny(connectTask, Task.Delay(3000, ct));
+                if (winner == connectTask && tcp.Connected)
+                {
+                    ToolAppend($"OPEN   {host}:{port}", "#4CAF50");
+                }
+                else
+                {
+                    try { tcp.Close(); } catch { }
+                    ToolAppend($"CLOSED {host}:{port}  (timeout)", "#EF5350");
+                }
+            }
+            catch (System.Net.Sockets.SocketException sex)
+            {
+                ToolAppend($"CLOSED {host}:{port}  ({sex.SocketErrorCode})", "#EF5350");
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        // ── DNS LOOKUP ────────────────────────────────────────────────────────
+        // A / AAAA via the system resolver; CNAME / TXT via DoH with fallback
+        // (same design as the Android v2.8.1 fix).
+        private async Task ToolDns(string host, System.Threading.CancellationToken ct)
+        {
+            ToolAppend("$ dig " + host + " A AAAA CNAME TXT", "#00E5FF");
+            bool any = false;
+
+            try
+            {
+                var addrs = await Dns.GetHostAddressesAsync(host);
+                foreach (var a in addrs.Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork))
+                { ToolAppend($"A      {a}", "#4CAF50"); any = true; }
+                foreach (var a in addrs.Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6))
+                { ToolAppend($"AAAA   {a}", "#4CAF50"); any = true; }
+            }
+            catch (Exception ex)
+            {
+                ToolAppend("— resolve failed: " + ex.Message, "#EF5350");
+            }
+
+            // CNAME / TXT via DNS-over-HTTPS, best effort with provider fallback
+            bool dohTried = false, dohOk = false;
+            string[][] dohTypes = { new[] { "CNAME", "5" }, new[] { "TXT", "16" } };
+            foreach (var t in dohTypes)
+            {
+                if (ct.IsCancellationRequested) break;
+                try
+                {
+                    var answers = await DohQueryAsync(host, t[0]);
+                    dohTried = true;
+                    if (answers == null) continue;
+                    foreach (var (typeNum, data) in answers)
+                    {
+                        if (typeNum.ToString() == t[1])
+                        {
+                            ToolAppend($"{t[0],-6} {data}", "#4CAF50");
+                            any = true; dohOk = true;
+                        }
+                    }
+                }
+                catch { dohTried = true; }
+            }
+            if (!dohOk && dohTried)
+                ToolAppend("CNAME/TXT: DoH providers unreachable on this network", "#546E7A");
+            if (!any && !ct.IsCancellationRequested)
+                ToolAppend("no records found", "#FFC107");
+        }
+
+        /// DoH JSON query with provider fallback (dns.google → Cloudflare).
+        private async Task<List<(int type, string data)>> DohQueryAsync(string host, string type)
+        {
+            (string url, string accept)[] eps = {
+                ("https://dns.google/resolve?name=",          null),
+                ("https://cloudflare-dns.com/dns-query?name=", "application/dns-json")
+            };
+            foreach (var (baseurl, accept) in eps)
+            {
+                try
+                {
+                    using var req = new HttpRequestMessage(HttpMethod.Get,
+                        baseurl + Uri.EscapeDataString(host) + "&type=" + type);
+                    req.Headers.Add("User-Agent", "Mozilla/5.0");
+                    if (accept != null) req.Headers.Accept.ParseAdd(accept);
+                    using var resp = await Http.SendAsync(req);
+                    if (!resp.IsSuccessStatusCode) continue;
+                    string body = await resp.Content.ReadAsStringAsync();
+                    var list = new List<(int, string)>();
+                    using var doc = JsonDocument.Parse(body);
+                    if (doc.RootElement.TryGetProperty("Answer", out var ans) && ans.ValueKind == JsonValueKind.Array)
+                        foreach (var a in ans.EnumerateArray())
+                            list.Add((a.TryGetProperty("type", out var tp) ? tp.GetInt32() : 0,
+                                      a.TryGetProperty("data", out var d) ? d.GetString() : ""));
+                    return list;
+                }
+                catch { /* try next provider */ }
+            }
+            return null;
         }
 
         // ═════════════════════════════════════════════════════════════════════
