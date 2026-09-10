@@ -332,6 +332,7 @@ Deno.serve(async (req) => {
           'tiktok.com',
           'linkedin.com', 'lnkd.in',
           'twitter.com', 'x.com',
+          'youtube.com', 'youtu.be',
         ]);
         
         const classify = (host: string, src: string) => {
