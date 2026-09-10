@@ -322,6 +322,17 @@ Deno.serve(async (req) => {
         const queryReg = getRegistrableDomain(cleanDomain);
         const hostSource = new Map<string, string>(); // host -> source type (first match wins)
         const sourcePriority = ['script', 'iframe', 'form', 'stylesheet', 'img', 'inline'];
+        // Social-media SITE domains are boilerplate on every corporate page (footer share
+        // links, og: meta tags) and carry zero dependency intel — filter them out.
+        // Their actual code infrastructure (connect.facebook.net SDK, twimg.com,
+        // fbcdn.net CDNs) lives on different registrable domains and is still reported.
+        const socialSiteDomains = new Set([
+          'facebook.com', 'fb.com', 'fb.me',
+          'instagram.com',
+          'tiktok.com',
+          'linkedin.com', 'lnkd.in',
+          'twitter.com', 'x.com',
+        ]);
         
         const classify = (host: string, src: string) => {
           if (!host || host.includes(' ') || host.includes('@')) return;
@@ -331,6 +342,8 @@ Deno.serve(async (req) => {
           // Skip pure IPs and localhost
           if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || host === 'localhost') return;
           if (!host.includes('.') || host.length > 253) return;
+          // Skip social-media site links (marketing boilerplate, not dependencies)
+          if (socialSiteDomains.has(getRegistrableDomain(host))) return;
           const existing = hostSource.get(host);
           if (existing && sourcePriority.indexOf(existing) <= sourcePriority.indexOf(src)) return;
           hostSource.set(host, src);

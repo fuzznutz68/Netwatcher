@@ -1,0 +1,85 @@
+scovery ────────────────────────────────────────────
+    if (crossDomainSet.size > 0) {
+      const crossResults: any[] = [];
+      const crossArr = Array.from(crossDomainSet).slice(0, 10);
+      const crossResolved = await Promise.allSettled(
+        crossArr.map(async (cd) => {
+          try {
+            const recs = await fetchDns(cd, 'A');
+            const ips = [...new Set(recs.map((r: any) => r.data as string))];
+            const cnameRecs = await fetchDns(cd, 'CNAME').catch(() => [] as any[]);
+            const cname = cnameRecs.length > 0 ? cnameRecs[0].data.replace(/\.$/, '') : null;
+            const cdn = detectCdn(cname || '', ips);
+            return { domain: cd, ips, cname, cdn, live: ips.length > 0 };
+          } catch (_) {
+            return { domain: cd, ips: [], cname: null, cdn: null, live: false };
+          }
+        })
+      );
+      for (const r of crossResolved) {
+        if (r.status === 'fulfilled') crossResults.push(r.value);
+      }
+      results.crossDomains = crossResults;
+    }
+
+    // ── 6. PTR / Shared-host (deep: check ALL resolved IPs) ───────────────────
+    const ptrDomains = new Set<string>();
+    const ipsToCheck = isDeep
+      ? [...new Set([
+          ...results.ipv4,
+          ...subdomainResults.filter(s => s.live).flatMap(s => s.ips).filter(ip => /^\d+\.\d+\.\d+\.\d+$/.test(ip))
+        ])].slice(0, 10)
+      : results.ipv4.slice(0, 3);
+
+    await Promise.allSettled(ipsToCheck.map(async (ip: string) => {
+      try {
+        const reversed = ip.split('.').reverse().join('.') + '.in-addr.arpa';
+        const recs = await fetchDns(reversed, 'PTR');
+        for (const r of recs) {
+          const ptr = r.data.replace(/\.$/, '').toLowerCase();
+          if (ptr && ptr !== cleanDomain) {
+            ptrDomains.add(ptr);
+            const ptrReg = getRegistrableDomain(ptr);
+            if (ptrReg !== cleanDomain && ptrReg !== getRegistrableDomain(cleanDomain)) {
+              const queryLabel = cleanDomain.split('.').slice(-2)[0];
+              const ptrLabel = ptrReg.split('.').slice(-2)[0];
+              if (ptrLabel && queryLabel && (ptrLabel.includes(queryLabel) || queryLabel.includes(ptrLabel))) {
+                crossDomainSet.add(ptrReg);
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }));
+    results.sharedHostDomains = Array.from(ptrDomains).slice(0, 30);
+
+    // Update crossDomains if PTR revealed more
+    if (isDeep && crossDomainSet.size > (results.crossDomains?.length || 0)) {
+      const existing = new Set((results.crossDomains || []).map((c: any) => c.domain));
+      const newOnes = Array.from(crossDomainSet).filter(d => !existing.has(d)).slice(0, 5);
+      if (newOnes.length > 0) {
+        const newResolved = await Promise.allSettled(
+          newOnes.map(async (cd) => {
+            try {
+              const recs = await fetchDns(cd, 'A');
+              const ips = [...new Set(recs.map((r: any) => r.data as string))];
+              return { domain: cd, ips, cname: null, cdn: detectCdn('', ips), live: ips.length > 0 };
+            } catch (_) {
+              return { domain: cd, ips: [], cname: null, cdn: null, live: false };
+            }
+          })
+        );
+        for (const r of newResolved) {
+          if (r.status === 'fulfilled') results.crossDomains.push(r.value);
+        }
+      }
+    }
+
+    return Response.json(results, {
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
+    });
+
+  } catch (err: any) {
+    return Response.json({ error: err.message }, { status: 500 });
+  }
+});
