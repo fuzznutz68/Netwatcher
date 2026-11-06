@@ -49,4 +49,22 @@ public class NotificationChannelTest {
                 nm.getNotificationChannel(TRAFFIC_CHANNEL));
         assertTrue(svc.stopSelfResult(1) || true);
     }
+
+    /**
+     * Requirement: the channel must also exist on the null-intent system restart path,
+     * where onStartCommand() has no extras and falls back to restoreTarget().
+     */
+    @Test
+    public void nullIntentRestartAlsoCreatesChannel() {
+        Context ctx = ApplicationProvider.getApplicationContext();
+        NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.deleteNotificationChannel(TRAFFIC_CHANNEL);   // fresh install, no prior channel
+
+        TrafficMonitorService svc =
+                Robolectric.buildService(TrafficMonitorService.class).create().get();
+        svc.onStartCommand(null, 0, 1);                   // system restart delivers null intent
+
+        assertNotNull("channel must exist before startForeground() on a null-intent restart",
+                nm.getNotificationChannel(TRAFFIC_CHANNEL));
+    }
 }

@@ -212,6 +212,11 @@ public class TrafficMonitorService extends Service {
     /** Android 12+ can refuse a background foreground-service start; a refused start must
      *  shut the service down cleanly rather than leave a silent zombie. */
     private void startForegroundSafely() {
+        // Channel must exist before the notification is posted, on every path —
+        // fresh start, user restart, and null-intent system restart. Without it
+        // Android raises BadNotificationForStartForeground on the main thread and
+        // kills the process. createNotificationChannel() is idempotent.
+        createChannel();
         Notification n = buildNotification();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIF_ID, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
