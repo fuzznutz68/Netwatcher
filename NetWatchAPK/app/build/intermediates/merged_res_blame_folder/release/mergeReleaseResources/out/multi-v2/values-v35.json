@@ -1,0 +1,38 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.netwatch.app-mergeReleaseResources-2:/values-v35/values-v35.xml",
+            "map": [
+                {
+                    "source": "/root/.gradle/caches/8.13/transforms/f49e59fe722d4b8940a9a3fea085f9b1/transformed/material-1.14.0/res/values-v35/values-v35.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,149,247,349",
+                        "endColumns": "93,97,101,99",
+                        "endOffsets": "144,242,344,444"
+                    }
+                },
+                {
+                    "source": "/app/NetWatchAPK/app/src/main/res/values-v35/themes.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "144",
+                        "endLines": "14",
+                        "endColumns": "12",
+                        "endOffsets": "840"
+                    },
+                    "to": {
+                        "startLines": "6",
+                        "startColumns": "4",
+                        "startOffsets": "449",
+                        "endLines": "17",
+                        "endColumns": "12",
+                        "endOffsets": "1145"
+                    }
+                }
+            ]
+        }
+    ]
+}
