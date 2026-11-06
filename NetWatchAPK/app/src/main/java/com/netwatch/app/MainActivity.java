@@ -3655,13 +3655,20 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             case 443:  return "https";
             case 445:  return "smb";
             case 554:  return "rtsp";
+            case 631:  return "ipp-print";
             case 1883: return "mqtt";
+            case 3074: return "xbox-live";
             case 3389: return "rdp";
             case 5000: return "upnp";
+            case 6668: return "tuya-iot";
             case 8008: return "http-alt";
+            case 8009: return "chromecast";
             case 8080: return "http-proxy";
             case 8443: return "https-alt";
+            case 8883: return "mqtt-tls";
             case 9100: return "print";
+            case 9999: return "kasa-iot";
+            case 62078: return "iphone-sync";
             default:   return "";
         }
     }
@@ -3693,7 +3700,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         executor.execute(() -> {
             toolPrint("#00e5ff", "\n$ port-scan " + ip +
                     (label != null && !label.isEmpty() ? "  (" + label + ")" : ""));
-            final int[] ports = {21, 22, 23, 53, 80, 139, 443, 445, 554, 1883, 3389, 5000, 8008, 8080, 8443, 9100};
+            final int[] ports = {21, 22, 23, 53, 80, 139, 443, 445, 554, 631, 1883, 3074, 3389,
+                    5000, 6668, 8008, 8009, 8080, 8443, 8883, 9100, 9999, 62078};
             java.util.List<Integer> open = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
             java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(8);
             java.util.List<java.util.concurrent.Future<?>> fs = new java.util.ArrayList<>();

@@ -3,8 +3,8 @@
 # min_api: 30
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 8b4d57fd4d41ec6c3ee0f00077c5d56a2339424891984e85a83b1d42b26f6d06
-# pg_map_hash: SHA-256 8b4d57fd4d41ec6c3ee0f00077c5d56a2339424891984e85a83b1d42b26f6d06
+# pg_map_id: f1daf7d8c8a2b5f2df68b0f4bf02707c197409bf28569e96e55e0944d295abcb
+# pg_map_hash: SHA-256 f1daf7d8c8a2b5f2df68b0f4bf02707c197409bf28569e96e55e0944d295abcb
 _COROUTINE.ArtificialStackFrames -> R8$$REMOVED$$CLASS$$0:
 # {"id":"sourceFile","fileName":"CoroutineDebugging.kt"}
 _COROUTINE.CoroutineDebuggingKt -> R8$$REMOVED$$CLASS$$1:
@@ -157751,16 +157751,16 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
 # {"id":"sourceFile","fileName":"MainActivity.java"}
     1:1:void <clinit>():98:98 -> <clinit>
     2:2:void <clinit>():1535:1535 -> <clinit>
-    3:3:void <clinit>():3816:3816 -> <clinit>
-    4:4:void <clinit>():3818:3818 -> <clinit>
-    5:5:void <clinit>():3827:3827 -> <clinit>
-    6:6:void <clinit>():3835:3835 -> <clinit>
-    7:7:void <clinit>():3841:3841 -> <clinit>
-    8:8:void <clinit>():3853:3853 -> <clinit>
-    9:9:void <clinit>():3860:3860 -> <clinit>
-    10:10:void <clinit>():3867:3867 -> <clinit>
-    11:11:void <clinit>():3876:3876 -> <clinit>
-    12:12:void <clinit>():3887:3887 -> <clinit>
+    3:3:void <clinit>():3824:3824 -> <clinit>
+    4:4:void <clinit>():3826:3826 -> <clinit>
+    5:5:void <clinit>():3835:3835 -> <clinit>
+    6:6:void <clinit>():3843:3843 -> <clinit>
+    7:7:void <clinit>():3849:3849 -> <clinit>
+    8:8:void <clinit>():3861:3861 -> <clinit>
+    9:9:void <clinit>():3868:3868 -> <clinit>
+    10:10:void <clinit>():3875:3875 -> <clinit>
+    11:11:void <clinit>():3884:3884 -> <clinit>
+    12:12:void <clinit>():3895:3895 -> <clinit>
     1:4:void <init>():76:76 -> <init>
     5:6:void <init>():87:87 -> <init>
     7:9:void <init>():88:88 -> <init>
@@ -157784,14 +157784,14 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     85:90:void <init>():175:175 -> <init>
     91:101:void <init>():177:177 -> <init>
     102:103:void <init>():178:178 -> <init>
-    104:110:void <init>():3898:3898 -> <init>
-    111:112:void <init>():4202:4202 -> <init>
-    113:114:void <init>():4203:4203 -> <init>
-    115:116:void <init>():4393:4393 -> <init>
-    117:118:void <init>():4394:4394 -> <init>
-    119:125:void <init>():4395:4395 -> <init>
-    126:127:void <init>():4451:4451 -> <init>
-    128:130:void <init>():4452:4452 -> <init>
+    104:110:void <init>():3906:3906 -> <init>
+    111:112:void <init>():4210:4210 -> <init>
+    113:114:void <init>():4211:4211 -> <init>
+    115:116:void <init>():4401:4401 -> <init>
+    117:118:void <init>():4402:4402 -> <init>
+    119:125:void <init>():4403:4403 -> <init>
+    126:127:void <init>():4459:4459 -> <init>
+    128:130:void <init>():4460:4460 -> <init>
     1:4:void $r8$lambda$6K2KwEWq1FguicWX8IBRgQ34XLI(com.netwatch.app.MainActivity):0:0 -> A
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$b4GImdIg-3ukxBc9JlvOWS_sbUo(com.netwatch.app.MainActivity):0:0 -> A0
@@ -158128,96 +158128,96 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$xIdZ6yURhNs5coLVH9xWejCgwpk(com.netwatch.app.MainActivity,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> b1
       # {"id":"com.android.tools.r8.synthesized"}
-    3:7:void buildCheckerRows():3901:3901 -> buildCheckerRows
-    8:12:void buildCheckerRows():3902:3902 -> buildCheckerRows
-    13:34:void buildCheckerRows():3904:3904 -> buildCheckerRows
-    35:39:void buildCheckerRows():3906:3906 -> buildCheckerRows
-    40:48:void buildCheckerRows():3907:3907 -> buildCheckerRows
-    49:59:void buildCheckerRows():3908:3908 -> buildCheckerRows
-    60:64:void buildCheckerRows():3909:3909 -> buildCheckerRows
-    65:67:void buildCheckerRows():3910:3910 -> buildCheckerRows
-    68:76:void buildCheckerRows():3911:3911 -> buildCheckerRows
-    77:89:void buildCheckerRows():3913:3913 -> buildCheckerRows
-    90:92:void buildCheckerRows():3914:3914 -> buildCheckerRows
-    93:95:void buildCheckerRows():3915:3915 -> buildCheckerRows
-    96:100:void buildCheckerRows():3916:3916 -> buildCheckerRows
-    101:112:void buildCheckerRows():3918:3918 -> buildCheckerRows
-    113:114:void buildCheckerRows():3919:3919 -> buildCheckerRows
-    115:116:void buildCheckerRows():3920:3920 -> buildCheckerRows
-    117:121:void buildCheckerRows():3922:3922 -> buildCheckerRows
-    122:124:void buildCheckerRows():3923:3923 -> buildCheckerRows
-    125:133:void buildCheckerRows():3924:3924 -> buildCheckerRows
-    134:139:void buildCheckerRows():3925:3925 -> buildCheckerRows
-    140:150:void buildCheckerRows():3927:3927 -> buildCheckerRows
-    151:153:void buildCheckerRows():3928:3928 -> buildCheckerRows
-    154:174:void buildCheckerRows():3929:3929 -> buildCheckerRows
-    175:179:void buildCheckerRows():3932:3932 -> buildCheckerRows
-    180:184:void buildCheckerRows():3933:3933 -> buildCheckerRows
-    185:195:void buildCheckerRows():3934:3934 -> buildCheckerRows
-    196:198:void buildCheckerRows():3935:3935 -> buildCheckerRows
-    199:205:void buildCheckerRows():3936:3936 -> buildCheckerRows
-    206:208:void buildCheckerRows():3937:3937 -> buildCheckerRows
-    209:213:void buildCheckerRows():3940:3940 -> buildCheckerRows
-    214:216:void buildCheckerRows():3941:3941 -> buildCheckerRows
-    217:226:void buildCheckerRows():3942:3942 -> buildCheckerRows
-    227:231:void buildCheckerRows():3943:3943 -> buildCheckerRows
-    232:234:void buildCheckerRows():3944:3944 -> buildCheckerRows
-    235:245:void buildCheckerRows():3945:3945 -> buildCheckerRows
-    246:248:void buildCheckerRows():3946:3946 -> buildCheckerRows
-    249:253:void buildCheckerRows():3947:3947 -> buildCheckerRows
-    254:256:void buildCheckerRows():3948:3948 -> buildCheckerRows
-    257:267:void buildCheckerRows():3949:3949 -> buildCheckerRows
-    268:270:void buildCheckerRows():3950:3950 -> buildCheckerRows
-    271:273:void buildCheckerRows():3951:3951 -> buildCheckerRows
-    274:276:void buildCheckerRows():3952:3952 -> buildCheckerRows
-    277:279:void buildCheckerRows():3953:3953 -> buildCheckerRows
-    280:284:void buildCheckerRows():3956:3956 -> buildCheckerRows
-    285:289:void buildCheckerRows():3957:3957 -> buildCheckerRows
-    290:298:void buildCheckerRows():3958:3958 -> buildCheckerRows
-    299:304:void buildCheckerRows():3959:3959 -> buildCheckerRows
-    305:307:void buildCheckerRows():3960:3960 -> buildCheckerRows
-    308:310:void buildCheckerRows():3961:3961 -> buildCheckerRows
-    311:315:void buildCheckerRows():3963:3963 -> buildCheckerRows
-    316:318:void buildCheckerRows():3965:3965 -> buildCheckerRows
-    319:331:void buildCheckerRows():3966:3966 -> buildCheckerRows
-    1:6:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4588:4588 -> buildDeviceRow
-    7:12:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4589:4589 -> buildDeviceRow
-    13:15:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4590:4590 -> buildDeviceRow
-    16:30:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4592:4592 -> buildDeviceRow
-    31:37:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4591:4591 -> buildDeviceRow
-    38:42:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4595:4595 -> buildDeviceRow
-    43:60:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
+    3:7:void buildCheckerRows():3909:3909 -> buildCheckerRows
+    8:12:void buildCheckerRows():3910:3910 -> buildCheckerRows
+    13:34:void buildCheckerRows():3912:3912 -> buildCheckerRows
+    35:39:void buildCheckerRows():3914:3914 -> buildCheckerRows
+    40:48:void buildCheckerRows():3915:3915 -> buildCheckerRows
+    49:59:void buildCheckerRows():3916:3916 -> buildCheckerRows
+    60:64:void buildCheckerRows():3917:3917 -> buildCheckerRows
+    65:67:void buildCheckerRows():3918:3918 -> buildCheckerRows
+    68:76:void buildCheckerRows():3919:3919 -> buildCheckerRows
+    77:89:void buildCheckerRows():3921:3921 -> buildCheckerRows
+    90:92:void buildCheckerRows():3922:3922 -> buildCheckerRows
+    93:95:void buildCheckerRows():3923:3923 -> buildCheckerRows
+    96:100:void buildCheckerRows():3924:3924 -> buildCheckerRows
+    101:112:void buildCheckerRows():3926:3926 -> buildCheckerRows
+    113:114:void buildCheckerRows():3927:3927 -> buildCheckerRows
+    115:116:void buildCheckerRows():3928:3928 -> buildCheckerRows
+    117:121:void buildCheckerRows():3930:3930 -> buildCheckerRows
+    122:124:void buildCheckerRows():3931:3931 -> buildCheckerRows
+    125:133:void buildCheckerRows():3932:3932 -> buildCheckerRows
+    134:139:void buildCheckerRows():3933:3933 -> buildCheckerRows
+    140:150:void buildCheckerRows():3935:3935 -> buildCheckerRows
+    151:153:void buildCheckerRows():3936:3936 -> buildCheckerRows
+    154:174:void buildCheckerRows():3937:3937 -> buildCheckerRows
+    175:179:void buildCheckerRows():3940:3940 -> buildCheckerRows
+    180:184:void buildCheckerRows():3941:3941 -> buildCheckerRows
+    185:195:void buildCheckerRows():3942:3942 -> buildCheckerRows
+    196:198:void buildCheckerRows():3943:3943 -> buildCheckerRows
+    199:205:void buildCheckerRows():3944:3944 -> buildCheckerRows
+    206:208:void buildCheckerRows():3945:3945 -> buildCheckerRows
+    209:213:void buildCheckerRows():3948:3948 -> buildCheckerRows
+    214:216:void buildCheckerRows():3949:3949 -> buildCheckerRows
+    217:226:void buildCheckerRows():3950:3950 -> buildCheckerRows
+    227:231:void buildCheckerRows():3951:3951 -> buildCheckerRows
+    232:234:void buildCheckerRows():3952:3952 -> buildCheckerRows
+    235:245:void buildCheckerRows():3953:3953 -> buildCheckerRows
+    246:248:void buildCheckerRows():3954:3954 -> buildCheckerRows
+    249:253:void buildCheckerRows():3955:3955 -> buildCheckerRows
+    254:256:void buildCheckerRows():3956:3956 -> buildCheckerRows
+    257:267:void buildCheckerRows():3957:3957 -> buildCheckerRows
+    268:270:void buildCheckerRows():3958:3958 -> buildCheckerRows
+    271:273:void buildCheckerRows():3959:3959 -> buildCheckerRows
+    274:276:void buildCheckerRows():3960:3960 -> buildCheckerRows
+    277:279:void buildCheckerRows():3961:3961 -> buildCheckerRows
+    280:284:void buildCheckerRows():3964:3964 -> buildCheckerRows
+    285:289:void buildCheckerRows():3965:3965 -> buildCheckerRows
+    290:298:void buildCheckerRows():3966:3966 -> buildCheckerRows
+    299:304:void buildCheckerRows():3967:3967 -> buildCheckerRows
+    305:307:void buildCheckerRows():3968:3968 -> buildCheckerRows
+    308:310:void buildCheckerRows():3969:3969 -> buildCheckerRows
+    311:315:void buildCheckerRows():3971:3971 -> buildCheckerRows
+    316:318:void buildCheckerRows():3973:3973 -> buildCheckerRows
+    319:331:void buildCheckerRows():3974:3974 -> buildCheckerRows
+    1:6:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
+    7:12:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4597:4597 -> buildDeviceRow
+    13:15:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4598:4598 -> buildDeviceRow
+    16:30:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4600:4600 -> buildDeviceRow
+    31:37:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4599:4599 -> buildDeviceRow
+    38:42:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4603:4603 -> buildDeviceRow
+    43:60:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
     61:64:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> buildDeviceRow
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":232,"3":234,"6":237,"9":241,"12":246},"outline":"Landroidx/activity/result/d;g(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
-    65:85:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
-    86:96:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4597:4597 -> buildDeviceRow
-    97:99:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4598:4598 -> buildDeviceRow
-    100:104:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4599:4599 -> buildDeviceRow
-    105:121:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4602:4602 -> buildDeviceRow
-    122:125:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4603:4603 -> buildDeviceRow
-    126:135:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
-    136:140:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4605:4605 -> buildDeviceRow
-    141:154:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4606:4606 -> buildDeviceRow
-    155:157:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4607:4607 -> buildDeviceRow
-    158:160:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4608:4608 -> buildDeviceRow
-    161:163:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4610:4610 -> buildDeviceRow
-    164:168:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4611:4611 -> buildDeviceRow
-    169:173:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4615:4615 -> buildDeviceRow
-    174:176:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4616:4616 -> buildDeviceRow
-    177:187:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4617:4617 -> buildDeviceRow
-    188:190:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4618:4618 -> buildDeviceRow
-    191:193:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4619:4619 -> buildDeviceRow
-    194:196:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4620:4620 -> buildDeviceRow
-    197:201:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4624:4624 -> buildDeviceRow
-    202:210:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4625:4625 -> buildDeviceRow
-    211:219:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4627:4627 -> buildDeviceRow
-    220:222:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4628:4628 -> buildDeviceRow
-    223:231:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4633:4633 -> buildDeviceRow
-    232:232:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
-    234:234:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
-    237:237:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
-    241:241:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
-    246:246:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4596:4596 -> buildDeviceRow
+    65:85:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
+    86:96:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4605:4605 -> buildDeviceRow
+    97:99:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4606:4606 -> buildDeviceRow
+    100:104:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4607:4607 -> buildDeviceRow
+    105:121:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4610:4610 -> buildDeviceRow
+    122:125:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4611:4611 -> buildDeviceRow
+    126:135:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4612:4612 -> buildDeviceRow
+    136:140:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4613:4613 -> buildDeviceRow
+    141:154:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4614:4614 -> buildDeviceRow
+    155:157:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4615:4615 -> buildDeviceRow
+    158:160:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4616:4616 -> buildDeviceRow
+    161:163:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4618:4618 -> buildDeviceRow
+    164:168:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4619:4619 -> buildDeviceRow
+    169:173:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4623:4623 -> buildDeviceRow
+    174:176:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4624:4624 -> buildDeviceRow
+    177:187:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4625:4625 -> buildDeviceRow
+    188:190:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4626:4626 -> buildDeviceRow
+    191:193:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4627:4627 -> buildDeviceRow
+    194:196:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4628:4628 -> buildDeviceRow
+    197:201:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4632:4632 -> buildDeviceRow
+    202:210:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4633:4633 -> buildDeviceRow
+    211:219:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4635:4635 -> buildDeviceRow
+    220:222:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4636:4636 -> buildDeviceRow
+    223:231:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4641:4641 -> buildDeviceRow
+    232:232:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
+    234:234:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
+    237:237:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
+    241:241:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
+    246:246:android.view.View buildDeviceRow(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):4604:4604 -> buildDeviceRow
     7:29:void buildReport(java.lang.String,java.lang.String,java.lang.String):1748:1748 -> buildReport
     30:34:void buildReport(java.lang.String,java.lang.String,java.lang.String):1749:1749 -> buildReport
     35:50:void buildReport(java.lang.String,java.lang.String,java.lang.String):1751:1751 -> buildReport
@@ -158424,70 +158424,70 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$xZtnb_5qnVcr8_bjeoSUO_87cbE(com.netwatch.app.MainActivity):0:0 -> c1
       # {"id":"com.android.tools.r8.synthesized"}
-    3:16:void checkCustomDomain():4091:4091 -> checkCustomDomain
-    17:35:void checkCustomDomain():4092:4092 -> checkCustomDomain
-    36:49:void checkCustomDomain():4094:4094 -> checkCustomDomain
-    50:51:void checkCustomDomain():4098:4098 -> checkCustomDomain
-    52:60:void checkCustomDomain():4099:4099 -> checkCustomDomain
-    61:69:void checkCustomDomain():4100:4100 -> checkCustomDomain
-    70:91:void checkCustomDomain():4103:4103 -> checkCustomDomain
-    92:102:void checkCustomDomain():4107:4107 -> checkCustomDomain
-    103:108:void checkCustomDomain():4108:4108 -> checkCustomDomain
-    109:119:void checkCustomDomain():4109:4109 -> checkCustomDomain
-    120:126:void checkCustomDomain():4110:4110 -> checkCustomDomain
-    127:129:void checkCustomDomain():4111:4111 -> checkCustomDomain
-    130:144:void checkCustomDomain():4112:4112 -> checkCustomDomain
-    145:160:void checkCustomDomain():4115:4115 -> checkCustomDomain
-    161:165:void checkCustomDomain():4116:4116 -> checkCustomDomain
-    166:168:void checkCustomDomain():4117:4117 -> checkCustomDomain
-    169:173:void checkCustomDomain():4118:4118 -> checkCustomDomain
-    174:180:void checkCustomDomain():4119:4119 -> checkCustomDomain
-    181:184:void checkCustomDomain():4120:4120 -> checkCustomDomain
-    185:187:void checkCustomDomain():4121:4121 -> checkCustomDomain
-    188:190:void checkCustomDomain():4122:4122 -> checkCustomDomain
-    191:195:void checkCustomDomain():4123:4123 -> checkCustomDomain
-    196:207:void checkCustomDomain():4125:4125 -> checkCustomDomain
-    208:210:void checkCustomDomain():4126:4126 -> checkCustomDomain
-    211:215:void checkCustomDomain():4127:4127 -> checkCustomDomain
-    216:220:void checkCustomDomain():4130:4130 -> checkCustomDomain
-    221:223:void checkCustomDomain():4131:4131 -> checkCustomDomain
-    224:232:void checkCustomDomain():4132:4132 -> checkCustomDomain
-    233:247:void checkCustomDomain():4133:4133 -> checkCustomDomain
-    248:253:void checkCustomDomain():4134:4134 -> checkCustomDomain
-    254:264:void checkCustomDomain():4136:4136 -> checkCustomDomain
-    265:267:void checkCustomDomain():4137:4137 -> checkCustomDomain
-    268:288:void checkCustomDomain():4138:4138 -> checkCustomDomain
-    289:293:void checkCustomDomain():4140:4140 -> checkCustomDomain
-    294:298:void checkCustomDomain():4141:4141 -> checkCustomDomain
-    299:307:void checkCustomDomain():4142:4142 -> checkCustomDomain
-    308:310:void checkCustomDomain():4143:4143 -> checkCustomDomain
-    311:317:void checkCustomDomain():4144:4144 -> checkCustomDomain
-    318:320:void checkCustomDomain():4145:4145 -> checkCustomDomain
-    321:323:void checkCustomDomain():4146:4146 -> checkCustomDomain
-    324:328:void checkCustomDomain():4148:4148 -> checkCustomDomain
-    329:331:void checkCustomDomain():4149:4149 -> checkCustomDomain
-    332:341:void checkCustomDomain():4150:4150 -> checkCustomDomain
-    342:346:void checkCustomDomain():4151:4151 -> checkCustomDomain
-    347:349:void checkCustomDomain():4152:4152 -> checkCustomDomain
-    350:360:void checkCustomDomain():4153:4153 -> checkCustomDomain
-    361:363:void checkCustomDomain():4154:4154 -> checkCustomDomain
-    364:368:void checkCustomDomain():4155:4155 -> checkCustomDomain
-    369:384:void checkCustomDomain():4156:4156 -> checkCustomDomain
-    385:395:void checkCustomDomain():4157:4157 -> checkCustomDomain
-    396:398:void checkCustomDomain():4158:4158 -> checkCustomDomain
-    399:401:void checkCustomDomain():4159:4159 -> checkCustomDomain
-    402:404:void checkCustomDomain():4160:4160 -> checkCustomDomain
-    405:407:void checkCustomDomain():4161:4161 -> checkCustomDomain
-    408:412:void checkCustomDomain():4163:4163 -> checkCustomDomain
-    413:415:void checkCustomDomain():4164:4164 -> checkCustomDomain
-    416:424:void checkCustomDomain():4165:4165 -> checkCustomDomain
-    425:430:void checkCustomDomain():4166:4166 -> checkCustomDomain
-    431:433:void checkCustomDomain():4167:4167 -> checkCustomDomain
-    434:436:void checkCustomDomain():4168:4168 -> checkCustomDomain
-    437:443:void checkCustomDomain():4172:4172 -> checkCustomDomain
-    444:475:void checkCustomDomain():4178:4178 -> checkCustomDomain
-    476:484:void checkCustomDomain():4179:4179 -> checkCustomDomain
-    485:496:void checkCustomDomain():4181:4181 -> checkCustomDomain
+    3:16:void checkCustomDomain():4099:4099 -> checkCustomDomain
+    17:35:void checkCustomDomain():4100:4100 -> checkCustomDomain
+    36:49:void checkCustomDomain():4102:4102 -> checkCustomDomain
+    50:51:void checkCustomDomain():4106:4106 -> checkCustomDomain
+    52:60:void checkCustomDomain():4107:4107 -> checkCustomDomain
+    61:69:void checkCustomDomain():4108:4108 -> checkCustomDomain
+    70:91:void checkCustomDomain():4111:4111 -> checkCustomDomain
+    92:102:void checkCustomDomain():4115:4115 -> checkCustomDomain
+    103:108:void checkCustomDomain():4116:4116 -> checkCustomDomain
+    109:119:void checkCustomDomain():4117:4117 -> checkCustomDomain
+    120:126:void checkCustomDomain():4118:4118 -> checkCustomDomain
+    127:129:void checkCustomDomain():4119:4119 -> checkCustomDomain
+    130:144:void checkCustomDomain():4120:4120 -> checkCustomDomain
+    145:160:void checkCustomDomain():4123:4123 -> checkCustomDomain
+    161:165:void checkCustomDomain():4124:4124 -> checkCustomDomain
+    166:168:void checkCustomDomain():4125:4125 -> checkCustomDomain
+    169:173:void checkCustomDomain():4126:4126 -> checkCustomDomain
+    174:180:void checkCustomDomain():4127:4127 -> checkCustomDomain
+    181:184:void checkCustomDomain():4128:4128 -> checkCustomDomain
+    185:187:void checkCustomDomain():4129:4129 -> checkCustomDomain
+    188:190:void checkCustomDomain():4130:4130 -> checkCustomDomain
+    191:195:void checkCustomDomain():4131:4131 -> checkCustomDomain
+    196:207:void checkCustomDomain():4133:4133 -> checkCustomDomain
+    208:210:void checkCustomDomain():4134:4134 -> checkCustomDomain
+    211:215:void checkCustomDomain():4135:4135 -> checkCustomDomain
+    216:220:void checkCustomDomain():4138:4138 -> checkCustomDomain
+    221:223:void checkCustomDomain():4139:4139 -> checkCustomDomain
+    224:232:void checkCustomDomain():4140:4140 -> checkCustomDomain
+    233:247:void checkCustomDomain():4141:4141 -> checkCustomDomain
+    248:253:void checkCustomDomain():4142:4142 -> checkCustomDomain
+    254:264:void checkCustomDomain():4144:4144 -> checkCustomDomain
+    265:267:void checkCustomDomain():4145:4145 -> checkCustomDomain
+    268:288:void checkCustomDomain():4146:4146 -> checkCustomDomain
+    289:293:void checkCustomDomain():4148:4148 -> checkCustomDomain
+    294:298:void checkCustomDomain():4149:4149 -> checkCustomDomain
+    299:307:void checkCustomDomain():4150:4150 -> checkCustomDomain
+    308:310:void checkCustomDomain():4151:4151 -> checkCustomDomain
+    311:317:void checkCustomDomain():4152:4152 -> checkCustomDomain
+    318:320:void checkCustomDomain():4153:4153 -> checkCustomDomain
+    321:323:void checkCustomDomain():4154:4154 -> checkCustomDomain
+    324:328:void checkCustomDomain():4156:4156 -> checkCustomDomain
+    329:331:void checkCustomDomain():4157:4157 -> checkCustomDomain
+    332:341:void checkCustomDomain():4158:4158 -> checkCustomDomain
+    342:346:void checkCustomDomain():4159:4159 -> checkCustomDomain
+    347:349:void checkCustomDomain():4160:4160 -> checkCustomDomain
+    350:360:void checkCustomDomain():4161:4161 -> checkCustomDomain
+    361:363:void checkCustomDomain():4162:4162 -> checkCustomDomain
+    364:368:void checkCustomDomain():4163:4163 -> checkCustomDomain
+    369:384:void checkCustomDomain():4164:4164 -> checkCustomDomain
+    385:395:void checkCustomDomain():4165:4165 -> checkCustomDomain
+    396:398:void checkCustomDomain():4166:4166 -> checkCustomDomain
+    399:401:void checkCustomDomain():4167:4167 -> checkCustomDomain
+    402:404:void checkCustomDomain():4168:4168 -> checkCustomDomain
+    405:407:void checkCustomDomain():4169:4169 -> checkCustomDomain
+    408:412:void checkCustomDomain():4171:4171 -> checkCustomDomain
+    413:415:void checkCustomDomain():4172:4172 -> checkCustomDomain
+    416:424:void checkCustomDomain():4173:4173 -> checkCustomDomain
+    425:430:void checkCustomDomain():4174:4174 -> checkCustomDomain
+    431:433:void checkCustomDomain():4175:4175 -> checkCustomDomain
+    434:436:void checkCustomDomain():4176:4176 -> checkCustomDomain
+    437:443:void checkCustomDomain():4180:4180 -> checkCustomDomain
+    444:475:void checkCustomDomain():4186:4186 -> checkCustomDomain
+    476:484:void checkCustomDomain():4187:4187 -> checkCustomDomain
+    485:496:void checkCustomDomain():4189:4189 -> checkCustomDomain
     1:9:void checkForWebViewOnlyTraffic():1033:1033 -> checkForWebViewOnlyTraffic
     10:27:void checkForWebViewOnlyTraffic():1035:1035 -> checkForWebViewOnlyTraffic
     28:31:void checkForWebViewOnlyTraffic():1036:1036 -> checkForWebViewOnlyTraffic
@@ -158545,36 +158545,36 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     164:173:org.json.JSONArray dohQuery(java.lang.String,java.lang.String):3588:3588 -> dohQuery
     174:176:org.json.JSONArray dohQuery(java.lang.String,java.lang.String):3589:3589 -> dohQuery
     177:184:org.json.JSONArray dohQuery(java.lang.String,java.lang.String):3588:3588 -> dohQuery
-    2:14:int dp(int):3797:3797 -> dp
+    2:14:int dp(int):3805:3805 -> dp
     1:4:void $r8$lambda$Ls625TiyMeUFE1CDtWUXRikgyVM(com.netwatch.app.MainActivity,int,java.lang.String,int):0:0 -> e0
       # {"id":"com.android.tools.r8.synthesized"}
     1:5:int $r8$lambda$xgmt-ggIpOUx-IZxK0HywD8xsOQ(java.lang.String,java.lang.String[],java.lang.String[]):0:0 -> e1
       # {"id":"com.android.tools.r8.synthesized"}
-    1:7:void ensureVpnEngineRunning():4480:4480 -> ensureVpnEngineRunning
-    8:12:void ensureVpnEngineRunning():4481:4481 -> ensureVpnEngineRunning
-    13:16:void ensureVpnEngineRunning():4482:4482 -> ensureVpnEngineRunning
-    1:15:void exportDeviceLog():4703:4703 -> exportDeviceLog
-    16:28:void exportDeviceLog():4704:4704 -> exportDeviceLog
-    29:49:void exportDeviceLog():4705:4705 -> exportDeviceLog
-    50:68:void exportDeviceLog():4707:4707 -> exportDeviceLog
-    69:78:void exportDeviceLog():4708:4708 -> exportDeviceLog
-    79:83:void exportDeviceLog():4709:4709 -> exportDeviceLog
-    84:86:void exportDeviceLog():4710:4710 -> exportDeviceLog
-    87:104:void exportDeviceLog():4711:4711 -> exportDeviceLog
-    105:189:void exportDeviceLog():4712:4712 -> exportDeviceLog
-    190:191:void exportDeviceLog():4713:4714 -> exportDeviceLog
-    192:193:void exportDeviceLog():4714:4714 -> exportDeviceLog
-    194:198:void exportDeviceLog():4715:4715 -> exportDeviceLog
-    199:214:void exportDeviceLog():4716:4716 -> exportDeviceLog
-    215:218:void exportDeviceLog():4715:4715 -> exportDeviceLog
-    219:225:void exportDeviceLog():4717:4717 -> exportDeviceLog
-    226:230:void exportDeviceLog():4718:4718 -> exportDeviceLog
-    231:235:void exportDeviceLog():4719:4719 -> exportDeviceLog
-    236:238:void exportDeviceLog():4720:4720 -> exportDeviceLog
-    239:255:void exportDeviceLog():4721:4721 -> exportDeviceLog
-    256:257:void exportDeviceLog():4713:4713 -> exportDeviceLog
-    258:279:void exportDeviceLog():4723:4723 -> exportDeviceLog
-    280:283:void exportDeviceLog():4724:4724 -> exportDeviceLog
+    1:7:void ensureVpnEngineRunning():4488:4488 -> ensureVpnEngineRunning
+    8:12:void ensureVpnEngineRunning():4489:4489 -> ensureVpnEngineRunning
+    13:16:void ensureVpnEngineRunning():4490:4490 -> ensureVpnEngineRunning
+    1:15:void exportDeviceLog():4711:4711 -> exportDeviceLog
+    16:28:void exportDeviceLog():4712:4712 -> exportDeviceLog
+    29:49:void exportDeviceLog():4713:4713 -> exportDeviceLog
+    50:68:void exportDeviceLog():4715:4715 -> exportDeviceLog
+    69:78:void exportDeviceLog():4716:4716 -> exportDeviceLog
+    79:83:void exportDeviceLog():4717:4717 -> exportDeviceLog
+    84:86:void exportDeviceLog():4718:4718 -> exportDeviceLog
+    87:104:void exportDeviceLog():4719:4719 -> exportDeviceLog
+    105:189:void exportDeviceLog():4720:4720 -> exportDeviceLog
+    190:191:void exportDeviceLog():4721:4722 -> exportDeviceLog
+    192:193:void exportDeviceLog():4722:4722 -> exportDeviceLog
+    194:198:void exportDeviceLog():4723:4723 -> exportDeviceLog
+    199:214:void exportDeviceLog():4724:4724 -> exportDeviceLog
+    215:218:void exportDeviceLog():4723:4723 -> exportDeviceLog
+    219:225:void exportDeviceLog():4725:4725 -> exportDeviceLog
+    226:230:void exportDeviceLog():4726:4726 -> exportDeviceLog
+    231:235:void exportDeviceLog():4727:4727 -> exportDeviceLog
+    236:238:void exportDeviceLog():4728:4728 -> exportDeviceLog
+    239:255:void exportDeviceLog():4729:4729 -> exportDeviceLog
+    256:257:void exportDeviceLog():4721:4721 -> exportDeviceLog
+    258:279:void exportDeviceLog():4731:4731 -> exportDeviceLog
+    280:283:void exportDeviceLog():4732:4732 -> exportDeviceLog
     1:29:void exportDomainIntel():2221:2221 -> exportDomainIntel
     30:47:void exportDomainIntel():2222:2222 -> exportDomainIntel
     48:54:void exportDomainIntel():2223:2223 -> exportDomainIntel
@@ -158662,11 +158662,11 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     96:99:void fireAlert(java.lang.String):1526:1526 -> fireAlert
     100:103:void fireAlert(java.lang.String):1527:1527 -> fireAlert
     104:112:void fireAlert(java.lang.String):1529:1529 -> fireAlert
-    7:15:java.lang.String formatBytes(long):3772:3772 -> formatBytes
-    16:40:java.lang.String formatBytes(long):3773:3773 -> formatBytes
-    41:68:java.lang.String formatBytes(long):3774:3774 -> formatBytes
-    69:89:java.lang.String formatBytes(long):3775:3775 -> formatBytes
-    90:110:java.lang.String formatBytes(long):3776:3776 -> formatBytes
+    7:15:java.lang.String formatBytes(long):3780:3780 -> formatBytes
+    16:40:java.lang.String formatBytes(long):3781:3781 -> formatBytes
+    41:68:java.lang.String formatBytes(long):3782:3782 -> formatBytes
+    69:89:java.lang.String formatBytes(long):3783:3783 -> formatBytes
+    90:110:java.lang.String formatBytes(long):3784:3784 -> formatBytes
     1:4:void $r8$lambda$McQX3JsU0JL5clIciet91SW4WvM(com.netwatch.app.MainActivity,android.view.View):0:0 -> g0
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$y8nkO7Q0Rue4Ba0zZ16FLOO8Pdk(com.netwatch.app.MainActivity,java.lang.String,android.view.View):0:0 -> g1
@@ -158679,33 +158679,33 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$zcrZmBkKsedG7qSW7hVXIKIn3WQ(com.netwatch.app.MainActivity,android.view.View):0:0 -> i1
       # {"id":"com.android.tools.r8.synthesized"}
-    1:6:void initDeviceTab():4409:4409 -> initDeviceTab
-    7:8:void initDeviceTab():4410:4410 -> initDeviceTab
-    9:18:void initDeviceTab():4412:4412 -> initDeviceTab
-    19:28:void initDeviceTab():4413:4413 -> initDeviceTab
-    29:38:void initDeviceTab():4414:4414 -> initDeviceTab
-    39:48:void initDeviceTab():4415:4415 -> initDeviceTab
-    49:58:void initDeviceTab():4416:4416 -> initDeviceTab
-    59:68:void initDeviceTab():4417:4417 -> initDeviceTab
-    69:78:void initDeviceTab():4418:4418 -> initDeviceTab
-    79:88:void initDeviceTab():4419:4419 -> initDeviceTab
-    89:100:void initDeviceTab():4421:4421 -> initDeviceTab
-    101:112:void initDeviceTab():4426:4426 -> initDeviceTab
-    113:125:void initDeviceTab():4435:4435 -> initDeviceTab
-    1:6:void initSpeedTab():4210:4210 -> initSpeedTab
-    7:8:void initSpeedTab():4211:4211 -> initSpeedTab
-    9:18:void initSpeedTab():4213:4213 -> initSpeedTab
-    19:28:void initSpeedTab():4214:4214 -> initSpeedTab
-    29:38:void initSpeedTab():4215:4215 -> initSpeedTab
-    39:48:void initSpeedTab():4216:4216 -> initSpeedTab
-    49:58:void initSpeedTab():4217:4217 -> initSpeedTab
-    59:68:void initSpeedTab():4218:4218 -> initSpeedTab
-    69:78:void initSpeedTab():4219:4219 -> initSpeedTab
-    79:85:void initSpeedTab():4222:4222 -> initSpeedTab
-    86:99:void initSpeedTab():4223:4223 -> initSpeedTab
-    100:104:void initSpeedTab():4224:4224 -> initSpeedTab
-    105:109:void initSpeedTab():4225:4225 -> initSpeedTab
-    110:121:void initSpeedTab():4227:4227 -> initSpeedTab
+    1:6:void initDeviceTab():4417:4417 -> initDeviceTab
+    7:8:void initDeviceTab():4418:4418 -> initDeviceTab
+    9:18:void initDeviceTab():4420:4420 -> initDeviceTab
+    19:28:void initDeviceTab():4421:4421 -> initDeviceTab
+    29:38:void initDeviceTab():4422:4422 -> initDeviceTab
+    39:48:void initDeviceTab():4423:4423 -> initDeviceTab
+    49:58:void initDeviceTab():4424:4424 -> initDeviceTab
+    59:68:void initDeviceTab():4425:4425 -> initDeviceTab
+    69:78:void initDeviceTab():4426:4426 -> initDeviceTab
+    79:88:void initDeviceTab():4427:4427 -> initDeviceTab
+    89:100:void initDeviceTab():4429:4429 -> initDeviceTab
+    101:112:void initDeviceTab():4434:4434 -> initDeviceTab
+    113:125:void initDeviceTab():4443:4443 -> initDeviceTab
+    1:6:void initSpeedTab():4218:4218 -> initSpeedTab
+    7:8:void initSpeedTab():4219:4219 -> initSpeedTab
+    9:18:void initSpeedTab():4221:4221 -> initSpeedTab
+    19:28:void initSpeedTab():4222:4222 -> initSpeedTab
+    29:38:void initSpeedTab():4223:4223 -> initSpeedTab
+    39:48:void initSpeedTab():4224:4224 -> initSpeedTab
+    49:58:void initSpeedTab():4225:4225 -> initSpeedTab
+    59:68:void initSpeedTab():4226:4226 -> initSpeedTab
+    69:78:void initSpeedTab():4227:4227 -> initSpeedTab
+    79:85:void initSpeedTab():4230:4230 -> initSpeedTab
+    86:99:void initSpeedTab():4231:4231 -> initSpeedTab
+    100:104:void initSpeedTab():4232:4232 -> initSpeedTab
+    105:109:void initSpeedTab():4233:4233 -> initSpeedTab
+    110:121:void initSpeedTab():4235:4235 -> initSpeedTab
     1:5:void initToolsTab():2517:2517 -> initToolsTab
     6:15:void initToolsTab():2518:2518 -> initToolsTab
     16:25:void initToolsTab():2519:2519 -> initToolsTab
@@ -158780,20 +158780,20 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     73:73:void lambda$addHostRow$32(java.lang.String,android.widget.LinearLayout,android.widget.TextView,boolean,android.widget.TextView,android.widget.TextView,android.widget.Button,android.view.View):1185:1185 -> lambda$addHostRow$32
     77:77:void lambda$addHostRow$32(java.lang.String,android.widget.LinearLayout,android.widget.TextView,boolean,android.widget.TextView,android.widget.TextView,android.widget.Button,android.view.View):1185:1185 -> lambda$addHostRow$32
     1:4:void lambda$addHostRow$33(java.lang.String,android.view.View):1208:1208 -> lambda$addHostRow$33
-    1:2:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4639:4639 -> lambda$buildDeviceRow$93
-    3:8:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4640:4640 -> lambda$buildDeviceRow$93
-    9:22:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4641:4641 -> lambda$buildDeviceRow$93
-    23:26:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4651:4651 -> lambda$buildDeviceRow$93
-    27:35:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4647:4647 -> lambda$buildDeviceRow$93
-    36:45:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4648:4648 -> lambda$buildDeviceRow$93
-    46:54:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4643:4643 -> lambda$buildDeviceRow$93
-    55:64:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4644:4644 -> lambda$buildDeviceRow$93
-    1:5:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4634:4634 -> lambda$buildDeviceRow$94
-    6:15:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4635:4635 -> lambda$buildDeviceRow$94
-    16:31:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4636:4636 -> lambda$buildDeviceRow$94
-    32:41:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4637:4637 -> lambda$buildDeviceRow$94
-    42:49:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4638:4638 -> lambda$buildDeviceRow$94
-    50:53:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4656:4656 -> lambda$buildDeviceRow$94
+    1:2:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4647:4647 -> lambda$buildDeviceRow$93
+    3:8:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4648:4648 -> lambda$buildDeviceRow$93
+    9:22:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4649:4649 -> lambda$buildDeviceRow$93
+    23:26:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4659:4659 -> lambda$buildDeviceRow$93
+    27:35:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4655:4655 -> lambda$buildDeviceRow$93
+    36:45:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4656:4656 -> lambda$buildDeviceRow$93
+    46:54:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4651:4651 -> lambda$buildDeviceRow$93
+    55:64:boolean lambda$buildDeviceRow$93(java.lang.String,java.lang.String,android.view.MenuItem):4652:4652 -> lambda$buildDeviceRow$93
+    1:5:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4642:4642 -> lambda$buildDeviceRow$94
+    6:15:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4643:4643 -> lambda$buildDeviceRow$94
+    16:31:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4644:4644 -> lambda$buildDeviceRow$94
+    32:41:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4645:4645 -> lambda$buildDeviceRow$94
+    42:49:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4646:4646 -> lambda$buildDeviceRow$94
+    50:53:boolean lambda$buildDeviceRow$94(java.lang.String,java.lang.String,android.view.View):4664:4664 -> lambda$buildDeviceRow$94
     1:8:void lambda$buildReport$46(java.lang.String,java.lang.String):1806:1806 -> lambda$buildReport$46
     9:12:void lambda$buildReport$46(java.lang.String,java.lang.String):0:0 -> lambda$buildReport$46
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":19,"3":21,"6":24,"9":28},"outline":"Landroidx/activity/result/d;q(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
@@ -158835,23 +158835,23 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     1:6:void lambda$buildReport$49(java.lang.String,android.view.View):1984:1984 -> lambda$buildReport$49
     7:10:void lambda$buildReport$49(java.lang.String,android.view.View):1985:1985 -> lambda$buildReport$49
     2:5:void lambda$buildReport$50(java.lang.String,android.view.View):2061:2061 -> lambda$buildReport$50
-    1:25:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4186:4186 -> lambda$checkCustomDomain$82
-    26:45:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4187:4187 -> lambda$checkCustomDomain$82
-    46:57:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4188:4188 -> lambda$checkCustomDomain$82
-    58:59:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4189:4189 -> lambda$checkCustomDomain$82
+    1:25:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4194:4194 -> lambda$checkCustomDomain$82
+    26:45:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4195:4195 -> lambda$checkCustomDomain$82
+    46:57:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4196:4196 -> lambda$checkCustomDomain$82
+    58:59:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4197:4197 -> lambda$checkCustomDomain$82
     60:65:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):0:0 -> lambda$checkCustomDomain$82
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":127,"3":129,"6":132},"outline":"Landroidx/activity/result/d;k(Ljava/lang/String;)Ljava/lang/StringBuilder;"}
-    66:95:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4189:4189 -> lambda$checkCustomDomain$82
-    96:113:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4190:4190 -> lambda$checkCustomDomain$82
-    114:122:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4192:4192 -> lambda$checkCustomDomain$82
-    123:126:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4193:4193 -> lambda$checkCustomDomain$82
-    127:127:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4189:4189 -> lambda$checkCustomDomain$82
-    129:129:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4189:4189 -> lambda$checkCustomDomain$82
-    132:132:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4189:4189 -> lambda$checkCustomDomain$82
-    1:5:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4182:4182 -> lambda$checkCustomDomain$83
-    6:17:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4183:4183 -> lambda$checkCustomDomain$83
-    18:19:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4184:4184 -> lambda$checkCustomDomain$83
-    20:34:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4185:4185 -> lambda$checkCustomDomain$83
+    66:95:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4197:4197 -> lambda$checkCustomDomain$82
+    96:113:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4198:4198 -> lambda$checkCustomDomain$82
+    114:122:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4200:4200 -> lambda$checkCustomDomain$82
+    123:126:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4201:4201 -> lambda$checkCustomDomain$82
+    127:127:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4197:4197 -> lambda$checkCustomDomain$82
+    129:129:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4197:4197 -> lambda$checkCustomDomain$82
+    132:132:void lambda$checkCustomDomain$82(android.widget.TextView,boolean,long,android.widget.TextView,java.lang.String):4197:4197 -> lambda$checkCustomDomain$82
+    1:5:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4190:4190 -> lambda$checkCustomDomain$83
+    6:17:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4191:4191 -> lambda$checkCustomDomain$83
+    18:19:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4192:4192 -> lambda$checkCustomDomain$83
+    20:34:void lambda$checkCustomDomain$83(java.lang.String,android.widget.TextView,android.widget.TextView):4193:4193 -> lambda$checkCustomDomain$83
     1:6:void lambda$discoverTlds$40(java.lang.String,java.util.List):1623:1623 -> lambda$discoverTlds$40
     7:18:void lambda$discoverTlds$40(java.lang.String,java.util.List):1625:1625 -> lambda$discoverTlds$40
     2:11:int lambda$discoverTlds$41(java.lang.String,java.lang.String[],java.lang.String[]):1641:1641 -> lambda$discoverTlds$41
@@ -158947,17 +158947,17 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     96:96:void lambda$discoverTlds$45(java.lang.String):1620:1620 -> lambda$discoverTlds$45
     100:100:void lambda$discoverTlds$45(java.lang.String):1620:1620 -> lambda$discoverTlds$45
     105:105:void lambda$discoverTlds$45(java.lang.String):1620:1620 -> lambda$discoverTlds$45
-    1:8:void lambda$initDeviceTab$89(android.view.View):4422:4422 -> lambda$initDeviceTab$89
-    9:12:void lambda$initDeviceTab$89(android.view.View):4423:4423 -> lambda$initDeviceTab$89
-    1:5:void lambda$initDeviceTab$90(android.view.View):4427:4427 -> lambda$initDeviceTab$90
-    6:10:void lambda$initDeviceTab$90(android.view.View):4428:4428 -> lambda$initDeviceTab$90
-    11:17:void lambda$initDeviceTab$90(android.view.View):4429:4429 -> lambda$initDeviceTab$90
-    18:24:void lambda$initDeviceTab$90(android.view.View):4430:4430 -> lambda$initDeviceTab$90
-    25:29:void lambda$initDeviceTab$90(android.view.View):4431:4431 -> lambda$initDeviceTab$90
-    30:35:void lambda$initDeviceTab$90(android.view.View):4432:4432 -> lambda$initDeviceTab$90
-    1:4:void lambda$initDeviceTab$91(android.view.View):4435:4435 -> lambda$initDeviceTab$91
-    1:5:void lambda$initSpeedTab$84(android.view.View):4228:4228 -> lambda$initSpeedTab$84
-    6:9:void lambda$initSpeedTab$84(android.view.View):4229:4229 -> lambda$initSpeedTab$84
+    1:8:void lambda$initDeviceTab$89(android.view.View):4430:4430 -> lambda$initDeviceTab$89
+    9:12:void lambda$initDeviceTab$89(android.view.View):4431:4431 -> lambda$initDeviceTab$89
+    1:5:void lambda$initDeviceTab$90(android.view.View):4435:4435 -> lambda$initDeviceTab$90
+    6:10:void lambda$initDeviceTab$90(android.view.View):4436:4436 -> lambda$initDeviceTab$90
+    11:17:void lambda$initDeviceTab$90(android.view.View):4437:4437 -> lambda$initDeviceTab$90
+    18:24:void lambda$initDeviceTab$90(android.view.View):4438:4438 -> lambda$initDeviceTab$90
+    25:29:void lambda$initDeviceTab$90(android.view.View):4439:4439 -> lambda$initDeviceTab$90
+    30:35:void lambda$initDeviceTab$90(android.view.View):4440:4440 -> lambda$initDeviceTab$90
+    1:4:void lambda$initDeviceTab$91(android.view.View):4443:4443 -> lambda$initDeviceTab$91
+    1:5:void lambda$initSpeedTab$84(android.view.View):4236:4236 -> lambda$initSpeedTab$84
+    6:9:void lambda$initSpeedTab$84(android.view.View):4237:4237 -> lambda$initSpeedTab$84
     2:5:void lambda$initToolsTab$54(android.view.View):2535:2535 -> lambda$initToolsTab$54
     2:5:void lambda$initToolsTab$55(android.view.View):2536:2536 -> lambda$initToolsTab$55
     2:5:void lambda$initToolsTab$56(android.view.View):2537:2537 -> lambda$initToolsTab$56
@@ -159075,7 +159075,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     2:5:void lambda$onCreate$7(android.view.View):223:223 -> lambda$onCreate$7
     1:4:void lambda$onCreate$8(android.view.View):228:228 -> lambda$onCreate$8
     1:4:void lambda$onCreate$9(android.view.View):234:234 -> lambda$onCreate$9
-    1:8:void lambda$refreshDeviceLog$92():4584:4584 -> lambda$refreshDeviceLog$92
+    1:8:void lambda$refreshDeviceLog$92():4592:4592 -> lambda$refreshDeviceLog$92
     1:16:void lambda$runDomainScan$38(java.lang.String,java.lang.String):1571:1571 -> lambda$runDomainScan$38
     17:31:void lambda$runDomainScan$38(java.lang.String,java.lang.String):1573:1573 -> lambda$runDomainScan$38
     32:36:void lambda$runDomainScan$38(java.lang.String,java.lang.String):1577:1577 -> lambda$runDomainScan$38
@@ -159134,45 +159134,45 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     27:30:void lambda$runNetworkTool$62(int,java.lang.String,int):2617:2617 -> lambda$runNetworkTool$62
     31:53:void lambda$runNetworkTool$62(int,java.lang.String,int):2619:2619 -> lambda$runNetworkTool$62
     54:66:void lambda$runNetworkTool$62(int,java.lang.String,int):2621:2621 -> lambda$runNetworkTool$62
-    1:15:void lambda$runSpeedTest$85():4305:4305 -> lambda$runSpeedTest$85
-    1:15:void lambda$runSpeedTest$86():4336:4336 -> lambda$runSpeedTest$86
-    3:4:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4371:4371 -> lambda$runSpeedTest$87
-    5:10:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4372:4372 -> lambda$runSpeedTest$87
-    11:14:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4373:4373 -> lambda$runSpeedTest$87
-    15:24:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4374:4374 -> lambda$runSpeedTest$87
-    25:38:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4375:4375 -> lambda$runSpeedTest$87
+    1:15:void lambda$runSpeedTest$85():4313:4313 -> lambda$runSpeedTest$85
+    1:15:void lambda$runSpeedTest$86():4344:4344 -> lambda$runSpeedTest$86
+    3:4:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4379:4379 -> lambda$runSpeedTest$87
+    5:10:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4380:4380 -> lambda$runSpeedTest$87
+    11:14:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4381:4381 -> lambda$runSpeedTest$87
+    15:24:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4382:4382 -> lambda$runSpeedTest$87
+    25:38:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4383:4383 -> lambda$runSpeedTest$87
     39:42:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):0:0 -> lambda$runSpeedTest$87
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":258,"4":260,"7":263},"outline":"Landroidx/activity/result/d;i(Ljava/lang/StringBuilder;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
-    43:45:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4373:4373 -> lambda$runSpeedTest$87
-    46:83:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4376:4376 -> lambda$runSpeedTest$87
-    84:122:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4377:4377 -> lambda$runSpeedTest$87
-    123:151:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4378:4378 -> lambda$runSpeedTest$87
-    152:153:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4380:4380 -> lambda$runSpeedTest$87
-    154:182:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4381:4381 -> lambda$runSpeedTest$87
-    183:189:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4380:4380 -> lambda$runSpeedTest$87
-    190:221:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4382:4382 -> lambda$runSpeedTest$87
-    222:251:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4384:4384 -> lambda$runSpeedTest$87
-    252:257:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4386:4386 -> lambda$runSpeedTest$87
-    258:258:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4375:4375 -> lambda$runSpeedTest$87
-    260:260:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4375:4375 -> lambda$runSpeedTest$87
-    263:263:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4375:4375 -> lambda$runSpeedTest$87
-    1:2:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4255:4256 -> lambda$runSpeedTest$88
-    3:18:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4258:4273 -> lambda$runSpeedTest$88
-    19:22:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4275:4278 -> lambda$runSpeedTest$88
-    23:23:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4280:4280 -> lambda$runSpeedTest$88
-    24:26:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4288:4290 -> lambda$runSpeedTest$88
-    27:28:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4292:4293 -> lambda$runSpeedTest$88
-    29:33:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4295:4299 -> lambda$runSpeedTest$88
-    34:34:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4305:4305 -> lambda$runSpeedTest$88
-    35:38:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4309:4312 -> lambda$runSpeedTest$88
-    39:48:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4314:4323 -> lambda$runSpeedTest$88
-    49:51:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4326:4328 -> lambda$runSpeedTest$88
-    52:52:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4332:4332 -> lambda$runSpeedTest$88
-    53:53:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4336:4336 -> lambda$runSpeedTest$88
-    54:56:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4341:4343 -> lambda$runSpeedTest$88
-    57:72:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4345:4360 -> lambda$runSpeedTest$88
-    73:73:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4363:4363 -> lambda$runSpeedTest$88
-    74:74:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4370:4370 -> lambda$runSpeedTest$88
+    43:45:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4381:4381 -> lambda$runSpeedTest$87
+    46:83:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4384:4384 -> lambda$runSpeedTest$87
+    84:122:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4385:4385 -> lambda$runSpeedTest$87
+    123:151:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4386:4386 -> lambda$runSpeedTest$87
+    152:153:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4388:4388 -> lambda$runSpeedTest$87
+    154:182:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4389:4389 -> lambda$runSpeedTest$87
+    183:189:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4388:4388 -> lambda$runSpeedTest$87
+    190:221:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4390:4390 -> lambda$runSpeedTest$87
+    222:251:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4392:4392 -> lambda$runSpeedTest$87
+    252:257:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4394:4394 -> lambda$runSpeedTest$87
+    258:258:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4383:4383 -> lambda$runSpeedTest$87
+    260:260:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4383:4383 -> lambda$runSpeedTest$87
+    263:263:void lambda$runSpeedTest$87(boolean,java.lang.String,long,double,double):4383:4383 -> lambda$runSpeedTest$87
+    1:2:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4263:4264 -> lambda$runSpeedTest$88
+    3:18:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4266:4281 -> lambda$runSpeedTest$88
+    19:22:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4283:4286 -> lambda$runSpeedTest$88
+    23:23:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4288:4288 -> lambda$runSpeedTest$88
+    24:26:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4296:4298 -> lambda$runSpeedTest$88
+    27:28:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4300:4301 -> lambda$runSpeedTest$88
+    29:33:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4303:4307 -> lambda$runSpeedTest$88
+    34:34:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4313:4313 -> lambda$runSpeedTest$88
+    35:38:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4317:4320 -> lambda$runSpeedTest$88
+    39:48:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4322:4331 -> lambda$runSpeedTest$88
+    49:51:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4334:4336 -> lambda$runSpeedTest$88
+    52:52:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4340:4340 -> lambda$runSpeedTest$88
+    53:53:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4344:4344 -> lambda$runSpeedTest$88
+    54:56:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4349:4351 -> lambda$runSpeedTest$88
+    57:72:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4353:4368 -> lambda$runSpeedTest$88
+    73:73:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4371:4371 -> lambda$runSpeedTest$88
+    74:74:void lambda$runSpeedTest$88(boolean,java.lang.String,boolean,boolean,java.lang.String):4378:4378 -> lambda$runSpeedTest$88
     1:7:boolean lambda$seedTrustedDomains$37(java.lang.String):1468:1468 -> lambda$seedTrustedDomains$37
     1:4:void lambda$showConnectionHistory$24(com.netwatch.app.HistoryManager$Session,android.view.View):788:788 -> lambda$showConnectionHistory$24
     1:3:void lambda$showConnectionHistory$25(android.content.DialogInterface,int):800:800 -> lambda$showConnectionHistory$25
@@ -159235,34 +159235,34 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     35:35:void lambda$showDomainIntelSheet$36(java.lang.String,android.widget.TextView,android.widget.LinearLayout):1298:1298 -> lambda$showDomainIntelSheet$36
     39:39:void lambda$showDomainIntelSheet$36(java.lang.String,android.widget.TextView,android.widget.LinearLayout):1298:1298 -> lambda$showDomainIntelSheet$36
     44:44:void lambda$showDomainIntelSheet$36(java.lang.String,android.widget.TextView,android.widget.LinearLayout):1298:1298 -> lambda$showDomainIntelSheet$36
-    1:4:void lambda$showIpWhois$95(java.lang.String,java.lang.String):4693:4693 -> lambda$showIpWhois$95
-    1:7:void lambda$showIpWhois$96(java.lang.Exception):4695:4695 -> lambda$showIpWhois$96
-    8:19:void lambda$showIpWhois$96(java.lang.Exception):4696:4696 -> lambda$showIpWhois$96
-    20:23:void lambda$showIpWhois$96(java.lang.Exception):4695:4695 -> lambda$showIpWhois$96
-    24:27:void lambda$showIpWhois$96(java.lang.Exception):4696:4696 -> lambda$showIpWhois$96
-    1:33:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4670:4670 -> lambda$showIpWhois$97
-    34:41:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4671:4671 -> lambda$showIpWhois$97
-    42:44:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4672:4672 -> lambda$showIpWhois$97
-    45:47:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4673:4673 -> lambda$showIpWhois$97
-    48:51:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4674:4674 -> lambda$showIpWhois$97
-    52:61:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4675:4675 -> lambda$showIpWhois$97
-    62:66:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4676:4676 -> lambda$showIpWhois$97
-    67:79:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4678:4678 -> lambda$showIpWhois$97
-    80:82:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4679:4679 -> lambda$showIpWhois$97
-    83:91:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4680:4680 -> lambda$showIpWhois$97
-    92:96:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4681:4681 -> lambda$showIpWhois$97
-    97:119:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4682:4682 -> lambda$showIpWhois$97
-    120:137:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4683:4683 -> lambda$showIpWhois$97
-    138:160:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4684:4684 -> lambda$showIpWhois$97
-    161:169:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4685:4685 -> lambda$showIpWhois$97
-    170:190:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4686:4686 -> lambda$showIpWhois$97
-    191:211:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4687:4687 -> lambda$showIpWhois$97
-    212:232:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4688:4688 -> lambda$showIpWhois$97
-    233:253:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4689:4689 -> lambda$showIpWhois$97
-    254:264:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4690:4690 -> lambda$showIpWhois$97
-    265:272:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4691:4691 -> lambda$showIpWhois$97
-    273:282:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4693:4693 -> lambda$showIpWhois$97
-    283:292:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4695:4695 -> lambda$showIpWhois$97
+    1:4:void lambda$showIpWhois$95(java.lang.String,java.lang.String):4701:4701 -> lambda$showIpWhois$95
+    1:7:void lambda$showIpWhois$96(java.lang.Exception):4703:4703 -> lambda$showIpWhois$96
+    8:19:void lambda$showIpWhois$96(java.lang.Exception):4704:4704 -> lambda$showIpWhois$96
+    20:23:void lambda$showIpWhois$96(java.lang.Exception):4703:4703 -> lambda$showIpWhois$96
+    24:27:void lambda$showIpWhois$96(java.lang.Exception):4704:4704 -> lambda$showIpWhois$96
+    1:33:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4678:4678 -> lambda$showIpWhois$97
+    34:41:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4679:4679 -> lambda$showIpWhois$97
+    42:44:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4680:4680 -> lambda$showIpWhois$97
+    45:47:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4681:4681 -> lambda$showIpWhois$97
+    48:51:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4682:4682 -> lambda$showIpWhois$97
+    52:61:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4683:4683 -> lambda$showIpWhois$97
+    62:66:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4684:4684 -> lambda$showIpWhois$97
+    67:79:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4686:4686 -> lambda$showIpWhois$97
+    80:82:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4687:4687 -> lambda$showIpWhois$97
+    83:91:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4688:4688 -> lambda$showIpWhois$97
+    92:96:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4689:4689 -> lambda$showIpWhois$97
+    97:119:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4690:4690 -> lambda$showIpWhois$97
+    120:137:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4691:4691 -> lambda$showIpWhois$97
+    138:160:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4692:4692 -> lambda$showIpWhois$97
+    161:169:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4693:4693 -> lambda$showIpWhois$97
+    170:190:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4694:4694 -> lambda$showIpWhois$97
+    191:211:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4695:4695 -> lambda$showIpWhois$97
+    212:232:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4696:4696 -> lambda$showIpWhois$97
+    233:253:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4697:4697 -> lambda$showIpWhois$97
+    254:264:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4698:4698 -> lambda$showIpWhois$97
+    265:272:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4699:4699 -> lambda$showIpWhois$97
+    273:282:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4701:4701 -> lambda$showIpWhois$97
+    283:292:void lambda$showIpWhois$97(java.lang.String,java.lang.String):4703:4703 -> lambda$showIpWhois$97
     7:10:void lambda$showLanguageDialog$23(android.content.DialogInterface,int):673:673 -> lambda$showLanguageDialog$23
     11:12:void lambda$showLanguageDialog$23(android.content.DialogInterface,int):674:674 -> lambda$showLanguageDialog$23
     13:18:void lambda$showLanguageDialog$23(android.content.DialogInterface,int):675:675 -> lambda$showLanguageDialog$23
@@ -159334,32 +159334,32 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     1:4:void lambda$showSessionDetail$26(com.netwatch.app.HistoryManager$Session,android.content.DialogInterface,int):835:835 -> lambda$showSessionDetail$26
     1:5:void lambda$showSessionDetail$27(com.netwatch.app.HistoryManager$Session,android.content.DialogInterface,int):837:837 -> lambda$showSessionDetail$27
     6:18:void lambda$showSessionDetail$27(com.netwatch.app.HistoryManager$Session,android.content.DialogInterface,int):838:838 -> lambda$showSessionDetail$27
-    1:50:void lambda$startDomainCheck$78(int,java.util.List,java.lang.String):4003:4003 -> lambda$startDomainCheck$78
-    1:13:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4012:4012 -> lambda$startDomainCheck$79
-    14:36:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4014:4014 -> lambda$startDomainCheck$79
-    37:54:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4015:4015 -> lambda$startDomainCheck$79
-    55:58:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4016:4016 -> lambda$startDomainCheck$79
-    59:62:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4017:4017 -> lambda$startDomainCheck$79
-    63:68:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4018:4018 -> lambda$startDomainCheck$79
-    69:72:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4019:4019 -> lambda$startDomainCheck$79
-    73:89:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4020:4020 -> lambda$startDomainCheck$79
-    1:6:void lambda$startDomainCheck$80(int,java.util.List,int,int):4027:4027 -> lambda$startDomainCheck$80
-    7:12:void lambda$startDomainCheck$80(int,java.util.List,int,int):4028:4028 -> lambda$startDomainCheck$80
-    13:17:void lambda$startDomainCheck$80(int,java.util.List,int,int):4029:4029 -> lambda$startDomainCheck$80
-    18:23:void lambda$startDomainCheck$80(int,java.util.List,int,int):4030:4030 -> lambda$startDomainCheck$80
-    24:82:void lambda$startDomainCheck$80(int,java.util.List,int,int):4031:4031 -> lambda$startDomainCheck$80
-    83:154:void lambda$startDomainCheck$80(int,java.util.List,int,int):4033:4033 -> lambda$startDomainCheck$80
-    155:172:void lambda$startDomainCheck$80(int,java.util.List,int,int):4035:4035 -> lambda$startDomainCheck$80
-    1:20:void lambda$startDomainCheck$81(java.util.List):3996:3996 -> lambda$startDomainCheck$81
-    21:30:void lambda$startDomainCheck$81(java.util.List):3997:3997 -> lambda$startDomainCheck$81
-    31:33:void lambda$startDomainCheck$81(java.util.List):3998:3998 -> lambda$startDomainCheck$81
-    34:37:void lambda$startDomainCheck$81(java.util.List):3999:3999 -> lambda$startDomainCheck$81
-    38:47:void lambda$startDomainCheck$81(java.util.List):4002:4002 -> lambda$startDomainCheck$81
-    48:51:void lambda$startDomainCheck$81(java.util.List):4005:4005 -> lambda$startDomainCheck$81
-    52:62:void lambda$startDomainCheck$81(java.util.List):4007:4007 -> lambda$startDomainCheck$81
-    63:71:void lambda$startDomainCheck$81(java.util.List):4008:4008 -> lambda$startDomainCheck$81
-    72:85:void lambda$startDomainCheck$81(java.util.List):4011:4011 -> lambda$startDomainCheck$81
-    86:97:void lambda$startDomainCheck$81(java.util.List):4026:4026 -> lambda$startDomainCheck$81
+    1:50:void lambda$startDomainCheck$78(int,java.util.List,java.lang.String):4011:4011 -> lambda$startDomainCheck$78
+    1:13:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4020:4020 -> lambda$startDomainCheck$79
+    14:36:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4022:4022 -> lambda$startDomainCheck$79
+    37:54:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4023:4023 -> lambda$startDomainCheck$79
+    55:58:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4024:4024 -> lambda$startDomainCheck$79
+    59:62:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4025:4025 -> lambda$startDomainCheck$79
+    63:68:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4026:4026 -> lambda$startDomainCheck$79
+    69:72:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4027:4027 -> lambda$startDomainCheck$79
+    73:89:void lambda$startDomainCheck$79(java.lang.String,boolean,long):4028:4028 -> lambda$startDomainCheck$79
+    1:6:void lambda$startDomainCheck$80(int,java.util.List,int,int):4035:4035 -> lambda$startDomainCheck$80
+    7:12:void lambda$startDomainCheck$80(int,java.util.List,int,int):4036:4036 -> lambda$startDomainCheck$80
+    13:17:void lambda$startDomainCheck$80(int,java.util.List,int,int):4037:4037 -> lambda$startDomainCheck$80
+    18:23:void lambda$startDomainCheck$80(int,java.util.List,int,int):4038:4038 -> lambda$startDomainCheck$80
+    24:82:void lambda$startDomainCheck$80(int,java.util.List,int,int):4039:4039 -> lambda$startDomainCheck$80
+    83:154:void lambda$startDomainCheck$80(int,java.util.List,int,int):4041:4041 -> lambda$startDomainCheck$80
+    155:172:void lambda$startDomainCheck$80(int,java.util.List,int,int):4043:4043 -> lambda$startDomainCheck$80
+    1:20:void lambda$startDomainCheck$81(java.util.List):4004:4004 -> lambda$startDomainCheck$81
+    21:30:void lambda$startDomainCheck$81(java.util.List):4005:4005 -> lambda$startDomainCheck$81
+    31:33:void lambda$startDomainCheck$81(java.util.List):4006:4006 -> lambda$startDomainCheck$81
+    34:37:void lambda$startDomainCheck$81(java.util.List):4007:4007 -> lambda$startDomainCheck$81
+    38:47:void lambda$startDomainCheck$81(java.util.List):4010:4010 -> lambda$startDomainCheck$81
+    48:51:void lambda$startDomainCheck$81(java.util.List):4013:4013 -> lambda$startDomainCheck$81
+    52:62:void lambda$startDomainCheck$81(java.util.List):4015:4015 -> lambda$startDomainCheck$81
+    63:71:void lambda$startDomainCheck$81(java.util.List):4016:4016 -> lambda$startDomainCheck$81
+    72:85:void lambda$startDomainCheck$81(java.util.List):4019:4019 -> lambda$startDomainCheck$81
+    86:97:void lambda$startDomainCheck$81(java.util.List):4034:4034 -> lambda$startDomainCheck$81
     2:3:void lambda$startLanScan$63():2689:2689 -> lambda$startLanScan$63
     4:9:void lambda$startLanScan$63():2690:2690 -> lambda$startLanScan$63
     10:16:void lambda$startLanScan$63():2691:2691 -> lambda$startLanScan$63
@@ -159367,52 +159367,52 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     1:5:void lambda$startLanScan$64():2684:2684 -> lambda$startLanScan$64
     6:28:void lambda$startLanScan$64():2686:2686 -> lambda$startLanScan$64
     29:40:void lambda$startLanScan$64():2688:2688 -> lambda$startLanScan$64
-    1:7:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3702:3702 -> lambda$startQuickPortScan$73
-    8:23:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3703:3703 -> lambda$startQuickPortScan$73
-    24:27:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
+    1:7:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3710:3710 -> lambda$startQuickPortScan$73
+    8:23:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3711:3711 -> lambda$startQuickPortScan$73
+    24:27:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
     28:31:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):0:0 -> lambda$startQuickPortScan$73
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":49,"3":51,"6":54,"9":58},"outline":"Landroidx/activity/result/d;l(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/StringBuilder;"}
-    32:48:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
-    49:49:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
-    51:51:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
-    54:54:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
-    58:58:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3704:3704 -> lambda$startQuickPortScan$73
-    2:3:void lambda$startQuickPortScan$74():3724:3724 -> lambda$startQuickPortScan$74
-    4:9:void lambda$startQuickPortScan$74():3725:3725 -> lambda$startQuickPortScan$74
-    10:16:void lambda$startQuickPortScan$74():3726:3726 -> lambda$startQuickPortScan$74
-    17:31:void lambda$startQuickPortScan$74():3727:3727 -> lambda$startQuickPortScan$74
-    1:12:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3694:3694 -> lambda$startQuickPortScan$75
-    13:22:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
+    32:48:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
+    49:49:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
+    51:51:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
+    54:54:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
+    58:58:void lambda$startQuickPortScan$73(java.lang.String,int,java.util.List):3712:3712 -> lambda$startQuickPortScan$73
+    2:3:void lambda$startQuickPortScan$74():3732:3732 -> lambda$startQuickPortScan$74
+    4:9:void lambda$startQuickPortScan$74():3733:3733 -> lambda$startQuickPortScan$74
+    10:16:void lambda$startQuickPortScan$74():3734:3734 -> lambda$startQuickPortScan$74
+    17:31:void lambda$startQuickPortScan$74():3735:3735 -> lambda$startQuickPortScan$74
+    1:12:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3701:3701 -> lambda$startQuickPortScan$75
+    13:22:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
     23:27:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):0:0 -> lambda$startQuickPortScan$75
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":221,"3":223,"6":226,"9":230,"12":235},"outline":"Landroidx/activity/result/d;g(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
-    28:36:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
-    37:43:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3694:3694 -> lambda$startQuickPortScan$75
-    44:48:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3696:3696 -> lambda$startQuickPortScan$75
-    49:59:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3697:3697 -> lambda$startQuickPortScan$75
-    60:63:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3698:3698 -> lambda$startQuickPortScan$75
-    64:72:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3699:3699 -> lambda$startQuickPortScan$75
-    73:74:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3700:3700 -> lambda$startQuickPortScan$75
-    75:89:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3701:3701 -> lambda$startQuickPortScan$75
-    90:107:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3708:3708 -> lambda$startQuickPortScan$75
-    108:110:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3709:3709 -> lambda$startQuickPortScan$75
-    111:114:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3711:3711 -> lambda$startQuickPortScan$75
-    115:129:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3712:3712 -> lambda$startQuickPortScan$75
-    130:135:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3713:3713 -> lambda$startQuickPortScan$75
-    136:139:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3714:3714 -> lambda$startQuickPortScan$75
-    140:142:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3715:3715 -> lambda$startQuickPortScan$75
-    143:144:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3716:3716 -> lambda$startQuickPortScan$75
-    145:150:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3714:3714 -> lambda$startQuickPortScan$75
-    151:153:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3718:3718 -> lambda$startQuickPortScan$75
-    154:157:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3719:3719 -> lambda$startQuickPortScan$75
-    158:181:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3720:3720 -> lambda$startQuickPortScan$75
-    182:204:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3721:3721 -> lambda$startQuickPortScan$75
-    205:207:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3719:3719 -> lambda$startQuickPortScan$75
-    208:220:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3723:3723 -> lambda$startQuickPortScan$75
-    221:221:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
-    223:223:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
-    226:226:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
-    230:230:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
-    235:235:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3695:3695 -> lambda$startQuickPortScan$75
+    28:36:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
+    37:43:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3701:3701 -> lambda$startQuickPortScan$75
+    44:48:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3703:3703 -> lambda$startQuickPortScan$75
+    49:59:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3705:3705 -> lambda$startQuickPortScan$75
+    60:63:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3706:3706 -> lambda$startQuickPortScan$75
+    64:72:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3707:3707 -> lambda$startQuickPortScan$75
+    73:74:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3708:3708 -> lambda$startQuickPortScan$75
+    75:89:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3709:3709 -> lambda$startQuickPortScan$75
+    90:107:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3716:3716 -> lambda$startQuickPortScan$75
+    108:110:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3717:3717 -> lambda$startQuickPortScan$75
+    111:114:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3719:3719 -> lambda$startQuickPortScan$75
+    115:129:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3720:3720 -> lambda$startQuickPortScan$75
+    130:135:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3721:3721 -> lambda$startQuickPortScan$75
+    136:139:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3722:3722 -> lambda$startQuickPortScan$75
+    140:142:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3723:3723 -> lambda$startQuickPortScan$75
+    143:144:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3724:3724 -> lambda$startQuickPortScan$75
+    145:150:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3722:3722 -> lambda$startQuickPortScan$75
+    151:153:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3726:3726 -> lambda$startQuickPortScan$75
+    154:157:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3727:3727 -> lambda$startQuickPortScan$75
+    158:181:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3728:3728 -> lambda$startQuickPortScan$75
+    182:204:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3729:3729 -> lambda$startQuickPortScan$75
+    205:207:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3727:3727 -> lambda$startQuickPortScan$75
+    208:220:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3731:3731 -> lambda$startQuickPortScan$75
+    221:221:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
+    223:223:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
+    226:226:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
+    230:230:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
+    235:235:void lambda$startQuickPortScan$75(java.lang.String,java.lang.String):3702:3702 -> lambda$startQuickPortScan$75
     1:5:void lambda$toolLanScan$66(java.lang.String,java.util.Set,java.util.HashMap):3298:3298 -> lambda$toolLanScan$66
     6:17:void lambda$toolLanScan$66(java.lang.String,java.util.Set,java.util.HashMap):3299:3299 -> lambda$toolLanScan$66
     18:23:void lambda$toolLanScan$66(java.lang.String,java.util.Set,java.util.HashMap):3300:3300 -> lambda$toolLanScan$66
@@ -159432,21 +159432,21 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     55:68:void lambda$toolPing$69(boolean[],java.lang.String):3394:3394 -> lambda$toolPing$69
     69:74:void lambda$toolPing$69(boolean[],java.lang.String):3395:3395 -> lambda$toolPing$69
     75:80:void lambda$toolPing$69(boolean[],java.lang.String):3393:3393 -> lambda$toolPing$69
-    1:8:void lambda$toolPrint$76():3739:3739 -> lambda$toolPrint$76
-    1:5:void lambda$toolPrint$77(java.lang.String,java.lang.String):3734:3734 -> lambda$toolPrint$77
-    6:9:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
+    1:8:void lambda$toolPrint$76():3747:3747 -> lambda$toolPrint$76
+    1:5:void lambda$toolPrint$77(java.lang.String,java.lang.String):3742:3742 -> lambda$toolPrint$77
+    6:9:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
     10:13:void lambda$toolPrint$77(java.lang.String,java.lang.String):0:0 -> lambda$toolPrint$77
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":53,"3":55,"6":58,"9":62,"12":67},"outline":"Landroidx/activity/result/d;f(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
-    14:16:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
-    17:33:void lambda$toolPrint$77(java.lang.String,java.lang.String):3736:3736 -> lambda$toolPrint$77
-    34:38:void lambda$toolPrint$77(java.lang.String,java.lang.String):3737:3737 -> lambda$toolPrint$77
-    39:42:void lambda$toolPrint$77(java.lang.String,java.lang.String):3738:3738 -> lambda$toolPrint$77
-    43:52:void lambda$toolPrint$77(java.lang.String,java.lang.String):3739:3739 -> lambda$toolPrint$77
-    53:53:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
-    55:55:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
-    58:58:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
-    62:62:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
-    67:67:void lambda$toolPrint$77(java.lang.String,java.lang.String):3735:3735 -> lambda$toolPrint$77
+    14:16:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
+    17:33:void lambda$toolPrint$77(java.lang.String,java.lang.String):3744:3744 -> lambda$toolPrint$77
+    34:38:void lambda$toolPrint$77(java.lang.String,java.lang.String):3745:3745 -> lambda$toolPrint$77
+    39:42:void lambda$toolPrint$77(java.lang.String,java.lang.String):3746:3746 -> lambda$toolPrint$77
+    43:52:void lambda$toolPrint$77(java.lang.String,java.lang.String):3747:3747 -> lambda$toolPrint$77
+    53:53:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
+    55:55:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
+    58:58:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
+    62:62:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
+    67:67:void lambda$toolPrint$77(java.lang.String,java.lang.String):3743:3743 -> lambda$toolPrint$77
     1:8:void lambda$toolPrintDevice$70():3617:3617 -> lambda$toolPrintDevice$70
     1:5:void lambda$toolPrintDevice$71(java.lang.String,java.lang.String,java.lang.String,java.lang.String):3599:3599 -> lambda$toolPrintDevice$71
     6:9:void lambda$toolPrintDevice$71(java.lang.String,java.lang.String,java.lang.String,java.lang.String):3600:3600 -> lambda$toolPrintDevice$71
@@ -159670,11 +159670,11 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     145:154:java.util.Map lanSsdpDiscover(long):2895:2895 -> lanSsdpDiscover
     155:157:java.util.Map lanSsdpDiscover(long):2896:2896 -> lanSsdpDiscover
     158:161:java.util.Map lanSsdpDiscover(long):2895:2895 -> lanSsdpDiscover
-    2:6:boolean lanTcpOpen(java.lang.String,int,int):3672:3672 -> lanTcpOpen
-    7:15:boolean lanTcpOpen(java.lang.String,int,int):3673:3673 -> lanTcpOpen
-    16:31:boolean lanTcpOpen(java.lang.String,int,int):3678:3678 -> lanTcpOpen
-    32:34:boolean lanTcpOpen(java.lang.String,int,int):3679:3679 -> lanTcpOpen
-    35:39:boolean lanTcpOpen(java.lang.String,int,int):3678:3678 -> lanTcpOpen
+    2:6:boolean lanTcpOpen(java.lang.String,int,int):3679:3679 -> lanTcpOpen
+    7:15:boolean lanTcpOpen(java.lang.String,int,int):3680:3680 -> lanTcpOpen
+    16:31:boolean lanTcpOpen(java.lang.String,int,int):3685:3685 -> lanTcpOpen
+    32:34:boolean lanTcpOpen(java.lang.String,int,int):3686:3686 -> lanTcpOpen
+    35:39:boolean lanTcpOpen(java.lang.String,int,int):3685:3685 -> lanTcpOpen
     3:11:java.lang.String lanVendor(java.lang.String):2766:2766 -> lanVendor
     12:14:java.lang.String lanVendor(java.lang.String):2767:2767 -> lanVendor
     15:45:java.lang.String lanVendor(java.lang.String):2768:2768 -> lanVendor
@@ -159684,21 +159684,21 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     16:21:void launchApp(java.lang.String):389:389 -> launchApp
     22:34:void launchApp(java.lang.String):391:391 -> launchApp
     35:56:void launchApp(java.lang.String):394:394 -> launchApp
-    1:7:void launchDeviceVpn():4487:4487 -> launchDeviceVpn
-    8:20:void launchDeviceVpn():4521:4521 -> launchDeviceVpn
-    21:23:void launchDeviceVpn():4522:4522 -> launchDeviceVpn
-    24:30:void launchDeviceVpn():4526:4526 -> launchDeviceVpn
-    31:35:void launchDeviceVpn():4527:4527 -> launchDeviceVpn
-    36:39:void launchDeviceVpn():4528:4528 -> launchDeviceVpn
-    40:41:void launchDeviceVpn():4530:4530 -> launchDeviceVpn
-    42:45:void launchDeviceVpn():4531:4531 -> launchDeviceVpn
-    46:57:void launchDeviceVpn():4532:4532 -> launchDeviceVpn
-    58:64:void launchDeviceVpn():4533:4533 -> launchDeviceVpn
-    65:68:void launchDeviceVpn():4535:4535 -> launchDeviceVpn
-    69:80:void launchDeviceVpn():4536:4536 -> launchDeviceVpn
-    81:91:void launchDeviceVpn():4537:4537 -> launchDeviceVpn
-    92:99:void launchDeviceVpn():4539:4539 -> launchDeviceVpn
-    100:107:void launchDeviceVpn():4540:4540 -> launchDeviceVpn
+    1:7:void launchDeviceVpn():4495:4495 -> launchDeviceVpn
+    8:20:void launchDeviceVpn():4529:4529 -> launchDeviceVpn
+    21:23:void launchDeviceVpn():4530:4530 -> launchDeviceVpn
+    24:30:void launchDeviceVpn():4534:4534 -> launchDeviceVpn
+    31:35:void launchDeviceVpn():4535:4535 -> launchDeviceVpn
+    36:39:void launchDeviceVpn():4536:4536 -> launchDeviceVpn
+    40:41:void launchDeviceVpn():4538:4538 -> launchDeviceVpn
+    42:45:void launchDeviceVpn():4539:4539 -> launchDeviceVpn
+    46:57:void launchDeviceVpn():4540:4540 -> launchDeviceVpn
+    58:64:void launchDeviceVpn():4541:4541 -> launchDeviceVpn
+    65:68:void launchDeviceVpn():4543:4543 -> launchDeviceVpn
+    69:80:void launchDeviceVpn():4544:4544 -> launchDeviceVpn
+    81:91:void launchDeviceVpn():4545:4545 -> launchDeviceVpn
+    92:99:void launchDeviceVpn():4547:4547 -> launchDeviceVpn
+    100:107:void launchDeviceVpn():4548:4548 -> launchDeviceVpn
     2:3:void launchTrafficMonitoringInternal():933:933 -> launchTrafficMonitoringInternal
     4:6:void launchTrafficMonitoringInternal():934:934 -> launchTrafficMonitoringInternal
     7:13:void launchTrafficMonitoringInternal():936:936 -> launchTrafficMonitoringInternal
@@ -159799,16 +159799,16 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     1:3:android.os.Handler -$$Nest$fgetmainHandler(com.netwatch.app.MainActivity):0:0 -> o1
       # {"id":"com.android.tools.r8.synthesized"}
-    1:7:void onActivityResult(int,int,android.content.Intent):4456:4456 -> onActivityResult
-    8:10:void onActivityResult(int,int,android.content.Intent):4458:4458 -> onActivityResult
-    11:19:void onActivityResult(int,int,android.content.Intent):4459:4459 -> onActivityResult
-    20:25:void onActivityResult(int,int,android.content.Intent):4462:4462 -> onActivityResult
-    26:31:void onActivityResult(int,int,android.content.Intent):4464:4464 -> onActivityResult
-    32:35:void onActivityResult(int,int,android.content.Intent):4469:4469 -> onActivityResult
-    36:38:void onActivityResult(int,int,android.content.Intent):4470:4470 -> onActivityResult
-    39:40:void onActivityResult(int,int,android.content.Intent):4471:4471 -> onActivityResult
-    41:43:void onActivityResult(int,int,android.content.Intent):4469:4469 -> onActivityResult
-    44:47:void onActivityResult(int,int,android.content.Intent):4472:4472 -> onActivityResult
+    1:7:void onActivityResult(int,int,android.content.Intent):4464:4464 -> onActivityResult
+    8:10:void onActivityResult(int,int,android.content.Intent):4466:4466 -> onActivityResult
+    11:19:void onActivityResult(int,int,android.content.Intent):4467:4467 -> onActivityResult
+    20:25:void onActivityResult(int,int,android.content.Intent):4470:4470 -> onActivityResult
+    26:31:void onActivityResult(int,int,android.content.Intent):4472:4472 -> onActivityResult
+    32:35:void onActivityResult(int,int,android.content.Intent):4477:4477 -> onActivityResult
+    36:38:void onActivityResult(int,int,android.content.Intent):4478:4478 -> onActivityResult
+    39:40:void onActivityResult(int,int,android.content.Intent):4479:4479 -> onActivityResult
+    41:43:void onActivityResult(int,int,android.content.Intent):4477:4477 -> onActivityResult
+    44:47:void onActivityResult(int,int,android.content.Intent):4480:4480 -> onActivityResult
     3:5:void onCreate(android.os.Bundle):182:182 -> onCreate
     6:8:void onCreate(android.os.Bundle):183:183 -> onCreate
     9:16:void onCreate(android.os.Bundle):184:184 -> onCreate
@@ -159908,9 +159908,9 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     968:975:void onCreate(android.os.Bundle):368:368 -> onCreate
     976:984:void onCreate(android.os.Bundle):370:370 -> onCreate
     985:988:void onCreate(android.os.Bundle):377:377 -> onCreate
-    1:3:void onDestroy():3806:3806 -> onDestroy
-    4:8:void onDestroy():3807:3807 -> onDestroy
-    9:14:void onDestroy():3808:3808 -> onDestroy
+    1:3:void onDestroy():3814:3814 -> onDestroy
+    4:8:void onDestroy():3815:3815 -> onDestroy
+    9:14:void onDestroy():3816:3816 -> onDestroy
     1:4:void $r8$lambda$SVXtwAkY1HfUQE5A9vPulfLhJWQ(com.netwatch.app.MainActivity,android.view.View):0:0 -> p0
       # {"id":"com.android.tools.r8.synthesized"}
     1:3:boolean -$$Nest$fgetmonitoring(com.netwatch.app.MainActivity):0:0 -> p1
@@ -159936,58 +159936,65 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     64:67:void performLookup():1548:1548 -> performLookup
     68:71:void performLookup():1551:1551 -> performLookup
     1:5:java.lang.String portServiceName(int):3648:3648 -> portServiceName
-    6:8:java.lang.String portServiceName(int):3665:3665 -> portServiceName
-    9:11:java.lang.String portServiceName(int):3664:3664 -> portServiceName
-    12:14:java.lang.String portServiceName(int):3663:3663 -> portServiceName
-    15:17:java.lang.String portServiceName(int):3662:3662 -> portServiceName
-    18:20:java.lang.String portServiceName(int):3661:3661 -> portServiceName
-    21:23:java.lang.String portServiceName(int):3660:3660 -> portServiceName
-    24:26:java.lang.String portServiceName(int):3659:3659 -> portServiceName
-    27:29:java.lang.String portServiceName(int):3658:3658 -> portServiceName
-    30:32:java.lang.String portServiceName(int):3657:3657 -> portServiceName
-    33:35:java.lang.String portServiceName(int):3655:3655 -> portServiceName
-    36:38:java.lang.String portServiceName(int):3653:3653 -> portServiceName
-    39:41:java.lang.String portServiceName(int):3652:3652 -> portServiceName
-    42:44:java.lang.String portServiceName(int):3651:3651 -> portServiceName
-    45:47:java.lang.String portServiceName(int):3650:3650 -> portServiceName
-    48:50:java.lang.String portServiceName(int):3649:3649 -> portServiceName
-    1:5:java.lang.String postJson(java.lang.String,java.lang.String):3781:3781 -> postJson
-    6:11:java.lang.String postJson(java.lang.String,java.lang.String):3782:3782 -> postJson
-    12:16:java.lang.String postJson(java.lang.String,java.lang.String):3783:3783 -> postJson
-    17:24:java.lang.String postJson(java.lang.String,java.lang.String):3784:3784 -> postJson
-    25:37:java.lang.String postJson(java.lang.String,java.lang.String):3785:3785 -> postJson
-    38:53:java.lang.String postJson(java.lang.String,java.lang.String):3786:3786 -> postJson
-    54:57:java.lang.String postJson(java.lang.String,java.lang.String):3787:3787 -> postJson
-    58:69:java.lang.String postJson(java.lang.String,java.lang.String):3788:3788 -> postJson
-    70:84:java.lang.String postJson(java.lang.String,java.lang.String):3789:3789 -> postJson
-    85:89:java.lang.String postJson(java.lang.String,java.lang.String):3790:3790 -> postJson
-    90:99:java.lang.String postJson(java.lang.String,java.lang.String):3791:3791 -> postJson
-    100:110:java.lang.String postJson(java.lang.String,java.lang.String):3792:3792 -> postJson
-    111:121:java.lang.String postJson(java.lang.String,java.lang.String):3786:3786 -> postJson
-    1:11:long[] probeHost(java.lang.String):4047:4047 -> probeHost
-    12:23:long[] probeHost(java.lang.String):4050:4050 -> probeHost
-    24:27:long[] probeHost(java.lang.String):4052:4052 -> probeHost
-    28:33:long[] probeHost(java.lang.String):4053:4053 -> probeHost
-    34:38:long[] probeHost(java.lang.String):4056:4056 -> probeHost
-    39:48:long[] probeHost(java.lang.String):4057:4057 -> probeHost
-    49:54:long[] probeHost(java.lang.String):4059:4059 -> probeHost
-    55:63:long[] probeHost(java.lang.String):4056:4056 -> probeHost
-    64:72:long[] probeHost(java.lang.String):4061:4061 -> probeHost
-    73:79:long[] probeHost(java.lang.String):4062:4062 -> probeHost
-    80:82:long[] probeHost(java.lang.String):4065:4065 -> probeHost
-    83:104:long[] probeHost(java.lang.String):4067:4067 -> probeHost
-    105:110:long[] probeHost(java.lang.String):4068:4068 -> probeHost
-    111:115:long[] probeHost(java.lang.String):4069:4069 -> probeHost
-    116:118:long[] probeHost(java.lang.String):4070:4070 -> probeHost
-    119:121:long[] probeHost(java.lang.String):4071:4071 -> probeHost
-    122:124:long[] probeHost(java.lang.String):4072:4072 -> probeHost
-    125:127:long[] probeHost(java.lang.String):4073:4073 -> probeHost
-    128:131:long[] probeHost(java.lang.String):4074:4074 -> probeHost
-    132:134:long[] probeHost(java.lang.String):4075:4075 -> probeHost
-    135:143:long[] probeHost(java.lang.String):4076:4076 -> probeHost
-    144:150:long[] probeHost(java.lang.String):4078:4078 -> probeHost
-    151:155:long[] probeHost(java.lang.String):4081:4081 -> probeHost
-    156:162:long[] probeHost(java.lang.String):4082:4082 -> probeHost
+    6:8:java.lang.String portServiceName(int):3672:3672 -> portServiceName
+    9:11:java.lang.String portServiceName(int):3671:3671 -> portServiceName
+    12:14:java.lang.String portServiceName(int):3670:3670 -> portServiceName
+    15:17:java.lang.String portServiceName(int):3669:3669 -> portServiceName
+    18:20:java.lang.String portServiceName(int):3668:3668 -> portServiceName
+    21:23:java.lang.String portServiceName(int):3667:3667 -> portServiceName
+    24:26:java.lang.String portServiceName(int):3666:3666 -> portServiceName
+    27:29:java.lang.String portServiceName(int):3665:3665 -> portServiceName
+    30:32:java.lang.String portServiceName(int):3664:3664 -> portServiceName
+    33:35:java.lang.String portServiceName(int):3663:3663 -> portServiceName
+    36:38:java.lang.String portServiceName(int):3662:3662 -> portServiceName
+    39:41:java.lang.String portServiceName(int):3661:3661 -> portServiceName
+    42:44:java.lang.String portServiceName(int):3660:3660 -> portServiceName
+    45:47:java.lang.String portServiceName(int):3659:3659 -> portServiceName
+    48:50:java.lang.String portServiceName(int):3658:3658 -> portServiceName
+    51:53:java.lang.String portServiceName(int):3657:3657 -> portServiceName
+    54:56:java.lang.String portServiceName(int):3655:3655 -> portServiceName
+    57:59:java.lang.String portServiceName(int):3653:3653 -> portServiceName
+    60:62:java.lang.String portServiceName(int):3652:3652 -> portServiceName
+    63:65:java.lang.String portServiceName(int):3651:3651 -> portServiceName
+    66:68:java.lang.String portServiceName(int):3650:3650 -> portServiceName
+    69:72:java.lang.String portServiceName(int):3649:3649 -> portServiceName
+    1:5:java.lang.String postJson(java.lang.String,java.lang.String):3789:3789 -> postJson
+    6:11:java.lang.String postJson(java.lang.String,java.lang.String):3790:3790 -> postJson
+    12:16:java.lang.String postJson(java.lang.String,java.lang.String):3791:3791 -> postJson
+    17:24:java.lang.String postJson(java.lang.String,java.lang.String):3792:3792 -> postJson
+    25:37:java.lang.String postJson(java.lang.String,java.lang.String):3793:3793 -> postJson
+    38:53:java.lang.String postJson(java.lang.String,java.lang.String):3794:3794 -> postJson
+    54:57:java.lang.String postJson(java.lang.String,java.lang.String):3795:3795 -> postJson
+    58:69:java.lang.String postJson(java.lang.String,java.lang.String):3796:3796 -> postJson
+    70:84:java.lang.String postJson(java.lang.String,java.lang.String):3797:3797 -> postJson
+    85:89:java.lang.String postJson(java.lang.String,java.lang.String):3798:3798 -> postJson
+    90:99:java.lang.String postJson(java.lang.String,java.lang.String):3799:3799 -> postJson
+    100:110:java.lang.String postJson(java.lang.String,java.lang.String):3800:3800 -> postJson
+    111:121:java.lang.String postJson(java.lang.String,java.lang.String):3794:3794 -> postJson
+    1:11:long[] probeHost(java.lang.String):4055:4055 -> probeHost
+    12:23:long[] probeHost(java.lang.String):4058:4058 -> probeHost
+    24:27:long[] probeHost(java.lang.String):4060:4060 -> probeHost
+    28:33:long[] probeHost(java.lang.String):4061:4061 -> probeHost
+    34:38:long[] probeHost(java.lang.String):4064:4064 -> probeHost
+    39:48:long[] probeHost(java.lang.String):4065:4065 -> probeHost
+    49:54:long[] probeHost(java.lang.String):4067:4067 -> probeHost
+    55:63:long[] probeHost(java.lang.String):4064:4064 -> probeHost
+    64:72:long[] probeHost(java.lang.String):4069:4069 -> probeHost
+    73:79:long[] probeHost(java.lang.String):4070:4070 -> probeHost
+    80:82:long[] probeHost(java.lang.String):4073:4073 -> probeHost
+    83:104:long[] probeHost(java.lang.String):4075:4075 -> probeHost
+    105:110:long[] probeHost(java.lang.String):4076:4076 -> probeHost
+    111:115:long[] probeHost(java.lang.String):4077:4077 -> probeHost
+    116:118:long[] probeHost(java.lang.String):4078:4078 -> probeHost
+    119:121:long[] probeHost(java.lang.String):4079:4079 -> probeHost
+    122:124:long[] probeHost(java.lang.String):4080:4080 -> probeHost
+    125:127:long[] probeHost(java.lang.String):4081:4081 -> probeHost
+    128:131:long[] probeHost(java.lang.String):4082:4082 -> probeHost
+    132:134:long[] probeHost(java.lang.String):4083:4083 -> probeHost
+    135:143:long[] probeHost(java.lang.String):4084:4084 -> probeHost
+    144:150:long[] probeHost(java.lang.String):4086:4086 -> probeHost
+    151:155:long[] probeHost(java.lang.String):4089:4089 -> probeHost
+    156:162:long[] probeHost(java.lang.String):4090:4090 -> probeHost
     1:4:void $r8$lambda$VDzUmLlT0lDJRc1PqkKEMz3FSNY(com.netwatch.app.MainActivity,java.lang.String,android.view.View):0:0 -> q0
       # {"id":"com.android.tools.r8.synthesized"}
     1:3:com.netwatch.app.AppEntry -$$Nest$fgetselectedApp(com.netwatch.app.MainActivity):0:0 -> q1
@@ -159998,17 +160005,17 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
       # {"id":"com.android.tools.r8.synthesized"}
     1:3:void -$$Nest$fputselectedApp(com.netwatch.app.MainActivity,com.netwatch.app.AppEntry):0:0 -> r1
       # {"id":"com.android.tools.r8.synthesized"}
-    1:6:void refreshDeviceLog():4574:4574 -> refreshDeviceLog
-    7:9:void refreshDeviceLog():4575:4575 -> refreshDeviceLog
-    10:12:void refreshDeviceLog():4576:4576 -> refreshDeviceLog
-    13:30:void refreshDeviceLog():4577:4577 -> refreshDeviceLog
-    31:61:void refreshDeviceLog():4578:4578 -> refreshDeviceLog
-    62:65:void refreshDeviceLog():4580:4580 -> refreshDeviceLog
-    66:108:void refreshDeviceLog():4581:4581 -> refreshDeviceLog
-    109:110:void refreshDeviceLog():4582:4583 -> refreshDeviceLog
-    111:113:void refreshDeviceLog():4583:4583 -> refreshDeviceLog
-    114:124:void refreshDeviceLog():4584:4584 -> refreshDeviceLog
-    125:126:void refreshDeviceLog():4582:4582 -> refreshDeviceLog
+    1:6:void refreshDeviceLog():4582:4582 -> refreshDeviceLog
+    7:9:void refreshDeviceLog():4583:4583 -> refreshDeviceLog
+    10:12:void refreshDeviceLog():4584:4584 -> refreshDeviceLog
+    13:30:void refreshDeviceLog():4585:4585 -> refreshDeviceLog
+    31:61:void refreshDeviceLog():4586:4586 -> refreshDeviceLog
+    62:65:void refreshDeviceLog():4588:4588 -> refreshDeviceLog
+    66:108:void refreshDeviceLog():4589:4589 -> refreshDeviceLog
+    109:110:void refreshDeviceLog():4590:4591 -> refreshDeviceLog
+    111:113:void refreshDeviceLog():4591:4591 -> refreshDeviceLog
+    114:124:void refreshDeviceLog():4592:4592 -> refreshDeviceLog
+    125:126:void refreshDeviceLog():4590:4590 -> refreshDeviceLog
     1:14:void refreshTabLabels():694:694 -> refreshTabLabels
     15:28:void refreshTabLabels():695:695 -> refreshTabLabels
     29:42:void refreshTabLabels():696:696 -> refreshTabLabels
@@ -160101,22 +160108,22 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     99:106:int runPingCapture(java.lang.String,int,int,com.netwatch.app.MainActivity$PingSink):2658:2658 -> runPingCapture
     107:109:int runPingCapture(java.lang.String,int,int,com.netwatch.app.MainActivity$PingSink):2659:2659 -> runPingCapture
     110:112:int runPingCapture(java.lang.String,int,int,com.netwatch.app.MainActivity$PingSink):2662:2662 -> runPingCapture
-    1:6:void runSpeedTest():4234:4234 -> runSpeedTest
-    7:14:void runSpeedTest():4235:4235 -> runSpeedTest
-    15:17:void runSpeedTest():4236:4236 -> runSpeedTest
-    18:23:void runSpeedTest():4237:4237 -> runSpeedTest
-    24:29:void runSpeedTest():4238:4238 -> runSpeedTest
-    30:35:void runSpeedTest():4239:4239 -> runSpeedTest
-    36:41:void runSpeedTest():4240:4240 -> runSpeedTest
-    42:43:void runSpeedTest():4242:4242 -> runSpeedTest
-    44:48:void runSpeedTest():4243:4243 -> runSpeedTest
-    49:53:void runSpeedTest():4244:4244 -> runSpeedTest
-    54:67:void runSpeedTest():4245:4245 -> runSpeedTest
-    68:74:void runSpeedTest():4246:4246 -> runSpeedTest
-    75:79:void runSpeedTest():4247:4247 -> runSpeedTest
-    80:84:void runSpeedTest():4248:4248 -> runSpeedTest
-    85:91:void runSpeedTest():4249:4249 -> runSpeedTest
-    92:103:void runSpeedTest():4251:4251 -> runSpeedTest
+    1:6:void runSpeedTest():4242:4242 -> runSpeedTest
+    7:14:void runSpeedTest():4243:4243 -> runSpeedTest
+    15:17:void runSpeedTest():4244:4244 -> runSpeedTest
+    18:23:void runSpeedTest():4245:4245 -> runSpeedTest
+    24:29:void runSpeedTest():4246:4246 -> runSpeedTest
+    30:35:void runSpeedTest():4247:4247 -> runSpeedTest
+    36:41:void runSpeedTest():4248:4248 -> runSpeedTest
+    42:43:void runSpeedTest():4250:4250 -> runSpeedTest
+    44:48:void runSpeedTest():4251:4251 -> runSpeedTest
+    49:53:void runSpeedTest():4252:4252 -> runSpeedTest
+    54:67:void runSpeedTest():4253:4253 -> runSpeedTest
+    68:74:void runSpeedTest():4254:4254 -> runSpeedTest
+    75:79:void runSpeedTest():4255:4255 -> runSpeedTest
+    80:84:void runSpeedTest():4256:4256 -> runSpeedTest
+    85:91:void runSpeedTest():4257:4257 -> runSpeedTest
+    92:103:void runSpeedTest():4259:4259 -> runSpeedTest
     1:4:void $r8$lambda$0zGFC6EYr0wM6ZEiNqBChorohkA(com.netwatch.app.MainActivity,com.netwatch.app.HistoryManager$Session,android.view.View):0:0 -> s
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$VXns_tIQGN89VC0uPIZcRHHf3jo(com.netwatch.app.MainActivity,android.content.DialogInterface,int):0:0 -> s0
@@ -160308,17 +160315,17 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     10:13:void showInfoDialog(java.lang.String,java.lang.String):738:738 -> showInfoDialog
     14:27:void showInfoDialog(java.lang.String,java.lang.String):739:739 -> showInfoDialog
     28:31:void showInfoDialog(java.lang.String,java.lang.String):740:740 -> showInfoDialog
-    1:16:void showIpWhois(java.lang.String,java.lang.String):4664:4664 -> showIpWhois
-    17:21:void showIpWhois(java.lang.String,java.lang.String):4665:4665 -> showIpWhois
+    1:16:void showIpWhois(java.lang.String,java.lang.String):4672:4672 -> showIpWhois
+    17:21:void showIpWhois(java.lang.String,java.lang.String):4673:4673 -> showIpWhois
     22:25:void showIpWhois(java.lang.String,java.lang.String):0:0 -> showIpWhois
       # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":65,"3":67,"6":70,"9":74},"outline":"Landroidx/activity/result/d;q(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
-    26:49:void showIpWhois(java.lang.String,java.lang.String):4666:4666 -> showIpWhois
-    50:52:void showIpWhois(java.lang.String,java.lang.String):4667:4667 -> showIpWhois
-    53:64:void showIpWhois(java.lang.String,java.lang.String):4668:4668 -> showIpWhois
-    65:65:void showIpWhois(java.lang.String,java.lang.String):4665:4665 -> showIpWhois
-    67:67:void showIpWhois(java.lang.String,java.lang.String):4665:4665 -> showIpWhois
-    70:70:void showIpWhois(java.lang.String,java.lang.String):4665:4665 -> showIpWhois
-    74:74:void showIpWhois(java.lang.String,java.lang.String):4665:4665 -> showIpWhois
+    26:49:void showIpWhois(java.lang.String,java.lang.String):4674:4674 -> showIpWhois
+    50:52:void showIpWhois(java.lang.String,java.lang.String):4675:4675 -> showIpWhois
+    53:64:void showIpWhois(java.lang.String,java.lang.String):4676:4676 -> showIpWhois
+    65:65:void showIpWhois(java.lang.String,java.lang.String):4673:4673 -> showIpWhois
+    67:67:void showIpWhois(java.lang.String,java.lang.String):4673:4673 -> showIpWhois
+    70:70:void showIpWhois(java.lang.String,java.lang.String):4673:4673 -> showIpWhois
+    74:74:void showIpWhois(java.lang.String,java.lang.String):4673:4673 -> showIpWhois
     1:8:void showLanguageDialog():667:667 -> showLanguageDialog
     9:10:void showLanguageDialog():668:668 -> showLanguageDialog
     11:15:void showLanguageDialog():669:669 -> showLanguageDialog
@@ -160357,7 +160364,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     223:241:void showSessionDetail(com.netwatch.app.HistoryManager$Session):836:836 -> showSessionDetail
     242:255:void showSessionDetail(com.netwatch.app.HistoryManager$Session):840:840 -> showSessionDetail
     256:259:void showSessionDetail(com.netwatch.app.HistoryManager$Session):841:841 -> showSessionDetail
-    2:9:void showToast(java.lang.String):3801:3801 -> showToast
+    2:9:void showToast(java.lang.String):3809:3809 -> showToast
     1:11:void showWebViewNotice():1093:1093 -> showWebViewNotice
     12:16:void showWebViewNotice():1095:1095 -> showWebViewNotice
     17:20:void showWebViewNotice():1096:1096 -> showWebViewNotice
@@ -160381,26 +160388,26 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     154:160:void showWebViewNotice():1116:1116 -> showWebViewNotice
     161:163:void showWebViewNotice():1117:1117 -> showWebViewNotice
     164:169:void showWebViewNotice():1120:1120 -> showWebViewNotice
-    2:3:void startDeviceMonitor():4439:4439 -> startDeviceMonitor
-    4:11:void startDeviceMonitor():4440:4440 -> startDeviceMonitor
-    12:15:void startDeviceMonitor():4442:4442 -> startDeviceMonitor
-    16:19:void startDeviceMonitor():4445:4445 -> startDeviceMonitor
-    1:9:void startDomainCheck():3972:3972 -> startDomainCheck
-    10:15:void startDomainCheck():3973:3973 -> startDomainCheck
-    16:21:void startDomainCheck():3974:3974 -> startDomainCheck
-    22:26:void startDomainCheck():3975:3975 -> startDomainCheck
-    27:37:void startDomainCheck():3976:3976 -> startDomainCheck
-    38:59:void startDomainCheck():3979:3979 -> startDomainCheck
-    60:70:void startDomainCheck():3980:3980 -> startDomainCheck
-    71:85:void startDomainCheck():3981:3981 -> startDomainCheck
-    86:95:void startDomainCheck():3983:3983 -> startDomainCheck
-    96:99:void startDomainCheck():3984:3984 -> startDomainCheck
-    100:105:void startDomainCheck():3985:3985 -> startDomainCheck
-    106:121:void startDomainCheck():3986:3986 -> startDomainCheck
-    122:126:void startDomainCheck():3990:3990 -> startDomainCheck
-    127:148:void startDomainCheck():3991:3991 -> startDomainCheck
-    149:160:void startDomainCheck():3992:3992 -> startDomainCheck
-    161:172:void startDomainCheck():3994:3994 -> startDomainCheck
+    2:3:void startDeviceMonitor():4447:4447 -> startDeviceMonitor
+    4:11:void startDeviceMonitor():4448:4448 -> startDeviceMonitor
+    12:15:void startDeviceMonitor():4450:4450 -> startDeviceMonitor
+    16:19:void startDeviceMonitor():4453:4453 -> startDeviceMonitor
+    1:9:void startDomainCheck():3980:3980 -> startDomainCheck
+    10:15:void startDomainCheck():3981:3981 -> startDomainCheck
+    16:21:void startDomainCheck():3982:3982 -> startDomainCheck
+    22:26:void startDomainCheck():3983:3983 -> startDomainCheck
+    27:37:void startDomainCheck():3984:3984 -> startDomainCheck
+    38:59:void startDomainCheck():3987:3987 -> startDomainCheck
+    60:70:void startDomainCheck():3988:3988 -> startDomainCheck
+    71:85:void startDomainCheck():3989:3989 -> startDomainCheck
+    86:95:void startDomainCheck():3991:3991 -> startDomainCheck
+    96:99:void startDomainCheck():3992:3992 -> startDomainCheck
+    100:105:void startDomainCheck():3993:3993 -> startDomainCheck
+    106:121:void startDomainCheck():3994:3994 -> startDomainCheck
+    122:126:void startDomainCheck():3998:3998 -> startDomainCheck
+    127:148:void startDomainCheck():3999:3999 -> startDomainCheck
+    149:160:void startDomainCheck():4000:4000 -> startDomainCheck
+    161:172:void startDomainCheck():4002:4002 -> startDomainCheck
     1:6:void startLanScan():2676:2676 -> startLanScan
     7:8:void startLanScan():2677:2677 -> startLanScan
     9:14:void startLanScan():2678:2678 -> startLanScan
@@ -160421,32 +160428,32 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     93:100:void startMonitoring():924:924 -> startMonitoring
     101:104:void startMonitoring():926:926 -> startMonitoring
     105:108:void startMonitoring():928:928 -> startMonitoring
-    1:4:void startQuickPortScan(java.lang.String,java.lang.String):3684:3684 -> startQuickPortScan
-    5:18:void startQuickPortScan(java.lang.String,java.lang.String):3685:3685 -> startQuickPortScan
-    19:20:void startQuickPortScan(java.lang.String,java.lang.String):3688:3688 -> startQuickPortScan
-    21:26:void startQuickPortScan(java.lang.String,java.lang.String):3689:3689 -> startQuickPortScan
-    27:31:void startQuickPortScan(java.lang.String,java.lang.String):3690:3690 -> startQuickPortScan
-    32:45:void startQuickPortScan(java.lang.String,java.lang.String):3691:3691 -> startQuickPortScan
-    46:57:void startQuickPortScan(java.lang.String,java.lang.String):3693:3693 -> startQuickPortScan
-    1:4:void stopDeviceMonitor():4544:4544 -> stopDeviceMonitor
-    5:10:void stopDeviceMonitor():4546:4546 -> stopDeviceMonitor
-    11:14:void stopDeviceMonitor():4547:4547 -> stopDeviceMonitor
-    15:17:void stopDeviceMonitor():4549:4549 -> stopDeviceMonitor
-    18:19:void stopDeviceMonitor():4552:4552 -> stopDeviceMonitor
-    20:23:void stopDeviceMonitor():4555:4555 -> stopDeviceMonitor
-    24:30:void stopDeviceMonitor():4556:4556 -> stopDeviceMonitor
-    31:35:void stopDeviceMonitor():4557:4557 -> stopDeviceMonitor
-    36:38:void stopDeviceMonitor():4558:4558 -> stopDeviceMonitor
-    39:42:void stopDeviceMonitor():4560:4560 -> stopDeviceMonitor
-    43:54:void stopDeviceMonitor():4561:4561 -> stopDeviceMonitor
-    55:61:void stopDeviceMonitor():4562:4562 -> stopDeviceMonitor
-    62:65:void stopDeviceMonitor():4564:4564 -> stopDeviceMonitor
-    66:77:void stopDeviceMonitor():4565:4565 -> stopDeviceMonitor
-    78:88:void stopDeviceMonitor():4566:4566 -> stopDeviceMonitor
-    89:100:void stopDeviceMonitor():4568:4568 -> stopDeviceMonitor
-    101:104:void stopDeviceMonitor():4569:4569 -> stopDeviceMonitor
-    1:6:void stopDomainCheck():4041:4041 -> stopDomainCheck
-    7:12:void stopDomainCheck():4042:4042 -> stopDomainCheck
+    1:4:void startQuickPortScan(java.lang.String,java.lang.String):3691:3691 -> startQuickPortScan
+    5:18:void startQuickPortScan(java.lang.String,java.lang.String):3692:3692 -> startQuickPortScan
+    19:20:void startQuickPortScan(java.lang.String,java.lang.String):3695:3695 -> startQuickPortScan
+    21:26:void startQuickPortScan(java.lang.String,java.lang.String):3696:3696 -> startQuickPortScan
+    27:31:void startQuickPortScan(java.lang.String,java.lang.String):3697:3697 -> startQuickPortScan
+    32:45:void startQuickPortScan(java.lang.String,java.lang.String):3698:3698 -> startQuickPortScan
+    46:57:void startQuickPortScan(java.lang.String,java.lang.String):3700:3700 -> startQuickPortScan
+    1:4:void stopDeviceMonitor():4552:4552 -> stopDeviceMonitor
+    5:10:void stopDeviceMonitor():4554:4554 -> stopDeviceMonitor
+    11:14:void stopDeviceMonitor():4555:4555 -> stopDeviceMonitor
+    15:17:void stopDeviceMonitor():4557:4557 -> stopDeviceMonitor
+    18:19:void stopDeviceMonitor():4560:4560 -> stopDeviceMonitor
+    20:23:void stopDeviceMonitor():4563:4563 -> stopDeviceMonitor
+    24:30:void stopDeviceMonitor():4564:4564 -> stopDeviceMonitor
+    31:35:void stopDeviceMonitor():4565:4565 -> stopDeviceMonitor
+    36:38:void stopDeviceMonitor():4566:4566 -> stopDeviceMonitor
+    39:42:void stopDeviceMonitor():4568:4568 -> stopDeviceMonitor
+    43:54:void stopDeviceMonitor():4569:4569 -> stopDeviceMonitor
+    55:61:void stopDeviceMonitor():4570:4570 -> stopDeviceMonitor
+    62:65:void stopDeviceMonitor():4572:4572 -> stopDeviceMonitor
+    66:77:void stopDeviceMonitor():4573:4573 -> stopDeviceMonitor
+    78:88:void stopDeviceMonitor():4574:4574 -> stopDeviceMonitor
+    89:100:void stopDeviceMonitor():4576:4576 -> stopDeviceMonitor
+    101:104:void stopDeviceMonitor():4577:4577 -> stopDeviceMonitor
+    1:6:void stopDomainCheck():4049:4049 -> stopDomainCheck
+    7:12:void stopDomainCheck():4050:4050 -> stopDomainCheck
     2:3:void stopMonitoring():944:944 -> stopMonitoring
     4:9:void stopMonitoring():945:945 -> stopMonitoring
     10:14:void stopMonitoring():946:946 -> stopMonitoring
@@ -160478,29 +160485,29 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     28:42:void stopNetworkTool():2635:2635 -> stopNetworkTool
     3:17:void styleToolBtn(android.widget.Button,boolean):2570:2570 -> styleToolBtn
     18:31:void styleToolBtn(android.widget.Button,boolean):2571:2571 -> styleToolBtn
-    1:13:void switchTab(int):3744:3744 -> switchTab
-    14:24:void switchTab(int):3745:3745 -> switchTab
-    25:35:void switchTab(int):3746:3746 -> switchTab
-    36:46:void switchTab(int):3747:3747 -> switchTab
-    47:59:void switchTab(int):3748:3748 -> switchTab
-    60:72:void switchTab(int):3749:3749 -> switchTab
-    73:85:void switchTab(int):3750:3750 -> switchTab
-    86:98:void switchTab(int):3751:3751 -> switchTab
-    99:103:void switchTab(int):3752:3752 -> switchTab
-    104:106:void switchTab(int):3753:3753 -> switchTab
-    107:116:void switchTab(int):3754:3754 -> switchTab
-    117:126:void switchTab(int):3755:3755 -> switchTab
-    127:136:void switchTab(int):3756:3756 -> switchTab
-    137:148:void switchTab(int):3757:3757 -> switchTab
-    149:160:void switchTab(int):3758:3758 -> switchTab
-    161:172:void switchTab(int):3759:3759 -> switchTab
-    173:180:void switchTab(int):3761:3761 -> switchTab
-    181:205:void switchTab(int):3762:3762 -> switchTab
-    206:230:void switchTab(int):3763:3763 -> switchTab
-    231:260:void switchTab(int):3764:3764 -> switchTab
-    261:288:void switchTab(int):3765:3765 -> switchTab
-    289:312:void switchTab(int):3766:3766 -> switchTab
-    313:335:void switchTab(int):3767:3767 -> switchTab
+    1:13:void switchTab(int):3752:3752 -> switchTab
+    14:24:void switchTab(int):3753:3753 -> switchTab
+    25:35:void switchTab(int):3754:3754 -> switchTab
+    36:46:void switchTab(int):3755:3755 -> switchTab
+    47:59:void switchTab(int):3756:3756 -> switchTab
+    60:72:void switchTab(int):3757:3757 -> switchTab
+    73:85:void switchTab(int):3758:3758 -> switchTab
+    86:98:void switchTab(int):3759:3759 -> switchTab
+    99:103:void switchTab(int):3760:3760 -> switchTab
+    104:106:void switchTab(int):3761:3761 -> switchTab
+    107:116:void switchTab(int):3762:3762 -> switchTab
+    117:126:void switchTab(int):3763:3763 -> switchTab
+    127:136:void switchTab(int):3764:3764 -> switchTab
+    137:148:void switchTab(int):3765:3765 -> switchTab
+    149:160:void switchTab(int):3766:3766 -> switchTab
+    161:172:void switchTab(int):3767:3767 -> switchTab
+    173:180:void switchTab(int):3769:3769 -> switchTab
+    181:205:void switchTab(int):3770:3770 -> switchTab
+    206:230:void switchTab(int):3771:3771 -> switchTab
+    231:260:void switchTab(int):3772:3772 -> switchTab
+    261:288:void switchTab(int):3773:3773 -> switchTab
+    289:312:void switchTab(int):3774:3774 -> switchTab
+    313:335:void switchTab(int):3775:3775 -> switchTab
     1:4:void $r8$lambda$1XyYKM3k5uWaCmI0CzzDF1w-6os(com.netwatch.app.MainActivity):0:0 -> t
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$VzhctisrAm8Qd6NqpSvPc41O7F0(com.netwatch.app.MainActivity,java.util.ArrayList,java.lang.String):0:0 -> t0
@@ -160612,7 +160619,7 @@ com.netwatch.app.MainActivity -> com.netwatch.app.MainActivity:
     123:133:void toolPortCheck(java.lang.String,int):3504:3504 -> toolPortCheck
     134:170:void toolPortCheck(java.lang.String,int):3508:3508 -> toolPortCheck
     171:197:void toolPortCheck(java.lang.String,int):3506:3506 -> toolPortCheck
-    1:12:void toolPrint(java.lang.String,java.lang.String):3733:3733 -> toolPrint
+    1:12:void toolPrint(java.lang.String,java.lang.String):3741:3741 -> toolPrint
     1:16:void toolPrintDevice(java.lang.String,java.lang.String,java.lang.String,java.lang.String):3598:3598 -> toolPrintDevice
     5:6:void toolTraceroute(java.lang.String):3402:3402 -> toolTraceroute
     7:10:void toolTraceroute(java.lang.String):0:0 -> toolTraceroute
@@ -161292,34 +161299,34 @@ com.netwatch.app.MainActivity$3 -> com.netwatch.app.MainActivity$3:
     11:14:void updateDrawState(android.text.TextPaint):3611:3611 -> updateDrawState
 com.netwatch.app.MainActivity$4 -> com.netwatch.app.MainActivity$4:
 # {"id":"sourceFile","fileName":"MainActivity.java"}
-    1:6:void <init>(com.netwatch.app.MainActivity):4487:4487 -> <init>
+    1:6:void <init>(com.netwatch.app.MainActivity):4495:4495 -> <init>
     1:4:void $r8$lambda$X6CYUa46tbPaWdJlczpyMWNsKNQ(com.netwatch.app.MainActivity$4):0:0 -> a
       # {"id":"com.android.tools.r8.synthesized"}
     1:4:void $r8$lambda$tsHrcPIZkCh57H7G2g4P_b0F6D4(com.netwatch.app.MainActivity$4):0:0 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    1:6:void lambda$onReceive$0():4509:4509 -> lambda$onReceive$0
-    1:6:void lambda$onReceive$1():4517:4517 -> lambda$onReceive$1
-    1:6:void onReceive(android.content.Context,android.content.Intent):4490:4490 -> onReceive
-    7:12:void onReceive(android.content.Context,android.content.Intent):4491:4491 -> onReceive
-    13:18:void onReceive(android.content.Context,android.content.Intent):4492:4492 -> onReceive
-    19:24:void onReceive(android.content.Context,android.content.Intent):4493:4493 -> onReceive
-    25:37:void onReceive(android.content.Context,android.content.Intent):4494:4494 -> onReceive
-    38:44:void onReceive(android.content.Context,android.content.Intent):4496:4496 -> onReceive
-    45:51:void onReceive(android.content.Context,android.content.Intent):4497:4497 -> onReceive
-    52:54:void onReceive(android.content.Context,android.content.Intent):4498:4498 -> onReceive
-    55:75:void onReceive(android.content.Context,android.content.Intent):4500:4500 -> onReceive
-    76:90:void onReceive(android.content.Context,android.content.Intent):4501:4501 -> onReceive
-    91:99:void onReceive(android.content.Context,android.content.Intent):4503:4503 -> onReceive
-    100:111:void onReceive(android.content.Context,android.content.Intent):4505:4505 -> onReceive
-    112:134:void onReceive(android.content.Context,android.content.Intent):4506:4506 -> onReceive
-    135:142:void onReceive(android.content.Context,android.content.Intent):4507:4507 -> onReceive
-    143:147:void onReceive(android.content.Context,android.content.Intent):4508:4508 -> onReceive
-    148:158:void onReceive(android.content.Context,android.content.Intent):4509:4509 -> onReceive
-    159:163:void onReceive(android.content.Context,android.content.Intent):4510:4510 -> onReceive
-    164:177:void onReceive(android.content.Context,android.content.Intent):4515:4515 -> onReceive
-    178:179:void onReceive(android.content.Context,android.content.Intent):4516:4517 -> onReceive
-    180:190:void onReceive(android.content.Context,android.content.Intent):4517:4517 -> onReceive
-    191:192:void onReceive(android.content.Context,android.content.Intent):4516:4516 -> onReceive
+    1:6:void lambda$onReceive$0():4517:4517 -> lambda$onReceive$0
+    1:6:void lambda$onReceive$1():4525:4525 -> lambda$onReceive$1
+    1:6:void onReceive(android.content.Context,android.content.Intent):4498:4498 -> onReceive
+    7:12:void onReceive(android.content.Context,android.content.Intent):4499:4499 -> onReceive
+    13:18:void onReceive(android.content.Context,android.content.Intent):4500:4500 -> onReceive
+    19:24:void onReceive(android.content.Context,android.content.Intent):4501:4501 -> onReceive
+    25:37:void onReceive(android.content.Context,android.content.Intent):4502:4502 -> onReceive
+    38:44:void onReceive(android.content.Context,android.content.Intent):4504:4504 -> onReceive
+    45:51:void onReceive(android.content.Context,android.content.Intent):4505:4505 -> onReceive
+    52:54:void onReceive(android.content.Context,android.content.Intent):4506:4506 -> onReceive
+    55:75:void onReceive(android.content.Context,android.content.Intent):4508:4508 -> onReceive
+    76:90:void onReceive(android.content.Context,android.content.Intent):4509:4509 -> onReceive
+    91:99:void onReceive(android.content.Context,android.content.Intent):4511:4511 -> onReceive
+    100:111:void onReceive(android.content.Context,android.content.Intent):4513:4513 -> onReceive
+    112:134:void onReceive(android.content.Context,android.content.Intent):4514:4514 -> onReceive
+    135:142:void onReceive(android.content.Context,android.content.Intent):4515:4515 -> onReceive
+    143:147:void onReceive(android.content.Context,android.content.Intent):4516:4516 -> onReceive
+    148:158:void onReceive(android.content.Context,android.content.Intent):4517:4517 -> onReceive
+    159:163:void onReceive(android.content.Context,android.content.Intent):4518:4518 -> onReceive
+    164:177:void onReceive(android.content.Context,android.content.Intent):4523:4523 -> onReceive
+    178:179:void onReceive(android.content.Context,android.content.Intent):4524:4525 -> onReceive
+    180:190:void onReceive(android.content.Context,android.content.Intent):4525:4525 -> onReceive
+    191:192:void onReceive(android.content.Context,android.content.Intent):4524:4524 -> onReceive
 com.netwatch.app.MainActivity$4$$ExternalSyntheticLambda0 -> com.netwatch.app.l0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
@@ -161335,13 +161342,13 @@ com.netwatch.app.MainActivity$PingSink -> com.netwatch.app.MainActivity$PingSink
 # {"id":"sourceFile","fileName":"MainActivity.java"}
 com.netwatch.app.MainActivity$ThemedArrayAdapter -> com.netwatch.app.MainActivity$ThemedArrayAdapter:
 # {"id":"sourceFile","fileName":"MainActivity.java"}
-    1:3:void <init>(com.netwatch.app.MainActivity,java.util.List):4734:4736 -> <init>
-    4:6:void <init>(com.netwatch.app.MainActivity,java.lang.Object[]):4738:4740 -> <init>
-    1:4:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup):4751:4751 -> getDropDownView
-    5:8:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup):4752:4752 -> getDropDownView
-    1:4:android.view.View getView(int,android.view.View,android.view.ViewGroup):4746:4746 -> getView
-    5:8:android.view.View getView(int,android.view.View,android.view.ViewGroup):4747:4747 -> getView
-    1:16:void tint(android.view.View):4743:4743 -> tint
+    1:3:void <init>(com.netwatch.app.MainActivity,java.util.List):4742:4744 -> <init>
+    4:6:void <init>(com.netwatch.app.MainActivity,java.lang.Object[]):4746:4748 -> <init>
+    1:4:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup):4759:4759 -> getDropDownView
+    5:8:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup):4760:4760 -> getDropDownView
+    1:4:android.view.View getView(int,android.view.View,android.view.ViewGroup):4754:4754 -> getView
+    5:8:android.view.View getView(int,android.view.View,android.view.ViewGroup):4755:4755 -> getView
+    1:16:void tint(android.view.View):4751:4751 -> tint
 com.netwatch.app.NetWatchVpnService -> com.netwatch.app.NetWatchVpnService:
 # {"id":"sourceFile","fileName":"NetWatchVpnService.java"}
     1:32:void <clinit>():436:436 -> <clinit>
