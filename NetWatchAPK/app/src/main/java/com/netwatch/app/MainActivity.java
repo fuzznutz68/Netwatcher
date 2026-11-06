@@ -571,9 +571,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n" +
                         "  • LAN — сканер локальной сети (ARP + ping sweep, без root)\n\n" +
                         "LAN: находит устройства в вашей Wi-Fi сети и определяет их\n" +
-                        "через UPnP/SSDP, DNS, NetBIOS и баннеры HTTP/FTP (MAC-адреса\n" +
-                        "недоступны приложениям на Android 10+ — ограничение ОС).\n" +
-                        "Выделяет шлюз и устройства, которые не удалось определить.\n" +
+                        "через UPnP/SSDP, mDNS (.local), DNS, NetBIOS и баннеры HTTP/FTP\n" +
+                        "(MAC-адреса недоступны приложениям на Android 10+ — ограничение\n" +
+                        "ОС). Нажмите на IP в результатах, чтобы просканировать порты.\n" +
                         "Для чистого результата остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
@@ -588,10 +588,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • DNS — look up A / AAAA / CNAME / TXT records\n" +
                         "  • LAN — scan your local network (ARP + ping sweep, rootless)\n\n" +
                         "LAN: discovers devices on your Wi-Fi network and identifies\n" +
-                        "them via UPnP/SSDP, DNS, NetBIOS, and HTTP/FTP banners (MAC\n" +
-                        "addresses are hidden from apps on Android 10+ — an OS\n" +
-                        "restriction). Flags the gateway and any devices it could not\n" +
-                        "identify. Stop monitoring (VPN) first for a clean scan.\n\n" +
+                        "them via UPnP/SSDP, mDNS (.local), DNS, NetBIOS, and HTTP/FTP\n" +
+                        "banners (MAC addresses are hidden from apps on Android 10+ — an\n" +
+                        "OS restriction). Tap any IP in the results to scan its ports.\n" +
+                        "Stop monitoring (VPN) first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
                         "Tap STOP to interrupt a running tool.");
@@ -2528,6 +2528,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toolsStopBtn     = findViewById(R.id.toolsStopBtn);
         toolsConsoleText = findViewById(R.id.toolsConsoleText);
         toolsScrollView  = findViewById(R.id.toolsScrollView);
+        // IPs in LAN results are tappable
+        toolsConsoleText.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        toolsConsoleText.setHighlightColor(Color.TRANSPARENT);
 
         toolPingBtn.setOnClickListener(v  -> setToolMode(TOOL_PING));
         toolTraceBtn.setOnClickListener(v -> setToolMode(TOOL_TRACE));
@@ -2539,7 +2542,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.9.2");
+        toolPrint("#546e7a", "netwatch tools v2.10.0");
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
@@ -2994,14 +2997,166 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         }
     }
 
+    // ── mDNS (.local / Bonjour) ──────────────────────────────────────────────
+    // Resolves "<ip>.in-addr.arpa" PTR questions over multicast DNS. Responders
+    // (Apple devices, printers, Chromecasts, NAS, Linux/Avahi boxes) answer with
+    // their <hostname>.local, which is often the only human-readable name an
+    // embedded device ever exposes. Rootless and permission-free.
+
+    /** Encodes a dotted name as DNS labels. */
+    private void mdnsWriteName(java.io.ByteArrayOutputStream out, String name) throws Exception {
+        for (String label : name.split("\\.")) {
+            if (label.isEmpty()) continue;
+            byte[] b = label.getBytes("US-ASCII");
+            out.write(b.length);
+            out.write(b, 0, b.length);
+        }
+        out.write(0);
+    }
+
+    /** One mDNS query packet carrying a reverse-PTR question per host (QU bit set
+     *  so responders answer by unicast, which we can always receive). */
+    private byte[] mdnsBuildQuery(java.util.List<String> ips) throws Exception {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        out.write(0x00); out.write(0x00);                       // id (ignored in mDNS)
+        out.write(0x00); out.write(0x00);                       // flags: standard query
+        out.write((ips.size() >> 8) & 0xFF); out.write(ips.size() & 0xFF); // QDCOUNT
+        out.write(0x00); out.write(0x00);                       // ANCOUNT
+        out.write(0x00); out.write(0x00);                       // NSCOUNT
+        out.write(0x00); out.write(0x00);                       // ARCOUNT
+        for (String ip : ips) {
+            String[] p = ip.split("\\.");
+            if (p.length != 4) continue;
+            mdnsWriteName(out, p[3] + "." + p[2] + "." + p[1] + "." + p[0] + ".in-addr.arpa");
+            out.write(0x00); out.write(0x0C);                   // QTYPE = PTR
+            out.write(0x80); out.write(0x01);                   // QCLASS = IN + unicast-response
+        }
+        return out.toByteArray();
+    }
+
+    /** Reads a (possibly compressed) DNS name. Returns {name, nextOffset}. */
+    private Object[] mdnsReadName(byte[] d, int off, int depth) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        int next = -1;
+        int guard = 0;
+        while (off < d.length && guard++ < 128) {
+            int len = d[off] & 0xFF;
+            if (len == 0) { off++; break; }
+            if ((len & 0xC0) == 0xC0) {                          // compression pointer
+                if (off + 1 >= d.length) break;
+                int ptr = ((len & 0x3F) << 8) | (d[off + 1] & 0xFF);
+                if (next < 0) next = off + 2;
+                if (depth <= 0) break;                           // pointer loop guard
+                Object[] r = mdnsReadName(d, ptr, depth - 1);
+                if (sb.length() > 0 && ((String) r[0]).length() > 0) sb.append('.');
+                sb.append((String) r[0]);
+                off = next;
+                break;
+            }
+            if (off + 1 + len > d.length) break;
+            if (sb.length() > 0) sb.append('.');
+            sb.append(new String(d, off + 1, len, "US-ASCII"));
+            off += 1 + len;
+        }
+        if (next < 0) next = off;
+        return new Object[]{ sb.toString(), next };
+    }
+
+    /** Parses one mDNS response into ip -> hostname (without the .local suffix). */
+    private void mdnsParseResponse(byte[] d, int len, java.util.Map<String, String> out) {
+        try {
+            if (len < 12) return;
+            int qd = ((d[4] & 0xFF) << 8) | (d[5] & 0xFF);
+            int an = ((d[6] & 0xFF) << 8) | (d[7] & 0xFF);
+            int off = 12;
+            for (int i = 0; i < qd && off < len; i++) {          // skip questions
+                Object[] nm = mdnsReadName(d, off, 8);
+                off = (int) nm[1] + 4;
+            }
+            for (int i = 0; i < an && off + 10 < len; i++) {
+                Object[] nm = mdnsReadName(d, off, 8);
+                String owner = (String) nm[0];
+                off = (int) nm[1];
+                if (off + 10 > len) break;
+                int type = ((d[off] & 0xFF) << 8) | (d[off + 1] & 0xFF);
+                off += 2 + 2 + 4;                                 // TYPE + CLASS + TTL
+                int rdlen = ((d[off] & 0xFF) << 8) | (d[off + 1] & 0xFF);
+                off += 2;
+                int rdataOff = off;
+                off += rdlen;
+                if (rdataOff + rdlen > len) break;
+
+                if (type == 12) {                                 // PTR -> hostname
+                    Object[] target = mdnsReadName(d, rdataOff, 8);
+                    String host = ((String) target[0]).replace("\\.local$", "").replace("\\.$", "");
+                    if (owner.endsWith(".in-addr.arpa") && !host.isEmpty()) {
+                        String[] oct = owner.substring(0, owner.length() - ".in-addr.arpa".length()).split("\\.");
+                        if (oct.length == 4) {
+                            String ip = oct[3] + "." + oct[2] + "." + oct[1] + "." + oct[0];
+                            if (!out.containsKey(ip)) out.put(ip, host);
+                        }
+                    }
+                } else if (type == 1 && rdlen == 4) {             // A -> ip
+                    String ip = (d[rdataOff] & 0xFF) + "." + (d[rdataOff + 1] & 0xFF) + "."
+                              + (d[rdataOff + 2] & 0xFF) + "." + (d[rdataOff + 3] & 0xFF);
+                    String host = owner.replace("\\.local$", "").replace("\\.$", "");
+                    if (!host.isEmpty() && !out.containsKey(ip)) out.put(ip, host);
+                }
+            }
+        } catch (Exception ignored) { }
+    }
+
+    /** Multicast mDNS pass for a set of hosts. Returns ip -> hostname. */
+    private java.util.Map<String, String> lanMdnsResolve(java.util.List<String> ips, long windowMs) {
+        java.util.Map<String, String> found = new java.util.HashMap<>();
+        java.net.MulticastSocket msock = null;
+        java.net.DatagramSocket dsock = null;
+        try {
+            byte[] query = mdnsBuildQuery(ips);
+            java.net.InetAddress mdnsGroup = java.net.InetAddress.getByName("224.0.0.251");
+            // Preferred: bind the mDNS port and join the group so multicast replies arrive too
+            try {
+                msock = new java.net.MulticastSocket(null);
+                msock.setReuseAddress(true);
+                msock.bind(new java.net.InetSocketAddress(5353));
+                msock.joinGroup(mdnsGroup);
+                msock.setSoTimeout(250);
+                msock.send(new java.net.DatagramPacket(query, query.length, mdnsGroup, 5353));
+                dsock = msock;
+            } catch (Exception bindFail) {
+                if (msock != null) { try { msock.close(); } catch (Exception ignored) {} msock = null; }
+                dsock = new java.net.DatagramSocket();
+                dsock.setSoTimeout(250);
+                dsock.send(new java.net.DatagramPacket(query, query.length, mdnsGroup, 5353));
+            }
+            long end = System.currentTimeMillis() + windowMs;
+            byte[] buf = new byte[2048];
+            while (System.currentTimeMillis() < end) {
+                try {
+                    java.net.DatagramPacket resp = new java.net.DatagramPacket(buf, buf.length);
+                    dsock.receive(resp);
+                    mdnsParseResponse(resp.getData(), resp.getLength(), found);
+                } catch (java.net.SocketTimeoutException ste) { /* keep collecting */ }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (dsock != null) try { dsock.close(); } catch (Exception ignored) { }
+        }
+        return found;
+    }
+
     /** Best identifier available for a host, cheapest/most-reliable first:
      *  UPnP friendly name > DNS hostname > NetBIOS name > HTTP banner > FTP banner > MAC vendor. */
-    private String lanIdentify(String ip, String vendor, java.util.Map<String, String> ssdpLocations) {
+    private String lanIdentify(String ip, String vendor,
+                               java.util.Map<String, String> ssdpLocations,
+                               java.util.Map<String, String> mdnsNames) {
         String loc = ssdpLocations.get(ip);
         if (loc != null) {
             String fn = lanFetchFriendlyName(loc);
             if (fn != null) return fn;
         }
+        String viaMdns = mdnsNames.get(ip);
+        if (viaMdns != null) return viaMdns;
         String host = lanReverseDns(ip);
         if (host != null) return host;
         String nb = lanNetbiosName(ip);
@@ -3162,14 +3317,21 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         if (!rows.isEmpty()) {
             toolPrint("#546e7a", isRussian ? "поиск UPnP/SSDP-устройств…" : "probing for UPnP/SSDP devices…");
             java.util.Map<String, String> ssdpLocations = lanSsdpDiscover(2000);
+
+            // mDNS (.local) — names Apple devices, printers, Chromecasts and NAS boxes
+            java.util.List<String> mdnsTargets = new java.util.ArrayList<>();
+            for (String[] r : rows) mdnsTargets.add(r[0]);
+            toolPrint("#546e7a", isRussian ? "запрос mDNS (.local)…" : "querying mDNS (.local)…");
+            java.util.Map<String, String> mdnsNames = lanMdnsResolve(mdnsTargets, 1600);
+
             toolPrint("#546e7a", isRussian
-                ? ("определение имён устройств (DNS/NetBIOS/HTTP/FTP)… найдено SSDP: " + ssdpLocations.size())
-                : ("identifying devices (DNS/NetBIOS/HTTP/FTP)… SSDP hits: " + ssdpLocations.size()));
+                ? ("определение имён (mDNS/DNS/NetBIOS/HTTP/FTP)… SSDP: " + ssdpLocations.size() + "  mDNS: " + mdnsNames.size())
+                : ("identifying devices (mDNS/DNS/NetBIOS/HTTP/FTP)… SSDP: " + ssdpLocations.size() + "  mDNS: " + mdnsNames.size()));
             java.util.concurrent.ExecutorService idPool = java.util.concurrent.Executors.newFixedThreadPool(8);
             java.util.List<java.util.concurrent.Future<String>> idFutures = new java.util.ArrayList<>();
             for (String[] r : rows) {
                 final String rip = r[0], rvendor = r[2];
-                idFutures.add(idPool.submit(() -> lanIdentify(rip, rvendor, ssdpLocations)));
+                idFutures.add(idPool.submit(() -> lanIdentify(rip, rvendor, ssdpLocations, mdnsNames)));
             }
             for (int i = 0; i < rows.size(); i++) {
                 String id = null;
@@ -3189,9 +3351,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             String idS   = r[2] != null ? r[2] : (isRussian ? "НЕИЗВЕСТНО" : "UNKNOWN");
             String flag  = isGw ? "  ← GATEWAY" : "";
             String line  = String.format(Locale.US, "  %-15s %-17s %-24s%s", r[0], macS, idS, flag);
-            if (isGw)              toolPrint("#00ff88", line);
-            else if (r[2] == null) { toolPrint("#ffd740", line); unknown++; }
-            else                   toolPrint("#e0e8f0", line);
+            if (isGw)              toolPrintDevice("#00ff88", line, r[0], idS);
+            else if (r[2] == null) { toolPrintDevice("#ffd740", line, r[0], idS); unknown++; }
+            else                   toolPrintDevice("#e0e8f0", line, r[0], idS);
         }
         if (rows.isEmpty())
             toolPrint("#546e7a", isRussian ? "  (ничего не найдено)" : "  (nothing found)");
@@ -3418,6 +3580,143 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     }
 
     /** Appends one colored line to the tools console (thread-safe). */
+    /** Prints a LAN result line whose IP is tappable (opens device actions). */
+    private void toolPrintDevice(final String color, final String line,
+                                 final String ip, final String label) {
+        mainHandler.post(() -> {
+            if (toolsConsoleText == null) return;
+            android.text.SpannableString ss = new android.text.SpannableString(line + "\n");
+            ss.setSpan(new android.text.style.ForegroundColorSpan(Color.parseColor(color)),
+                    0, ss.length(), 0);
+            int idx = line.indexOf(ip);
+            if (idx >= 0) {
+                ss.setSpan(new android.text.style.ClickableSpan() {
+                    @Override public void onClick(android.view.View w) {
+                        showDeviceActions(ip, label);
+                    }
+                    @Override public void updateDrawState(android.text.TextPaint ds) {
+                        ds.setColor(Color.parseColor(color));
+                        ds.setUnderlineText(false);
+                    }
+                }, idx, idx + ip.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            toolsConsoleText.append(ss);
+            if (toolsScrollView != null)
+                toolsScrollView.post(() -> toolsScrollView.fullScroll(android.view.View.FOCUS_DOWN));
+        });
+    }
+
+    private void showDeviceActions(final String ip, final String label) {
+        final String title = ip + (label != null && !label.isEmpty() ? "  —  " + label : "");
+        final String[] items = {
+            isRussian ? "🔍  Сканировать порты" : "🔍  Scan common ports",
+            isRussian ? "🔌  Открыть в PORT"    : "🔌  Open in PORT tool",
+            isRussian ? "📋  Копировать IP"     : "📋  Copy IP",
+        };
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setItems(items, (d, which) -> {
+                if (which == 0) {
+                    startQuickPortScan(ip, label);
+                } else if (which == 1) {
+                    setToolMode(TOOL_PORT);
+                    toolsHostInput.setText(ip);
+                    toolsPortInput.requestFocus();
+                } else {
+                    android.content.ClipboardManager cm =
+                        (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("IP", ip));
+                    showToast(isRussian ? "IP скопирован" : "IP copied");
+                }
+            })
+            .show();
+    }
+
+    private String portServiceName(int p) {
+        switch (p) {
+            case 21:   return "ftp";
+            case 22:   return "ssh";
+            case 23:   return "telnet";
+            case 53:   return "dns";
+            case 80:   return "http";
+            case 139:  return "smb";
+            case 443:  return "https";
+            case 445:  return "smb";
+            case 554:  return "rtsp";
+            case 1883: return "mqtt";
+            case 3389: return "rdp";
+            case 5000: return "upnp";
+            case 8008: return "http-alt";
+            case 8080: return "http-proxy";
+            case 8443: return "https-alt";
+            case 9100: return "print";
+            default:   return "";
+        }
+    }
+
+    private boolean lanTcpOpen(String ip, int port, int timeoutMs) {
+        java.net.Socket s = null;
+        try {
+            s = new java.net.Socket();
+            s.connect(new java.net.InetSocketAddress(ip, port), timeoutMs);
+            return true;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (s != null) try { s.close(); } catch (Exception ignored) { }
+        }
+    }
+
+    /** Quick common-port sweep for a host picked from the LAN results. */
+    private void startQuickPortScan(final String ip, final String label) {
+        if (toolsRunning) {
+            showToast(isRussian ? "Дождитесь завершения текущей операции" : "Wait for the current operation to finish");
+            return;
+        }
+        toolsRunning = true;
+        toolsRunBtn.setEnabled(false);
+        toolsStopBtn.setVisibility(View.VISIBLE);
+        toolsStatusText.setText(isRussian ? "⏳ Сканирование портов…" : "⏳ Scanning ports…");
+
+        executor.execute(() -> {
+            toolPrint("#00e5ff", "\n$ port-scan " + ip +
+                    (label != null && !label.isEmpty() ? "  (" + label + ")" : ""));
+            final int[] ports = {21, 22, 23, 53, 80, 139, 443, 445, 554, 1883, 3389, 5000, 8008, 8080, 8443, 9100};
+            java.util.List<Integer> open = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+            java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(8);
+            java.util.List<java.util.concurrent.Future<?>> fs = new java.util.ArrayList<>();
+            for (final int p : ports) {
+                fs.add(pool.submit(() -> {
+                    if (!toolsRunning) return;
+                    if (lanTcpOpen(ip, p, 400) && open.add(p)) {
+                        toolPrint("#00ff88", "  OPEN  " + p + "/tcp   " + portServiceName(p));
+                    }
+                }));
+            }
+            for (java.util.concurrent.Future<?> f : fs) { try { f.get(); } catch (Exception ignored) { } }
+            pool.shutdownNow();
+
+            if (!toolsRunning) {
+                toolPrint("#ffd740", isRussian ? "^ остановлено пользователем" : "^ stopped by user");
+            } else if (open.isEmpty()) {
+                toolPrint("#546e7a", isRussian
+                    ? "— открытых портов из списка не найдено (хост может блокировать ICMP/фильтровать)"
+                    : "— none of the common ports are open (host may be filtered/firewalled)");
+            } else {
+                java.util.Collections.sort(open);
+                toolPrint("#00e5ff", isRussian
+                    ? ("— открыто: " + open.size() + " из " + ports.length + " проверенных")
+                    : ("— " + open.size() + " of " + ports.length + " ports open"));
+            }
+            mainHandler.post(() -> {
+                toolsRunning = false;
+                toolsRunBtn.setEnabled(true);
+                toolsStopBtn.setVisibility(View.GONE);
+                toolsStatusText.setText(isRussian ? "⚫ Готово" : "⚫ Done");
+            });
+        });
+    }
+
     private void toolPrint(final String color, final String text) {
         mainHandler.post(() -> {
             if (toolsConsoleText == null) return;
