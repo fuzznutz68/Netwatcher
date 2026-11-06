@@ -181,6 +181,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        CrashLogger.install(getApplicationContext());
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -346,6 +347,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             public void onReceive(Context ctx, Intent intent) {
                 if (TrafficMonitorService.EVENT_CONFIG_LOST.equals(intent.getAction())) {
                     // Fail-closed: the service could not restore its target and stopped.
+                    if (isFinishing() || startMonBtn == null || monStatusText == null) return;
                     monitoring = false;
                     startMonBtn.setEnabled(true);
                     stopMonBtn.setEnabled(false);
@@ -877,6 +879,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             List<AppEntry> entries = new ArrayList<>();
 
             for (ApplicationInfo ai : apps) {
+              try {
                 // Must have a launcher intent (visible in app drawer)
                 Intent launchIntent = pm.getLaunchIntentForPackage(ai.packageName);
                 if (launchIntent == null) continue;
@@ -905,8 +908,19 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                     pkg.startsWith("com.google.android.ext.") ||
                     pkg.startsWith("com.google.android.trichromelibrary")) continue;
 
-                String label = pm.getApplicationLabel(ai).toString();
+                String label;
+                try {
+                    CharSequence cs = pm.getApplicationLabel(ai);
+                    label = (cs != null ? cs.toString() : ai.packageName);
+                } catch (Throwable t) {
+                    label = ai.packageName;   // broken resources must not hide the app
+                }
                 entries.add(new AppEntry(label, ai.packageName, ai.uid));
+              } catch (Throwable t) {
+                // Skip only this package; never let one bad entry abort the whole list
+                // (an uncaught throw here runs on a pool thread and kills the process).
+                if (BuildConfig.DEBUG) android.util.Log.w("NetWatch", "app enum skip: " + ai.packageName, t);
+              }
             }
 
             // Sort alphabetically

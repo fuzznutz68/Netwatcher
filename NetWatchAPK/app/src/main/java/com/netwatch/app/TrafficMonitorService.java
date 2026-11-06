@@ -141,22 +141,26 @@ public class TrafficMonitorService extends Service {
             restoreTarget();
         }
 
-        // FAIL CLOSED. Without a validated target we must never silently degrade to
-        // whole-device monitoring, which would attribute every app's traffic to the user's
-        // chosen view. Stop and report instead.
-        if (targetUid < 0 || targetPkg.isEmpty()) {
-            running = false;
-            clearPersistedTarget();
-            sendConfigLost();
-            stopSelf();
-            return START_NOT_STICKY;
-        }
-
+        // Satisfy the startForegroundService() contract FIRST. Returning from
+        // onStartCommand without startForeground() makes the system kill the app with
+        // RemoteServiceException on Android 12+, so validation must happen after this.
         try {
             startForegroundSafely();
         } catch (Exception e) {
             Log.e(TAG, "startForeground refused: " + e.getClass().getSimpleName());
             running = false;
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        // FAIL CLOSED. Without a validated target we must never silently degrade to
+        // whole-device monitoring, which would attribute every app's traffic to the user's
+        // chosen view. Stop and report instead.
+        if (!MonitorTarget.isValid(targetUid, targetPkg)) {
+            running = false;
+            clearPersistedTarget();
+            sendConfigLost();
+            stopForeground(android.app.Service.STOP_FOREGROUND_REMOVE);
             stopSelf();
             return START_NOT_STICKY;
         }

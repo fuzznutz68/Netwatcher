@@ -16,8 +16,8 @@ android {
         applicationId "com.netwatch.net"
         minSdk 30
         targetSdk 36
-        versionCode 80
-        versionName "2.10.2-p0"
+        versionCode 81
+        versionName "2.10.2-p0-diag"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
