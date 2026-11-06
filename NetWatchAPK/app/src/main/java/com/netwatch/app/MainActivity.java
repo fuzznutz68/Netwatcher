@@ -2938,10 +2938,12 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 java.io.BufferedReader r = new java.io.BufferedReader(
                         new java.io.InputStreamReader(sock.getInputStream()));
                 String line; String server = null, realm = null; boolean inHeaders = true;
+                String statusLine = null;
                 StringBuilder body = new StringBuilder();
                 int n = 0;
                 while ((line = r.readLine()) != null && n++ < 80) {
                     String ll = line.toLowerCase(Locale.US);
+                    if (statusLine == null) { statusLine = line; continue; }
                     if (inHeaders) {
                         if (ll.startsWith("server:")) server = line.substring(line.indexOf(':') + 1).trim();
                         if (ll.startsWith("www-authenticate:")) {
@@ -2957,17 +2959,27 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         if (body.length() > 3000) break;
                     }
                 }
+                // Redirect pages ("302 Moved Temporarily") name nothing useful and would
+                // mask the device behind a meaningless label — let other probes identify it.
+                boolean isRedirect = statusLine != null && statusLine.matches("HTTP/\\S+\\s+3\\d\\d.*");
                 String bl = body.toString().toLowerCase(Locale.US);
                 int ts = bl.indexOf("<title>");
-                if (ts >= 0) {
+                if (ts >= 0 && !isRedirect) {
                     int te = bl.indexOf("</title>", ts);
                     if (te > ts) {
                         String title = body.substring(ts + 7, te).trim();
-                        if (!title.isEmpty()) return title;
+                        String tl = title.toLowerCase(Locale.US);
+                        boolean generic = title.matches("^\\d{3}\\s.*")          // "302 Moved Temporarily"
+                                || tl.startsWith("index of /")                    // directory listing
+                                || tl.equals("redirecting...")
+                                || tl.equals("object moved")
+                                || tl.equals("document moved")
+                                || tl.isEmpty();
+                        if (!generic) return title;
                     }
                 }
                 if (realm != null)  return realm;
-                if (server != null) return server;
+                if (server != null && !isRedirect) return server;
             } catch (Exception ignored) {
             } finally {
                 if (sock != null) try { sock.close(); } catch (Exception ignored) { }
