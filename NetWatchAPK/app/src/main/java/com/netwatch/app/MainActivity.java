@@ -875,8 +875,22 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private void loadAppList() {
         executor.execute(() -> {
             PackageManager pm = getPackageManager();
-            List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
             List<AppEntry> entries = new ArrayList<>();
+            try {
+            List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            if (apps == null || apps.isEmpty()) {
+                // Fallback: derive the list from launcher activities instead of the
+                // installed-applications API. Never leave the picker empty.
+                java.util.LinkedHashSet<String> pkgs = new java.util.LinkedHashSet<>();
+                Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+                for (android.content.pm.ResolveInfo ri : pm.queryIntentActivities(main, 0)) {
+                    if (ri.activityInfo != null) pkgs.add(ri.activityInfo.packageName);
+                }
+                apps = new ArrayList<>();
+                for (String pkg : pkgs) {
+                    try { apps.add(pm.getApplicationInfo(pkg, 0)); } catch (Throwable ignored) { }
+                }
+            }
 
             for (ApplicationInfo ai : apps) {
               try {
@@ -923,14 +937,21 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
               }
             }
 
+            } catch (Throwable t) {
+                // Enumeration must never take the app down or leave the picker unusable.
+                if (BuildConfig.DEBUG) android.util.Log.e("NetWatch", "app enumeration failed", t);
+            }
+
             // Sort alphabetically
             Collections.sort(entries, (a, b) -> a.label.compareToIgnoreCase(b.label));
 
-            appList = entries;
+            final List<AppEntry> result = entries;
+            appList = result;
             mainHandler.post(() -> {
-                appAdapter = new ThemedArrayAdapter<>(appList);
+                if (isFinishing() || isDestroyed()) return;
+                appAdapter = new ThemedArrayAdapter<>(result);
                 appSpinner.setAdapter(appAdapter);
-                if (!appList.isEmpty()) selectedApp = appList.get(0);
+                if (!result.isEmpty()) selectedApp = result.get(0);
             });
         });
     }
