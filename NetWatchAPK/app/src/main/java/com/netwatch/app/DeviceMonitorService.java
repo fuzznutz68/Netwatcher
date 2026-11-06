@@ -30,7 +30,7 @@ public class DeviceMonitorService extends Service {
 
     private static final String TAG        = "NetWatchDev";
     private static final String CHANNEL_ID = "netwatch_dev";
-    private static final int    NOTIF_ID   = 43;
+    private static final int    NOTIF_ID   = 44;   // 42=VPN, 43=Traffic Monitor
 
     // How often to poll /proc/net (ms)
     private static final long   POLL_INTERVAL_MS = 1000;
@@ -58,12 +58,23 @@ public class DeviceMonitorService extends Service {
         }
         pm = getPackageManager();
         createNotificationChannel();
-        startForeground(NOTIF_ID, buildNotification());
+        try {
+            startForeground(NOTIF_ID, buildNotification());
+        } catch (Exception e) {
+            Log.e(TAG, "startForeground refused: " + e.getClass().getSimpleName());
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
-        scheduler   = Executors.newSingleThreadScheduledExecutor();
-        dnsExecutor = Executors.newScheduledThreadPool(4);
-
-        scheduler.scheduleAtFixedRate(this::poll, 0, POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        // Idempotent: a repeat start must not create a second polling scheduler, which
+        // would double every emission and the battery cost with it.
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.scheduleAtFixedRate(this::poll, 0, POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        }
+        if (dnsExecutor == null || dnsExecutor.isShutdown()) {
+            dnsExecutor = Executors.newScheduledThreadPool(4);
+        }
         return START_STICKY;
     }
 
@@ -78,7 +89,7 @@ public class DeviceMonitorService extends Service {
      *  monitoring immediately — it shouldn't keep running once the app itself is closed. */
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        stopForeground(true);
+        stopForeground(android.app.Service.STOP_FOREGROUND_REMOVE);
         stopSelf();
         super.onTaskRemoved(rootIntent);
     }
@@ -103,7 +114,7 @@ public class DeviceMonitorService extends Service {
             parseProcNetFile("/proc/net/udp",  true,  false, now);
             parseProcNetFile("/proc/net/udp6", true,  true,  now);
         } catch (Exception e) {
-            Log.d(TAG, "Poll error: " + e.getMessage());
+            if (BuildConfig.DEBUG) Log.d(TAG, "Poll error: " + e.getMessage());
         }
     }
 
@@ -210,7 +221,7 @@ public class DeviceMonitorService extends Service {
         i.putExtra("app",       appLabel != null ? appLabel : "");
         i.putExtra("timestamp", ts);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-        Log.d(TAG, proto + " " + (host != null && !host.isEmpty() ? host : ip) + ":" + port
+        if (BuildConfig.DEBUG) Log.d(TAG, proto + " " + (host != null && !host.isEmpty() ? host : ip) + ":" + port
               + (appLabel != null && !appLabel.isEmpty() ? " [" + appLabel + "]" : ""));
     }
 

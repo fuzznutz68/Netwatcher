@@ -50,21 +50,7 @@ public class HistoryManager {
     public static void save(Context ctx, Session s) {
         if (s.hosts.isEmpty()) return;
         try {
-            JSONObject o = new JSONObject();
-            o.put("appLabel", s.appLabel);
-            o.put("packageName", s.packageName);
-            o.put("startTime", s.startTime);
-            o.put("endTime", s.endTime);
-            o.put("txBytes", s.txBytes);
-            o.put("rxBytes", s.rxBytes);
-            JSONArray arr = new JSONArray();
-            for (Map.Entry<String, String> e : s.hosts.entrySet()) {
-                JSONObject h = new JSONObject();
-                h.put("host", e.getKey());
-                h.put("ts", e.getValue());
-                arr.put(h);
-            }
-            o.put("hosts", arr);
+            JSONObject o = HistoryCodec.toJson(s);
 
             String filename = "session_" + s.startTime + ".json";
             File f = new File(dir(ctx), filename);
@@ -92,23 +78,7 @@ public class HistoryManager {
         for (File f : files) {
             try {
                 String json = new String(Files.readAllBytes(f.toPath()));
-                JSONObject o = new JSONObject(json);
-                Session s = new Session();
-                s.id = f.getName();
-                s.appLabel    = o.optString("appLabel", "Device");
-                s.packageName = o.optString("packageName", "");
-                s.startTime   = o.optLong("startTime", 0);
-                s.endTime     = o.optLong("endTime", 0);
-                s.txBytes     = o.optLong("txBytes", -1);
-                s.rxBytes     = o.optLong("rxBytes", -1);
-                JSONArray arr = o.optJSONArray("hosts");
-                if (arr != null) {
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject h = arr.optJSONObject(i);
-                        if (h != null) s.hosts.put(h.optString("host"), h.optString("ts"));
-                    }
-                }
-                result.add(s);
+                result.add(HistoryCodec.fromJson(json, f.getName()));
             } catch (Exception ignored) { }
         }
         result.sort((a, b) -> Long.compare(b.startTime, a.startTime));

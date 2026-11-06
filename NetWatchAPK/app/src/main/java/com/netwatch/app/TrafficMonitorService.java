@@ -54,6 +54,17 @@ public class TrafficMonitorService extends Service {
 
     private static final String CHANNEL_ID      = "netwatch_monitor";
     private static final int    NOTIF_ID        = 43;
+
+    /** Monitoring identity persisted separately from user preferences so it is never
+     *  included in cloud/device-transfer backups. */
+    private static final String SESSION_PREFS   = "netwatch_session";
+    private static final String KEY_UID         = "target_uid";
+    private static final String KEY_PKG         = "target_pkg";
+    private static final String KEY_NAME        = "target_name";
+
+    /** Broadcast when a restart cannot restore a valid target. MainActivity surfaces
+     *  this as an explicit stopped state — never as whole-device monitoring. */
+    public static final String EVENT_CONFIG_LOST = "com.netwatch.app.TRAFFIC_CONFIG_LOST";
     private static final long   POLL_MS         = 1000L;
     private static final String DOMAIN_INTEL_URL = "https://superagent-cfb25b3e.base44.app/functions/domainIntel";
     private static final String GEO_IP_URL       = "https://superagent-cfb25b3e.base44.app/functions/geoIp";
@@ -114,23 +125,42 @@ public class TrafficMonitorService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            clearPersistedTarget();   // explicit user stop — do not restore later
             stopSelf();
             return START_NOT_STICKY;
         }
 
-        if (intent != null) {
+        if (intent != null && intent.hasExtra("target_uid")) {
+            // Fresh start from the UI: adopt and persist the selected app.
             targetUid  = intent.getIntExtra("target_uid", -1);
             targetPkg  = intent.getStringExtra("target_pkg");  if (targetPkg  == null) targetPkg  = "";
             targetName = intent.getStringExtra("target_name"); if (targetName == null) targetName = "";
+            persistTarget();
+        } else {
+            // System restart (START_STICKY delivers a null intent): restore identity.
+            restoreTarget();
         }
 
-        createChannel();
-        Notification n = buildNotification();
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIF_ID, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-        } else {
-            startForeground(NOTIF_ID, n);
+        // FAIL CLOSED. Without a validated target we must never silently degrade to
+        // whole-device monitoring, which would attribute every app's traffic to the user's
+        // chosen view. Stop and report instead.
+        if (targetUid < 0 || targetPkg.isEmpty()) {
+            running = false;
+            clearPersistedTarget();
+            sendConfigLost();
+            stopSelf();
+            return START_NOT_STICKY;
         }
+
+        try {
+            startForegroundSafely();
+        } catch (Exception e) {
+            Log.e(TAG, "startForeground refused: " + e.getClass().getSimpleName());
+            running = false;
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
 
         dnsCache.clear(); geoCache.clear();
         submittedIps.clear(); geoSubmitted.clear(); broadcastHosts.clear(); submittedDomains.clear();
@@ -146,6 +176,44 @@ public class TrafficMonitorService extends Service {
         if (!targetPkg.isEmpty()) seedDomainsFromBackend(targetPkg);
         handler.post(pollRunnable);
         return START_STICKY;
+    }
+
+    private void persistTarget() {
+        getSharedPreferences(SESSION_PREFS, MODE_PRIVATE).edit()
+            .putInt(KEY_UID, targetUid)
+            .putString(KEY_PKG, targetPkg)
+            .putString(KEY_NAME, targetName)
+            .apply();
+    }
+
+    private void restoreTarget() {
+        android.content.SharedPreferences p = getSharedPreferences(SESSION_PREFS, MODE_PRIVATE);
+        targetUid  = p.getInt(KEY_UID, -1);
+        targetPkg  = p.getString(KEY_PKG, "");
+        targetName = p.getString(KEY_NAME, "");
+        if (targetPkg == null) targetPkg = "";
+        if (targetName == null) targetName = "";
+    }
+
+    private void clearPersistedTarget() {
+        getSharedPreferences(SESSION_PREFS, MODE_PRIVATE).edit().clear().apply();
+    }
+
+    private void sendConfigLost() {
+        Intent ev = new Intent(EVENT_CONFIG_LOST);
+        ev.setPackage(getPackageName());
+        sendBroadcast(ev);
+    }
+
+    /** Android 12+ can refuse a background foreground-service start; a refused start must
+     *  shut the service down cleanly rather than leave a silent zombie. */
+    private void startForegroundSafely() {
+        Notification n = buildNotification();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NOTIF_ID, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        } else {
+            startForeground(NOTIF_ID, n);
+        }
     }
 
     /** Real host discovery now comes from NetWatchVpnService's raw packet capture
@@ -173,7 +241,7 @@ public class TrafficMonitorService extends Service {
                         if (uid == -1) {
                             unresolvedUidStreak++;
                             if (unresolvedUidStreak == UID_RESOLVE_FALLBACK_THRESHOLD) {
-                                Log.w(TAG, "Connection-owner UID unresolved for "
+                                if (BuildConfig.DEBUG) Log.w(TAG, "Connection-owner UID unresolved for "
                                         + UID_RESOLVE_FALLBACK_THRESHOLD + " connections — "
                                         + "some of " + targetPkg + "'s hosts may not appear");
                                 sendFallbackNotice();
@@ -262,7 +330,7 @@ public class TrafficMonitorService extends Service {
                 }
                 // Broadcast seeded domain names immediately (without geo yet)
                 broadcastNewHosts(domains);
-            } catch (Exception e) { Log.w(TAG, "seedDomains: " + e.getMessage()); }
+            } catch (Exception e) { if (BuildConfig.DEBUG) Log.w(TAG, "seedDomains: " + e.getMessage()); }
         });
     }
 
@@ -467,7 +535,7 @@ public class TrafficMonitorService extends Service {
                         }
                     }
                 }
-            } catch (Exception e) { Log.w(TAG, "fetchGeo: " + e.getMessage()); }
+            } catch (Exception e) { if (BuildConfig.DEBUG) Log.w(TAG, "fetchGeo: " + e.getMessage()); }
         });
     }
 
@@ -550,7 +618,8 @@ public class TrafficMonitorService extends Service {
      *  monitoring immediately — it shouldn't keep running once the app itself is closed. */
     @Override public void onTaskRemoved(Intent rootIntent) {
         running = false;
-        stopForeground(true);
+        clearPersistedTarget();   // swiped from Recents = explicit stop
+        stopForeground(android.app.Service.STOP_FOREGROUND_REMOVE);
         stopSelf();
         super.onTaskRemoved(rootIntent);
     }

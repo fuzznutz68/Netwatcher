@@ -173,6 +173,8 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private boolean isRussian = false;
     private BroadcastReceiver trafficReceiver;
     private final ExecutorService executor    = Executors.newCachedThreadPool();
+    /** Single thread so saved sessions keep their chronological order. */
+    private final ExecutorService historyExecutor = Executors.newSingleThreadExecutor();
     private static final String IP_WHOIS_URL = "https://superagent-cfb25b3e.base44.app/functions/ipWhois";
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
     private long monitoringStartTime = 0L;
@@ -342,6 +344,21 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         trafficReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
+                if (TrafficMonitorService.EVENT_CONFIG_LOST.equals(intent.getAction())) {
+                    // Fail-closed: the service could not restore its target and stopped.
+                    monitoring = false;
+                    startMonBtn.setEnabled(true);
+                    stopMonBtn.setEnabled(false);
+                    appSpinner.setEnabled(true);
+                    monStatusText.setText(isRussian
+                        ? "⚫  Мониторинг остановлен: не удалось восстановить приложение"
+                        : "⚫  Monitoring stopped: could not restore selected app");
+                    monStatusText.setTextColor(Color.parseColor("#EF5350"));
+                    showToast(isRussian
+                        ? "Мониторинг остановлен: выберите приложение заново"
+                        : "Monitoring stopped: select an app again");
+                    return;
+                }
                 if (intent.getBooleanExtra(TrafficMonitorService.EXTRA_FALLBACK_NOTICE, false)) {
                     showFallbackNotice();
                     return;
@@ -355,10 +372,11 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             }
         };
         IntentFilter f = new IntentFilter(TrafficMonitorService.EVENT_ACTION);
-        // Must use RECEIVER_EXPORTED (or no flag pre-T) because the broadcast
-        // has setPackage() applied — Android still routes it correctly.
+        f.addAction(TrafficMonitorService.EVENT_CONFIG_LOST);
+        // Intra-app only: setPackage() on the sender plus NOT_EXPORTED prevents other
+        // apps from spoofing traffic events into the UI.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(trafficReceiver, f, Context.RECEIVER_EXPORTED);
+            registerReceiver(trafficReceiver, f, Context.RECEIVER_NOT_EXPORTED);
         } else {
             registerReceiver(trafficReceiver, f);
         }
@@ -973,7 +991,11 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             s.txBytes     = lastKnownTx;
             s.rxBytes     = lastKnownRx;
             s.hosts.putAll(trafficLogForExport);
-            HistoryManager.save(this, s);
+            final HistoryManager.Session toSave = s;
+            final android.content.Context appCtx = getApplicationContext();
+            historyExecutor.execute(() -> {
+                HistoryManager.save(appCtx, toSave);
+            });
         }
     }
 
@@ -2213,8 +2235,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
     /** Wrap a value for safe CSV embedding (escapes quotes, wraps in quotes). */
     private String csv(String v) {
-        if (v == null) return "\"\"";
-        return "\"" + v.replace("\"", "\"\"") + "\"";
+        return CsvUtil.escape(v);
     }
 
     private void exportDomainIntel() {
@@ -3813,6 +3834,16 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         try { unregisterReceiver(trafficReceiver); } catch (Exception ignored) {}
+        // Device-monitor receiver is registered with LocalBroadcastManager when the
+        // Device tab starts monitoring; leaving it registered leaks this Activity.
+        if (deviceReceiver != null) {
+            try {
+                androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+                    .unregisterReceiver(deviceReceiver);
+            } catch (Exception ignored) {}
+            deviceReceiver = null;
+        }
+        historyExecutor.shutdown();
         executor.shutdownNow();
     }
 

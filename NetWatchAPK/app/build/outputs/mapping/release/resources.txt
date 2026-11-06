@@ -1080,8 +1080,8 @@ ACTION_SCROLL_RIGHT
 .baseline
 primary_container
 asyncTraceEnd
-appLabel
 android.view.accessibility.action.ARG...
+appLabel
 android.permission.ACCESS_NETWORK_STATE
 STARTED
 android:view_registry_state
@@ -1230,6 +1230,7 @@ PrecomputedText
 supportScrollUp
 preferWrap
 DrawableDelegate
+com.netwatch.app.TRAFFIC_CONFIG_LOST
 androidx.profileinstaller.action.INST...
 hBias
 ON_START
@@ -1456,6 +1457,7 @@ postfix
 track
 value
 android.activity.usage_time
+com.netwatch.net
 .org
 REUSABLE_CLAIMED
 android:visibility:visibility
@@ -1668,6 +1670,7 @@ islamic
 setExclusiveCheckable
 centerX
 azure.com
+release
 UNDEFINED
 indeterminate
 .online
@@ -1837,9 +1840,9 @@ SURFACE_3
 SURFACE_2
 FloatingActionButton
 SURFACE_5
-packageName
 SURFACE_4
 row
+packageName
 startHorizontal
 androidx.activity.result.contract.ext...
 android.answerColor
@@ -2248,6 +2251,7 @@ getModule
 PATH
 parent
 layout_constraintEnd_toEndOf
+netwatch_session
 gradientRadius
 androidx.lifecycle.LifecycleCoroutine...
 MMMMEEEEd
@@ -3654,7 +3658,7 @@ Marking integer:status_bar_notification_info_maxnum:2131296328 used because it m
 Marking string:status_bar_notification_info_overflow:2131689663 used because it matches string pool constant status
 Marking id:skipCollapsed:2131231191 used because it matches string pool constant skip
 Marking id:skipped:2131231192 used because it matches string pool constant skip
-Marking xml:file_provider_paths:2131886080 used because it matches string pool constant file
+Marking xml:file_provider_paths:2131886082 used because it matches string pool constant file
 Marking attr:maxAcceleration:2130903934 used because it matches string pool constant max
 Marking attr:maxActionInlineWidth:2130903935 used because it matches string pool constant max
 Marking attr:maxButtonHeight:2130903936 used because it matches string pool constant max
@@ -3911,6 +3915,7 @@ Marking color:error_color_material_dark:2131034201 used because it matches strin
 Marking color:error_color_material_light:2131034202 used because it matches string pool constant error
 Marking string:error_a11y_label:2131689524 used because it matches string pool constant error
 Marking string:error_icon_content_description:2131689525 used because it matches string pool constant error
+Marking xml:network_security_config:2131886088 used because it matches string pool constant network
 Marking attr:shortcutMatchRequired:2130904152 used because it matches string pool constant shortcut
 Marking id:shortcut:2131231186 used because it matches string pool constant shortcut
 Marking attr:track:2130904415 used because it matches string pool constant track
@@ -5211,6 +5216,7 @@ Marking attr:targetId:2130904269 used because it matches string pool constant ta
 Marking id:baseline:2131230816 used because it matches string pool constant baseline
 Marking attr:layout_constraintLeft_toRightOf:2130903791 used because it matches string pool constant layout_constraintLeft_toRightOf
 Marking attr:autoSizeTextType:2130903109 used because it matches string pool constant autoSizeTextType
+Marking xml:data_extraction_rules:2131886081 used because it matches string pool constant data
 Marking attr:springMass:2130904186 used because it matches string pool constant springMass
 Marking attr:barrierAllowsGoneWidgets:2130903142 used because it matches string pool constant barrier
 Marking attr:barrierDirection:2130903143 used because it matches string pool constant barrier
@@ -25719,6 +25725,8 @@ Marking attr:viewTransitionOnCross:2130904458 used because it matches string poo
     @com.netwatch.net:drawable/m3_focus_ring_framework_button_background
 @com.netwatch.net:style/Widget_Support_CoordinatorLayout : reachable=true
     @com.netwatch.net:attr/statusBarBackground
+@com.netwatch.net:xml/backup_rules : reachable=true
+@com.netwatch.net:xml/data_extraction_rules : reachable=true
 @com.netwatch.net:xml/file_provider_paths : reachable=true
 @com.netwatch.net:xml/m3_button_group_child_size_change : reachable=false
 @com.netwatch.net:xml/m3_list_item_shape_state_list : reachable=false
@@ -25738,6 +25746,7 @@ Marking attr:viewTransitionOnCross:2130904458 used because it matches string poo
 @com.netwatch.net:xml/m3expressive_connected_buttons_inner_corner_size_state_list : reachable=false
     @com.netwatch.net:attr/shapeCornerSizeExtraSmall
     @com.netwatch.net:attr/shapeCornerSizeSmall
+@com.netwatch.net:xml/network_security_config : reachable=true
 
 The root reachable resources are:
  anim:abc_fade_in:2130771968
@@ -28280,7 +28289,10 @@ The root reachable resources are:
  style:Widget_MaterialComponents_Toolbar:2131756520
  style:Widget_MaterialComponents_Tooltip:2131756524
  style:Widget_Support_CoordinatorLayout:2131756525
- xml:file_provider_paths:2131886080
+ xml:backup_rules:2131886080
+ xml:data_extraction_rules:2131886081
+ xml:file_provider_paths:2131886082
+ xml:network_security_config:2131886088
 Unused resources are: 
  anim:design_snackbar_in:2130771994
  anim:design_snackbar_out:2130771995
@@ -29762,4 +29774,4 @@ Unused resources are:
  style:Widget_MaterialComponents_Toolbar_Primary:2131756521
  style:Widget_MaterialComponents_Toolbar_PrimarySurface:2131756522
  style:Widget_MaterialComponents_Toolbar_Surface:2131756523
- xml:m3expressive_connected_buttons_inner_corner_size_state_list:2131886085
+ xml:m3expressive_connected_buttons_inner_corner_size_state_list:2131886087

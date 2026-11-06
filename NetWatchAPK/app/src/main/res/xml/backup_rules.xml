@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and below (android:fullBackupContent).
+     Allowlist only: sole backed-up item is the non-sensitive preferences file
+     (language + alert toggle). Monitoring history, session identity, exports,
+     databases and caches are therefore excluded implicitly. -->
+<full-backup-content>
+    <include domain="sharedpref" path="netwatch_prefs.xml" />
+</full-backup-content>

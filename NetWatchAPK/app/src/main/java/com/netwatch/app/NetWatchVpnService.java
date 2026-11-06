@@ -43,7 +43,12 @@ public class NetWatchVpnService extends VpnService {
     private ExecutorService      ioPool;
     private ExecutorService      dnsExecutor;
 
-    private final ConcurrentHashMap<String, Long>   seenKeys = new ConcurrentHashMap<>();
+    /** Entries older than 2x the dedup window are pruned. Pruning well beyond DEDUP_MS
+     *  cannot resurrect a suppressed duplicate, it only frees memory. */
+    private static final long SEEN_PRUNE_INTERVAL_MS = 60_000L;
+    private static final int  SEEN_MAX_ENTRIES       = 20_000;
+    private final SeenKeyCache seenKeys =
+            new SeenKeyCache(DEDUP_MS, SEEN_PRUNE_INTERVAL_MS, SEEN_MAX_ENTRIES);
     private final ConcurrentHashMap<String, String> dnsCache = new ConcurrentHashMap<>();
 
     // ── Lifecycle ─────────────────────────────────────────────────
@@ -121,7 +126,7 @@ public class NetWatchVpnService extends VpnService {
             FileOutputStream out = new FileOutputStream(vpnInterface.getFileDescriptor());
             byte[] buf = new byte[MTU];
             running = true;
-            Log.d(TAG, "VPN tunnel up");
+            if (BuildConfig.DEBUG) Log.d(TAG, "VPN tunnel up");
 
             while (running) {
                 int len = in.read(buf);
@@ -169,9 +174,7 @@ public class NetWatchVpnService extends VpnService {
 
             String key = (isTcp ? "TCP" : "UDP") + dstIp + ":" + dstPort;
             long   now = System.currentTimeMillis();
-            Long   last = seenKeys.get(key);
-            if (last == null || now - last > DEDUP_MS) {
-                seenKeys.put(key, now);
+            if (seenKeys.shouldReport(key, now)) {
                 reportConnection(isTcp ? "TCP" : "UDP", proto, srcIp, srcPort, dstIp, dstPort);
             }
 
@@ -237,9 +240,7 @@ public class NetWatchVpnService extends VpnService {
 
             String key = (isTcp ? "TCP" : "UDP") + dstIp + ":" + dstPort;
             long   now  = System.currentTimeMillis();
-            Long   last = seenKeys.get(key);
-            if (last == null || now - last > DEDUP_MS) {
-                seenKeys.put(key, now);
+            if (seenKeys.shouldReport(key, now)) {
                 reportConnection(isTcp ? "TCP" : "UDP", proto, srcIp, srcPort, dstIp, dstPort);
             }
 
@@ -265,7 +266,7 @@ public class NetWatchVpnService extends VpnService {
             ch.write(ByteBuffer.wrap(pkt, payloadOff, payloadLen));
             ch.close();
         } catch (Exception e) {
-            Log.d(TAG, "TCP fwd error: " + e.getMessage());
+            if (BuildConfig.DEBUG) Log.d(TAG, "TCP fwd error: " + e.getMessage());
         }
     }
 
@@ -300,7 +301,7 @@ public class NetWatchVpnService extends VpnService {
             }
             ch.close();
         } catch (Exception e) {
-            Log.d(TAG, "UDP fwd error: " + e.getMessage());
+            if (BuildConfig.DEBUG) Log.d(TAG, "UDP fwd error: " + e.getMessage());
         }
     }
 
@@ -457,7 +458,7 @@ public class NetWatchVpnService extends VpnService {
         i.putExtra("uid",       ownerUid);
         i.putExtra("timestamp", ts);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-        Log.d(TAG, "EMIT " + proto + " " + (host.isEmpty() ? ip : host) + ":" + port + " uid=" + ownerUid);
+        if (BuildConfig.DEBUG) Log.d(TAG, "EMIT " + proto + " " + (host.isEmpty() ? ip : host) + ":" + port + " uid=" + ownerUid);
     }
 
     // ── Helpers ───────────────────────────────────────────────────

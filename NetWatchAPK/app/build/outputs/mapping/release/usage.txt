@@ -6978,7 +6978,7 @@ com.google.android.material.color.HarmonizedColors:
     static void <clinit>()
 com.google.android.material.internal.CollapsingTextHelper:
     static void <clinit>()
-com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$0be59e4ed9bc0c17fdea3cb02c4dc6ae7c6dfb0fde5d25dfe3cdd0e92d121ef7$2:
+com.netwatch.app.MainActivity$$InternalSyntheticLambda$1$5a5aaee6da29dbb22b556cb314f72c46bf3b0be8a039bd871c3dbfaaa86261a8$2:
     public final synthetic java.lang.String f$4
 kotlin.ExceptionsKt__ExceptionsKt
 kotlin.LazyKt

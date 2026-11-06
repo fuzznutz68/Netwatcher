@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: applies to cloud backup and device-to-device transfer.
+     Allowlist only: non-sensitive preferences (language + alert toggle).
+     Monitoring history, session identity, exports and databases are excluded. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="netwatch_prefs.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="sharedpref" path="netwatch_prefs.xml" />
+    </device-transfer>
+</data-extraction-rules>

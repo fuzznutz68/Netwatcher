@@ -1,0 +1,22 @@
+# Build output
+.gradle/
+build/
+app/build/
+*.iml
+.idea/
+
+# Signing material — never commit
+*.keystore
+*.jks
+keystore.properties
+
+# Local SDK paths
+local.properties
+
+# Agent memory / personal context
+.agents/.memory/
+.agents/.env
+
+# OS cruft
+.DS_Store
+Thumbs.db

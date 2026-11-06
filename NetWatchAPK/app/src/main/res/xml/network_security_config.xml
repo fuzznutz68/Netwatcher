@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Default: HTTPS only. The speed-test targets below are public third-party test
+     endpoints that still serve plain HTTP; they are the only cleartext destinations
+     the app connects to with an HTTP client.
+
+     NOTE: the LAN scanner's HTTP banner probe uses a raw TCP socket, which is not
+     governed by Network Security Config, so local-device probing is unaffected. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">speedtest.newark.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.fremont.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.toronto.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.london.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.frankfurt.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.singapore.linode.com</domain>
+        <domain includeSubdomains="false">speedtest.tokyo2.linode.com</domain>
+        <domain includeSubdomains="false">speedtest-ad-1.zoominternet.net</domain>
+        <domain includeSubdomains="false">la-ookla.geolinks.com</domain>
+        <domain includeSubdomains="false">stchi.highlinefast.com</domain>
+        <domain includeSubdomains="false">dallas.tx.speedtest.frontier.com</domain>
+        <domain includeSubdomains="false">speedtest03.bluestreamfiber.net</domain>
+        <domain includeSubdomains="false">speedtest1-sttlwawb.as20055.net</domain>
+        <domain includeSubdomains="false">speedtest14.point-broadband.com</domain>
+        <domain includeSubdomains="false">speedtest.selectel.ru</domain>
+    </domain-config>
+</network-security-config>
