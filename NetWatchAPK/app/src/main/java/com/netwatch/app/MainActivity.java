@@ -2542,7 +2542,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.10.0");
+        toolPrint("#546e7a", "netwatch tools v2.10.1");
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
