@@ -66,14 +66,12 @@ lives on `main`, source for each release lives on its tag.
 
 | Capture | Shows |
 | --- | --- |
-| ![Network Tools panel](docs/images/tools-whois.png) | Build 87 Network Tools: PING, TRACE, PORT, DNS, **WHOIS**, LAN |
+| ![Network Tools panel](docs/images/tools-whois.png) | Build 88 Network Tools: PING, TRACE, PORT, DNS, **WHOIS**, LAN, footer reporting the installed version |
 | ![Device Monitor with a full IPv6 row](docs/images/device-monitor-ipv6.png) | Build 87 Device Monitor: complete IPv6 address, per-connection rows |
 
-Both were captured on Android 14 tablet hardware running build 87. `DeviceMonitor.jpg` at
-the repository root is from an older build and is kept for history only; the live captures
-above supersede it. In the Tools capture the footer still reads the old hardcoded
-`netwatch tools v2.10.1`; build 88 derived that line from the package, so it now prints the
-installed version.
+The Tools capture is build 88, the Device Monitor capture is build 87 (unchanged in 88).
+Both come from Android 14 tablet hardware. `DeviceMonitor.jpg` at the repository root is
+from an older build and is kept for history only; the captures above supersede it.
 
 ## Limitations
 

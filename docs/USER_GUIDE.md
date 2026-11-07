@@ -96,11 +96,10 @@ except the DNS resolver you choose and the WHOIS backend described below.
 | LAN | none | ARP cache plus ping sweep, vendor identification |
 | WHOIS | **IP address only** | Registry lookup, see below |
 
-![Network Tools panel with PING, TRACE, PORT, DNS, WHOIS and LAN](images/tools-whois.png)
+![Network Tools panel on build 88: PING, TRACE, PORT, DNS, WHOIS, LAN, with the footer reading netwatch tools v2.10.6](images/tools-whois.png)
 
-*Network Tools, captured on build 87. The footer in this capture still shows the old
-hardcoded `netwatch tools v2.10.1`; build 88 reads the installed version, so the same line
-now prints `netwatch tools v2.10.6` (and whatever version is running in future builds).*
+*Network Tools on build 88: six tools including WHOIS, and the footer now reads
+`netwatch tools v2.10.6`, taken from the installed package rather than a hardcoded string.*
 
 ### WHOIS
 

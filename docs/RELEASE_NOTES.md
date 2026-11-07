@@ -21,8 +21,8 @@ enumeration or backend calls. APK SHA-256
 
 Verification: 191 regression assertions (0 failures), release build successful, shipped dex
 contains `netwatch tools v` and no stale `v2.10.1` literal, signing certificate unchanged.
-Not yet re-captured on hardware — the footer string is confirmed from the dex and from the
-value the helper reads.
+Confirmed on hardware: a build 88 tablet capture of the Tools tab shows the footer reading
+`netwatch tools v2.10.6`.
 
 Documentation: [user guide](USER_GUIDE.md), [installation](INSTALLATION.md),
 [technical reference](TECHNICAL.md), [features](FEATURES.md), [security](SECURITY.md).
