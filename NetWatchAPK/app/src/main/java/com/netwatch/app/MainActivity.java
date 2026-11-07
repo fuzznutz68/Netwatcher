@@ -83,13 +83,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private View   tab5, tab6, tab7;
 
     // ── Tab 7 — Network Tools ────────────────────────────────────────────────
-    private static final int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3, TOOL_LAN = 4;
+    private static final int TOOL_PING = 0, TOOL_TRACE = 1, TOOL_PORT = 2, TOOL_DNS = 3, TOOL_LAN = 4, TOOL_WHOIS = 5;
     private int     toolMode = TOOL_PING;
     private boolean toolsRunning = false;
     private Process toolsProc = null;
     // LAN scanner: IEEE OUI vendor database, loaded lazily from assets (prefix hex -> org)
     private java.util.HashMap<String, String> ouiDb = null;
-    private Button  tabToolsBtn, toolPingBtn, toolTraceBtn, toolPortBtn, toolDnsBtn, toolLanBtn, toolsRunBtn, toolsStopBtn;
+    private Button  tabToolsBtn, toolPingBtn, toolTraceBtn, toolPortBtn, toolDnsBtn, toolWhoisBtn, toolLanBtn, toolsRunBtn, toolsStopBtn;
     private EditText toolsHostInput, toolsPortInput;
     private TextView toolsTitleText, toolsStatusText, toolsConsoleText;
     private android.widget.ScrollView toolsScrollView;
@@ -440,7 +440,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Результаты включают:\n" +
                         "  • IP-адреса (A-записи)\n" +
                         "  • Обнаруженные поддомены\n" +
-                        "  • Информация WHOIS\n" +
+                        "  • Сведения о TLS-сертификате\n" +
                         "  • Geo-IP локация сервера\n\n" +
                         "Нажмите Экспорт для сохранения результатов в CSV.");
                 } else {
@@ -449,7 +449,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Results include:\n" +
                         "  • IP Addresses (A records)\n" +
                         "  • Subdomains detected\n" +
-                        "  • WHOIS registration info\n" +
+                        "  • TLS certificate info\n" +
                         "  • Geo-IP location of the server\n\n" +
                         "Tap Export to save results as a CSV file.");
                 }
@@ -594,6 +594,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • TRACE — трассировка маршрута (до 30 прыжков, без root)\n" +
                         "  • PORT — проверка TCP-порта (открыт/закрыт)\n" +
                         "  • DNS — запросы A / AAAA / CNAME / TXT-записей\n" +
+                        "  • WHOIS — регистрация IP, ASN и abuse-контакт\n" +
                         "  • LAN — сканер локальной сети (ARP + ping sweep, без root)\n\n" +
                         "LAN: находит устройства в вашей Wi-Fi сети и определяет их\n" +
                         "через UPnP/SSDP, mDNS (.local), DNS, NetBIOS и баннеры HTTP/FTP\n" +
@@ -602,7 +603,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Для чистого результата остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
-                        "Кнопка СТОП прерывает выполнение.");
+                        "Кнопка СТОП прерывает выполнение.\nWHOIS работает только для публичных IP.");
                 } else {
                     showInfoDialog("🛠 Network Tools — Help",
                         "Basic network utilities right inside NetWatch.\n\n" +
@@ -611,6 +612,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "  • TRACE — trace the route (up to 30 hops, rootless)\n" +
                         "  • PORT — check if a TCP port is open or closed\n" +
                         "  • DNS — look up A / AAAA / CNAME / TXT records\n" +
+                        "  • WHOIS — IP registration, ASN and abuse contact\n" +
                         "  • LAN — scan your local network (ARP + ping sweep, rootless)\n\n" +
                         "LAN: discovers devices on your Wi-Fi network and identifies\n" +
                         "them via UPnP/SSDP, mDNS (.local), DNS, NetBIOS, and HTTP/FTP\n" +
@@ -619,7 +621,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Stop monitoring (VPN) first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
-                        "Tap STOP to interrupt a running tool.");
+                        "Tap STOP to interrupt a running tool.\nWHOIS works on public IPs only.");
                 }
                 return true;
             } else if (id == R.id.menu_history) {
@@ -2743,6 +2745,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toolTraceBtn     = findViewById(R.id.toolTraceBtn);
         toolPortBtn      = findViewById(R.id.toolPortBtn);
         toolDnsBtn       = findViewById(R.id.toolDnsBtn);
+        toolWhoisBtn     = findViewById(R.id.toolWhoisBtn);
         toolLanBtn       = findViewById(R.id.toolLanBtn);
         toolsHostInput   = findViewById(R.id.toolsHostInput);
         toolsPortInput   = findViewById(R.id.toolsPortInput);
@@ -2758,6 +2761,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toolTraceBtn.setOnClickListener(v -> setToolMode(TOOL_TRACE));
         toolPortBtn.setOnClickListener(v  -> setToolMode(TOOL_PORT));
         toolDnsBtn.setOnClickListener(v   -> setToolMode(TOOL_DNS));
+        toolWhoisBtn.setOnClickListener(v  -> setToolMode(TOOL_WHOIS));
         toolLanBtn.setOnClickListener(v   -> setToolMode(TOOL_LAN));
         toolsRunBtn.setOnClickListener(v -> runNetworkTool());
         toolsStopBtn.setOnClickListener(v -> stopNetworkTool());
@@ -2777,6 +2781,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         styleToolBtn(toolTraceBtn, m == TOOL_TRACE);
         styleToolBtn(toolPortBtn,  m == TOOL_PORT);
         styleToolBtn(toolDnsBtn,   m == TOOL_DNS);
+        styleToolBtn(toolWhoisBtn, m == TOOL_WHOIS);
         styleToolBtn(toolLanBtn,    m == TOOL_LAN);
         // Port field only relevant for the PORT tool; host input hidden for LAN scans
         toolsPortInput.setVisibility(m == TOOL_PORT ? View.VISIBLE : View.GONE);
@@ -2805,6 +2810,12 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         if (host.startsWith("https://")) host = host.substring(8);
         if (host.contains("/")) host = host.substring(0, host.indexOf('/'));
         final String fHost = host;
+
+        // WHOIS is a single request: it never enters the RUN/STOP state machine.
+        if (toolMode == TOOL_WHOIS) {
+            showIpWhois(fHost, fHost);
+            return;
+        }
 
         int port = -1;
         if (toolMode == TOOL_PORT) {
@@ -4839,7 +4850,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         header.setTypeface(android.graphics.Typeface.MONOSPACE);
 
         // Line 2: resolved hostname or IP:port (cyan = resolved, white = raw IP)
-        String rawIp = ipPort.contains(":") ? ipPort.split(":")[0] : ipPort;
+        String rawIp = splitIpPort(ipPort)[0];
         boolean resolved = !display.equals(rawIp);
         android.widget.TextView hostView = new android.widget.TextView(this);
         hostView.setText(resolved ? display : ipPort);
@@ -4900,17 +4911,92 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return row;
     }
 
-    private void showIpWhois(String ip, String hostname) {
-        String title = hostname != null && !hostname.isEmpty() && !hostname.equals(ip)
+    private volatile boolean whoisInFlight = false;
+
+    private static String firstNonEmpty(String a, String b) {
+        if (a != null && !a.trim().isEmpty()) return a.trim();
+        return b != null ? b.trim() : "";
+    }
+
+    private static boolean isDigits(String s) {
+        if (s == null || s.isEmpty()) return false;
+        for (int i = 0; i < s.length(); i++) if (!Character.isDigit(s.charAt(i))) return false;
+        return true;
+    }
+
+    /** Accepts a bare address or a bracketed one; strips brackets and spaces. */
+    private static String normalizeIpInput(String raw) {
+        if (raw == null) return "";
+        String s = raw.trim();
+        if (s.startsWith("[")) {
+            int close = s.indexOf(']');
+            s = close > 0 ? s.substring(1, close) : s.substring(1);
+            s = s.trim();
+        }
+        return s;
+    }
+
+    /** Splits an "ip:port" string as emitted by the VPN service - IPv4,
+     *  bracketed IPv6 or unbracketed IPv6 - and tolerates a bare address that
+     *  carries no port. Returns {ip, port}; port is "" when absent or not
+     *  numeric. An address is never truncated just because it contains colons. */
+    private static String[] splitIpPort(String s) {
+        if (s == null) return new String[]{"", ""};
+        String t = s.trim();
+        if (t.isEmpty()) return new String[]{"", ""};
+        if (t.startsWith("[")) {                                  // [v6]:port or [v6]
+            int close = t.indexOf(']');
+            if (close < 0) return new String[]{t.substring(1), ""};
+            String ip = t.substring(1, close).trim();
+            String rest = t.substring(close + 1).trim();
+            String port = rest.startsWith(":") ? rest.substring(1).trim() : "";
+            return new String[]{ip, isDigits(port) ? port : ""};
+        }
+        int colons = 0;
+        for (int i = 0; i < t.length(); i++) if (t.charAt(i) == ':') colons++;
+        if (colons == 0) return new String[]{t, ""};              // bare address
+        int cut = t.lastIndexOf(':');
+        if (cut <= 0) return new String[]{t, ""};                 // ":443" or empty host
+        String ip = t.substring(0, cut);
+        String port = t.substring(cut + 1);
+        if (ip.endsWith(":")) return new String[]{t, ""};         // "::" tail is not a port
+        if (!isDigits(port) || port.length() > 5) return new String[]{t, ""};
+        try { if (Integer.parseInt(port) > 65535) return new String[]{t, ""}; }
+        catch (NumberFormatException nfe) { return new String[]{t, ""}; }
+        if (colons > 1 && ip.endsWith("::")) return new String[]{t, ""};
+        return new String[]{ip, port};
+    }
+
+    private void showIpWhois(String rawIpIn, String hostname) {
+        final String ip = normalizeIpInput(rawIpIn);
+        final String title = hostname != null && !hostname.isEmpty() && !hostname.equals(ip)
             ? "WHOIS: " + hostname : "WHOIS: " + ip;
+        if (ip.isEmpty()) {
+            showInfoDialog(title, isRussian ? "Введите IP-адрес." : "Enter an IP address.");
+            return;
+        }
+        if (whoisInFlight) {                                   // no overlapping lookups
+            showToast(isRussian ? "WHOIS уже выполняется" : "WHOIS lookup already running");
+            return;
+        }
+        whoisInFlight = true;
         android.widget.Toast.makeText(this, "Looking up " + ip + "...",
             android.widget.Toast.LENGTH_SHORT).show();
         executor.execute(() -> {
             try {
-                java.net.URL url = new java.net.URL(IP_WHOIS_URL + "?ip=" + ip);
+                java.net.URL url = new java.net.URL(IP_WHOIS_URL + "?ip="
+                    + java.net.URLEncoder.encode(ip, "UTF-8"));
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(8000);
                 conn.setReadTimeout(8000);
+                int code = conn.getResponseCode();
+                if (code == 400) {
+                    runOnUiThread(() -> showInfoDialog(title, isRussian
+                        ? "Не публичный IP-адрес.\n\nЧастные, служебные и\nнекорректные адреса\nне запрашиваются."
+                        : "Not a public IP address.\n\nPrivate, reserved and malformed\naddresses are not queried."));
+                    return;
+                }
+                if (code != 200) throw new java.io.IOException("HTTP " + code);
                 java.io.BufferedReader br = new java.io.BufferedReader(
                     new java.io.InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
@@ -4918,22 +5004,50 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 while ((line = br.readLine()) != null) sb.append(line);
                 br.close();
                 org.json.JSONObject j = new org.json.JSONObject(sb.toString());
+                // New backend keys first, legacy names as fallback.
+                String asnName = firstNonEmpty(j.optString("asn_name", ""), j.optString("asnName", ""));
+                String netName = firstNonEmpty(j.optString("rdap_name", ""), j.optString("netName", ""));
+                String abuse   = firstNonEmpty(j.optString("abuse_contact", ""), j.optString("abuse", ""));
+                String registr = j.optString("rdap_registrar", "");
+                String org     = j.optString("org", "");
+                String asn     = j.optString("asn", "");
+                String cidr    = j.optString("cidr", "");
+                String country = firstNonEmpty(j.optString("country", ""), j.optString("country_code", ""));
+                String host    = j.optString("hostname", "");
+                boolean rdapDown = false;
+                org.json.JSONArray errs = j.optJSONArray("errors");
+                if (errs != null) {
+                    for (int i = 0; i < errs.length(); i++) {
+                        if (String.valueOf(errs.optString(i)).startsWith("rdap")) rdapDown = true;
+                    }
+                }
                 StringBuilder msg = new StringBuilder();
-                if (j.has("org"))      msg.append("Org:     ").append(j.getString("org")).append("\n");
-                if (j.has("asn"))      msg.append("ASN:     ").append(j.getString("asn"));
-                if (j.has("asnName"))  msg.append(" (").append(j.getString("asnName")).append(")");
-                if (j.has("asn"))      msg.append("\n");
-                if (j.has("cidr"))     msg.append("CIDR:    ").append(j.getString("cidr")).append("\n");
-                if (j.has("country"))  msg.append("Country: ").append(j.getString("country")).append("\n");
-                if (j.has("netName"))  msg.append("Net:     ").append(j.getString("netName")).append("\n");
-                if (j.has("abuse"))    msg.append("Abuse:   ").append(j.getString("abuse")).append("\n");
-                if (msg.length() == 0) msg.append("No data returned.");
+                if (!org.isEmpty())   msg.append("Org:      ").append(org).append("\n");
+                if (!asn.isEmpty()) {
+                    msg.append("ASN:      ").append(asn);
+                    if (!asnName.isEmpty()) msg.append(" (").append(asnName).append(")");
+                    msg.append("\n");
+                }
+                if (!cidr.isEmpty())    msg.append("CIDR:     ").append(cidr).append("\n");
+                if (!country.isEmpty()) msg.append("Country:  ").append(country).append("\n");
+                if (!netName.isEmpty()) msg.append("Net:      ").append(netName).append("\n");
+                if (!registr.isEmpty()) msg.append("Registrar:").append(" ").append(registr).append("\n");
+                if (!abuse.isEmpty())   msg.append("Abuse:    ").append(abuse).append("\n");
+                if (!host.isEmpty())    msg.append("Hostname: ").append(host).append("\n");
+                if (msg.length() == 0) msg.append(isRussian ? "Данных нет." : "No data returned.");
+                else if (rdapDown) msg.append("\n(").append(isRussian
+                        ? "RDAP недоступен для этого адреса" : "RDAP unavailable for this address").append(")");
                 final String result = msg.toString().trim();
-                final String dlgTitle = title;
-                runOnUiThread(() -> showInfoDialog(dlgTitle, result));
+                runOnUiThread(() -> showInfoDialog(title, result));
+            } catch (java.net.SocketTimeoutException te) {
+                runOnUiThread(() -> android.widget.Toast.makeText(this,
+                    isRussian ? "WHOIS: превышено время ожидания" : "WHOIS timed out",
+                    android.widget.Toast.LENGTH_LONG).show());
             } catch (Exception ex) {
                 runOnUiThread(() -> android.widget.Toast.makeText(this,
                     "WHOIS failed: " + ex.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+            } finally {
+                whoisInFlight = false;
             }
         });
     }
