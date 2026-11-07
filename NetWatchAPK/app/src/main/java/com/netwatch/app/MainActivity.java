@@ -4923,6 +4923,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return flag != null && flag.compareAndSet(false, true);
     }
 
+    /** Android's org.json optString() returns the literal "null" for a JSON null. */
+    private static String optText(org.json.JSONObject j, String key) {
+        if (j == null || j.isNull(key)) return "";
+        String v = j.optString(key, "").trim();      // trim before comparing: " null " is null too
+        return "null".equals(v) ? "" : v;
+    }
+
     private static String firstNonEmpty(String a, String b) {
         if (a != null && !a.trim().isEmpty()) return a.trim();
         return b != null ? b.trim() : "";
@@ -5142,16 +5149,17 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 while ((line = br.readLine()) != null) sb.append(line);
                 br.close();
                 org.json.JSONObject j = new org.json.JSONObject(sb.toString());
-                // New backend keys first, legacy names as fallback.
-                String asnName = firstNonEmpty(j.optString("asn_name", ""), j.optString("asnName", ""));
-                String netName = firstNonEmpty(j.optString("rdap_name", ""), j.optString("netName", ""));
-                String abuse   = firstNonEmpty(j.optString("abuse_contact", ""), j.optString("abuse", ""));
-                String registr = j.optString("rdap_registrar", "");
-                String org     = j.optString("org", "");
-                String asn     = j.optString("asn", "");
-                String cidr    = j.optString("cidr", "");
-                String country = firstNonEmpty(j.optString("country", ""), j.optString("country_code", ""));
-                String host    = j.optString("hostname", "");
+                // New backend keys first, legacy names as fallback. Every read goes
+                // through optText so a JSON null never prints as the word "null".
+                String asnName = firstNonEmpty(optText(j, "asn_name"), optText(j, "asnName"));
+                String netName = firstNonEmpty(optText(j, "rdap_name"), optText(j, "netName"));
+                String abuse   = firstNonEmpty(optText(j, "abuse_contact"), optText(j, "abuse"));
+                String registr = optText(j, "rdap_registrar");
+                String org     = optText(j, "org");
+                String asn     = optText(j, "asn");
+                String cidr    = optText(j, "cidr");
+                String country = firstNonEmpty(optText(j, "country"), optText(j, "country_code"));
+                String host    = optText(j, "hostname");
                 boolean rdapDown = false;
                 org.json.JSONArray errs = j.optJSONArray("errors");
                 if (errs != null) {

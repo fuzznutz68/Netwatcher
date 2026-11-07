@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <cache-path name="exports" path="exports/" />
+    <!-- Device Monitor export writes to getExternalFilesDir(null)/NetWatch -->
+    <external-files-path name="device_logs" path="NetWatch/" />
 </paths>
