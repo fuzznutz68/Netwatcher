@@ -939,6 +939,10 @@
                 android:layout_marginRight="4dp"
                 android:text="WHOIS"
                 android:layout_weight="1"/>
+            <Button
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#e0e8f0"
                 android:id="@+id/toolLanBtn"
                 android:background="@drawable/input_background"
                 android:layout_width="0dp"
