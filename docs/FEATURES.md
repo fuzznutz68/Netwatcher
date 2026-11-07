@@ -1,6 +1,6 @@
 # Features
 
-Current as of **v2.10.5 (Build 87)**. For step-by-step instructions see the
+Current as of **v2.10.6 (Build 88)**. For step-by-step instructions see the
 [user guide](USER_GUIDE.md).
 
 ## Traffic Monitor

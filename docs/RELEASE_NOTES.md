@@ -3,7 +3,31 @@
 Newest first. Earlier entries link to their original GitHub releases, which remain the
 authoritative copy of those notes; nothing below rewrites history.
 
-## v2.10.5 — Build 87 (current)
+## v2.10.6 — Build 88 (current)
+
+Cosmetic correction on top of the tablet-tested Build 87. Same package, same certificate,
+same behaviour everywhere except one line of the UI.
+
+- **Tools tab footer fixed.** The footer printed a hardcoded `netwatch tools v2.10.1` for
+  several releases. It now reads the installed package's `versionName` through a new
+  `installedVersionName()` helper, so it always matches the running build and falls back to
+  a bare `netwatch tools` if the package query fails.
+- **Internal identity now matches the tag.** `versionCode 88` / `versionName 2.10.6`,
+  replacing `87` / `2.10.4-whois-test3`.
+
+No change to capture, filtering, WHOIS, Device Monitor, Traffic Trace, CSV export, app
+enumeration or backend calls. APK SHA-256
+`26f2bf5c34be3f5de63e2f55bcf794bc3b3543f7ec2d42a503b7b75588427445`.
+
+Verification: 191 regression assertions (0 failures), release build successful, shipped dex
+contains `netwatch tools v` and no stale `v2.10.1` literal, signing certificate unchanged.
+Not yet re-captured on hardware — the footer string is confirmed from the dex and from the
+value the helper reads.
+
+Documentation: [user guide](USER_GUIDE.md), [installation](INSTALLATION.md),
+[technical reference](TECHNICAL.md), [features](FEATURES.md), [security](SECURITY.md).
+
+## v2.10.5 — Build 87 (superseded by v2.10.6)
 
 Tablet-verified test build. APK internal identity unchanged from the tested artifact:
 `versionCode 87`, `versionName 2.10.4-whois-test3`, package `com.netwatch.net`.

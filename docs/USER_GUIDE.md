@@ -1,6 +1,6 @@
 # NetWatch user guide
 
-Applies to **v2.10.5 (Build 87)**. Menu → Instructions shows the same help in-app, in
+Applies to **v2.10.6 (Build 88)**. Menu → Instructions shows the same help in-app, in
 English or Russian.
 
 ## First run
@@ -71,8 +71,9 @@ the lookup now use the same port-aware splitter, so the address is shown in full
 
 ![Device Monitor showing five connections, including a full IPv6 address in the DOMAIN / IP column](images/device-monitor-ipv6.png)
 
-*Device Monitor on Android 14, build 87: row 2 is an IPv6 connection displayed in full
-(`2a03:2880:f382:90:face:b00c:0:8e:443`). Before build 87 this row read `2a03`.*
+*Device Monitor on Android 14, captured on build 87 (unchanged in build 88): row 2 is an
+IPv6 connection displayed in full (`2a03:2880:f382:90:face:b00c:0:8e:443`). Before build 87
+this row read `2a03`.*
 
 ### CSV export
 
@@ -97,9 +98,9 @@ except the DNS resolver you choose and the WHOIS backend described below.
 
 ![Network Tools panel with PING, TRACE, PORT, DNS, WHOIS and LAN](images/tools-whois.png)
 
-*Network Tools on build 87. The small footer line is a static label left over from an
-earlier build — it still reads `netwatch tools v2.10.1`. The version actually installed is
-shown in Menu → About, which reads it from the package.*
+*Network Tools, captured on build 87. The footer in this capture still shows the old
+hardcoded `netwatch tools v2.10.1`; build 88 reads the installed version, so the same line
+now prints `netwatch tools v2.10.6` (and whatever version is running in future builds).*
 
 ### WHOIS
 

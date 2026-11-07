@@ -8,13 +8,13 @@
 
 ## Install from the release
 
-1. Open the [v2.10.5 release](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.5).
-2. Download `NetWatch-v2.10.5.apk`.
+1. Open the [v2.10.6 release](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.6).
+2. Download `NetWatch-v2.10.6.apk`.
 3. Optionally verify the file before installing:
 
    ```bash
-   sha256sum NetWatch-v2.10.5.apk
-   # 2f3d141f8ffb7b898f1afd45f9bc4da9da628dfd24a0e0bca394d3104421a9a8
+   sha256sum NetWatch-v2.10.6.apk
+   # 26f2bf5c34be3f5de63e2f55bcf794bc3b3543f7ec2d42a503b7b75588427445
    ```
 
    On a device, any file manager showing checksums, or `apksigner verify --print-certs`
@@ -28,8 +28,8 @@
 
 ## Upgrading
 
-Builds 85, 86 and 87 share package `com.netwatch.net` and the same signing certificate,
-so installing Build 87 over an earlier build keeps your settings, history and saved
+Builds 85 through 88 share package `com.netwatch.net` and the same signing certificate,
+so installing Build 88 over an earlier build keeps your settings, history and saved
 sessions. Just open the new APK and confirm.
 
 You do **not** need to uninstall first. If Android refuses with "App not installed", the
@@ -39,17 +39,18 @@ install is lost in that case.
 
 ## Version naming
 
-Two numbers matter and they intentionally differ:
+Since v2.10.6 the release tag and the internal build identity agree:
 
-- The **release/tag** is `v2.10.5`.
-- The **internal** `versionName` is `2.10.4-whois-test3` and `versionCode` is `87`.
+- The **release/tag** is `v2.10.6`.
+- The **internal** `versionName` is `2.10.6` and `versionCode` is `88`.
 
-The internal identity was frozen when the APK passed tablet testing; renaming it would mean
-shipping a build that was never tested. `Settings → Apps → NetWatch` therefore shows
-`2.10.4-whois-test3`, and that is expected for release v2.10.5.
+`Settings → Apps → NetWatch` shows `2.10.6`. Releases v2.10.5 and earlier used a frozen
+internal name (`2.10.4-whois-test3`, versionCode 87) because that APK was the exact artifact
+that passed tablet testing; that mismatch no longer exists.
 
-Rollback anchors for the maintainer: tag `baseline-2.10.4-p0-diag` (`de993d08`) and branch
-`fix/build85-export-and-whois` (`1e5aec70`, the verified Build 86 source).
+Rollback anchors for the maintainer: release tag `v2.10.5` (previous published build),
+tag `baseline-2.10.4-p0-diag` (`de993d08`) and branch `fix/build85-export-and-whois`
+(`1e5aec70`, the verified Build 86 source).
 
 ## Permissions explained
 

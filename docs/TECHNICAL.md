@@ -1,23 +1,23 @@
 # Technical reference
 
-Describes the source shipped as **v2.10.5 (Build 87)** — tag
-[`v2.10.5`](https://github.com/fuzznutz68/Netwatcher/tree/v2.10.5), commit
-`73b2ae47f739f1badc38888ec1989fff6b40a11f`. Project root: `NetWatchAPK/`.
+Describes the source shipped as **v2.10.6 (Build 88)** — tag
+[`v2.10.6`](https://github.com/fuzznutz68/Netwatcher/tree/v2.10.6), commit
+`59a60517862f2db8d33e79aa05f917aa8fe6d26f`. Project root: `NetWatchAPK/`.
 
 ## Build configuration
 
 | | |
 | --- | --- |
 | Application id | `com.netwatch.net` |
-| versionCode / versionName | `87` / `2.10.4-whois-test3` |
+| versionCode / versionName | `88` / `2.10.6` |
 | minSdk / targetSdk / compileSdk | 30 / 36 / 36 |
 | Language | Java, single-activity app |
 | Build | Gradle 8.13 wrapper, Android Gradle Plugin with R8 minification for release |
 | Signing | `netwatch-release.keystore` via untracked `keystore.properties` |
 
-Release identity is intentionally frozen for a tested artifact: the tag says `v2.10.5`
-while the APK keeps the `versionName` it was tested with. Bump the internal name only for a
-new build, never for a re-publish.
+Since v2.10.6 the tag and the internal `versionName` agree. Earlier releases (through
+v2.10.5) kept a frozen internal name because the APK was the exact artifact that passed
+tablet testing; a re-publish must never rename a tested build.
 
 Build a release APK:
 
@@ -107,6 +107,13 @@ Traffic Monitor session CSV uses `timestamp,host_or_ip` with RFC 4180 quoting.
 `stopSelf()`, so removing NetWatch from Recents ends capture without needing Usage Access.
 Notifications use channels created before `startForeground()` — a fresh install in Build 85
 crashed when that ordering regressed, which is why channel creation stays at service start.
+
+## Version labels in the UI
+
+Anything that displays a version reads it at runtime through `installedVersionName()`
+(`PackageManager.getPackageInfo(...).versionName`), which returns `""` on failure so callers
+can degrade to a bare label. The Tools footer used a hardcoded `v2.10.1` until build 88;
+never reintroduce a literal version string in UI code.
 
 ## Localisation
 

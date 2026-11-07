@@ -9,16 +9,17 @@ UI. No root required.
 
 | | |
 | --- | --- |
-| Version | **v2.10.5** (Build 87) |
-| APK | [`NetWatch-v2.10.5.apk`](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.5) |
-| APK SHA-256 | `2f3d141f8ffb7b898f1afd45f9bc4da9da628dfd24a0e0bca394d3104421a9a8` |
-| Package / versionCode | `com.netwatch.net` / 87 |
-| Internal versionName | `2.10.4-whois-test3` (the tested build, unchanged) |
+| Version | **v2.10.6** (Build 88) |
+| APK | [`NetWatch-v2.10.6.apk`](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.6) |
+| APK SHA-256 | `26f2bf5c34be3f5de63e2f55bcf794bc3b3543f7ec2d42a503b7b75588427445` |
+| Package / versionCode | `com.netwatch.net` / 88 |
+| Internal versionName | `2.10.6` (matches the release tag) |
 | Android | 11 and newer (minSdk 30), targetSdk 36 |
-| Signing | release certificate `4409b548…bd681af6`, installs over builds 85 and 86 |
+| Signing | release certificate `4409b548…bd681af6`, installs over builds 85, 86 and 87 |
 
-Build 87 is the artifact that passed physical tablet testing for WHOIS, IPv6 display,
-Device Monitor CSV sharing and Traffic Trace.
+Build 87 carried the WHOIS tool, the IPv6 display fix and the CSV sharing fix and passed
+physical tablet testing. Build 88 is the same code with one cosmetic correction: the Tools
+tab footer now shows the installed version instead of a hardcoded `v2.10.1`.
 
 ## What it does
 
@@ -35,7 +36,7 @@ Device Monitor CSV sharing and Traffic Trace.
 
 ## Install
 
-Download the APK from the [v2.10.5 release](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.5),
+Download the APK from the [v2.10.6 release](https://github.com/fuzznutz68/Netwatcher/releases/tag/v2.10.6),
 allow installation from your browser or file manager, then open NetWatch and grant the VPN
 prompt the first time you start either monitoring tab. Full steps, upgrade notes and
 permission explanations: [docs/INSTALLATION.md](docs/INSTALLATION.md).
@@ -52,10 +53,10 @@ permission explanations: [docs/INSTALLATION.md](docs/INSTALLATION.md).
 ## Source
 
 The source of the published APK is tag
-[`v2.10.5`](https://github.com/fuzznutz68/Netwatcher/tree/v2.10.5) (commit
-`73b2ae47f739f1badc38888ec1989fff6b40a11f`), also on branch `release/v2.10.5`, with the
+[`v2.10.6`](https://github.com/fuzznutz68/Netwatcher/tree/v2.10.6) (commit
+`59a60517862f2db8d33e79aa05f917aa8fe6d26f`), also on branch `release/v2.10.6`, with the
 Android project under `NetWatchAPK/`. The release also carries
-`NetWatch-v2.10.5-source.zip`, a source-only archive with per-file hashes in
+`NetWatch-v2.10.6-source.zip`, a source-only archive with per-file hashes in
 `SOURCE_MANIFEST.sha256`.
 
 The `main` branch snapshot predates the v2.10.x line and is kept for history; documentation
@@ -70,8 +71,9 @@ lives on `main`, source for each release lives on its tag.
 
 Both were captured on Android 14 tablet hardware running build 87. `DeviceMonitor.jpg` at
 the repository root is from an older build and is kept for history only; the live captures
-above supersede it. Note that the footer line inside the Tools tab is a static label that
-still reads `netwatch tools v2.10.1` — the installed version comes from Menu → About.
+above supersede it. In the Tools capture the footer still reads the old hardcoded
+`netwatch tools v2.10.1`; build 88 derived that line from the package, so it now prints the
+installed version.
 
 ## Limitations
 

@@ -1,6 +1,6 @@
 # Security
 
-Status as of **v2.10.5 (Build 87)**. This document is about the app and its backend
+Status as of **v2.10.6 (Build 88)**. This document is about the app and its backend
 functions, not about the Android platform.
 
 ## Current posture: PARTIALLY MITIGATED
@@ -56,7 +56,7 @@ derive their data on-device; Domain Intel and WHOIS never call `trafficProbe`.
 - Release APKs are signed with the project release certificate
   (`SHA-256 4409b548…bd681af6`). Verify before installing anything claiming to be NetWatch.
 - Keystores and `keystore.properties` are excluded from source archives and version control.
-- Each release publishes `SHA256SUMS.txt`; v2.10.5 also publishes a source archive with
+- Each release publishes `SHA256SUMS.txt` and, since v2.10.5, a source archive with
   `SOURCE_MANIFEST.sha256` so the APK can be tied to reviewed source.
 
 ## Reporting
