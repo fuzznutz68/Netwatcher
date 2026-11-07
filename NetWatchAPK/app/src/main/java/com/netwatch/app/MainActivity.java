@@ -2768,10 +2768,24 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         setToolMode(TOOL_PING);
         toolsConsoleText.setText("");
-        toolPrint("#546e7a", "netwatch tools v2.10.1");
+        String toolsVer = installedVersionName();
+        toolPrint("#546e7a", toolsVer.isEmpty() ? "netwatch tools" : "netwatch tools v" + toolsVer);
         toolPrint("#00e5ff", isRussian
             ? "выберите инструмент и введите хост"
             : "select a tool, enter a host, tap RUN");
+    }
+
+    /**
+     * Version string of the installed package. Footer labels use this so they can never
+     * drift from the build that is actually running (the Tools footer read a hardcoded
+     * "v2.10.1" for several releases before this was fixed).
+     */
+    private String installedVersionName() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private void setToolMode(int m) {
