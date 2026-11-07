@@ -5047,6 +5047,38 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return new String[]{ip, port};
     }
 
+    // WHOIS HTTP outcomes, kept as a pure mapping so it can be unit tested.
+    private static final int WHOIS_OK = 0, WHOIS_BAD_ADDRESS = 1, WHOIS_RATE_LIMITED = 2,
+                             WHOIS_PROVIDER_DOWN = 3, WHOIS_HTTP_ERROR = 4;
+
+    private static int whoisHttpClass(int code) {
+        if (code == 200) return WHOIS_OK;
+        if (code == 400) return WHOIS_BAD_ADDRESS;          // private / reserved / malformed
+        if (code == 429) return WHOIS_RATE_LIMITED;         // provider throttling
+        if (code >= 500 && code <= 599) return WHOIS_PROVIDER_DOWN;
+        return WHOIS_HTTP_ERROR;                            // 401/403/404/422/...
+    }
+
+    private static String whoisHttpMessage(int cls, int code, boolean ru) {
+        switch (cls) {
+            case WHOIS_OK:
+                return null;                                 // success has no message
+            case WHOIS_BAD_ADDRESS:
+                return ru
+                    ? "Не публичный IP-адрес.\n\nЧастные, служебные и\nнекорректные адреса\nне запрашиваются."
+                    : "Not a public IP address.\n\nPrivate, reserved and malformed\naddresses are not queried.";
+            case WHOIS_RATE_LIMITED:
+                return ru ? "WHOIS: превышен лимит запросов.\nПовторите через несколько минут."
+                          : "WHOIS: provider rate limit reached.\nTry again in a few minutes.";
+            case WHOIS_PROVIDER_DOWN:
+                return ru ? "WHOIS: сервис недоступен (HTTP " + code + ").\nПовторите позже."
+                          : "WHOIS: provider unavailable (HTTP " + code + ").\nTry again later.";
+            default:
+                return ru ? "WHOIS: ошибка запроса (HTTP " + code + ")."
+                          : "WHOIS: request failed (HTTP " + code + ").";
+        }
+    }
+
     /** One WHOIS dialog at a time: a new result replaces the previous one
      *  instead of stacking on top of it. */
     private void showWhoisDialog(String title, String message) {
@@ -5092,13 +5124,17 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 conn.setConnectTimeout(8000);
                 conn.setReadTimeout(8000);
                 int code = conn.getResponseCode();
-                if (code == 400) {
-                    runOnUiThread(() -> showWhoisDialog(title, isRussian
-                        ? "Не публичный IP-адрес.\n\nЧастные, служебные и\nнекорректные адреса\nне запрашиваются."
-                        : "Not a public IP address.\n\nPrivate, reserved and malformed\naddresses are not queried."));
+                final int cls = whoisHttpClass(code);
+                if (cls != WHOIS_OK) {
+                    final String msg = whoisHttpMessage(cls, code, isRussian);
+                    if (cls == WHOIS_BAD_ADDRESS) {
+                        runOnUiThread(() -> showWhoisDialog(title, msg));   // address problem
+                    } else {
+                        runOnUiThread(() -> android.widget.Toast.makeText(this, msg,
+                            android.widget.Toast.LENGTH_LONG).show());     // transport problem
+                    }
                     return;
                 }
-                if (code != 200) throw new java.io.IOException("HTTP " + code);
                 java.io.BufferedReader br = new java.io.BufferedReader(
                     new java.io.InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
@@ -5141,9 +5177,17 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         ? "RDAP недоступен для этого адреса" : "RDAP unavailable for this address").append(")");
                 final String result = msg.toString().trim();
                 runOnUiThread(() -> showWhoisDialog(title, result));
-            } catch (java.net.SocketTimeoutException te) {
+            } catch (java.net.SocketTimeoutException te) {           // provider too slow
                 runOnUiThread(() -> android.widget.Toast.makeText(this,
                     isRussian ? "WHOIS: превышено время ожидания" : "WHOIS timed out",
+                    android.widget.Toast.LENGTH_LONG).show());
+            } catch (java.net.UnknownHostException | java.net.ConnectException ne) {   // no route
+                runOnUiThread(() -> android.widget.Toast.makeText(this,
+                    isRussian ? "WHOIS: нет соединения с сервисом" : "WHOIS: cannot reach the service",
+                    android.widget.Toast.LENGTH_LONG).show());
+            } catch (org.json.JSONException je) {                    // unexpected body
+                runOnUiThread(() -> android.widget.Toast.makeText(this,
+                    isRussian ? "WHOIS: неожиданный ответ сервиса" : "WHOIS: unexpected response",
                     android.widget.Toast.LENGTH_LONG).show());
             } catch (Exception ex) {
                 runOnUiThread(() -> android.widget.Toast.makeText(this,
