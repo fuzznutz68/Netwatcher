@@ -1,0 +1,1108 @@
+--- a/domainIntel.ts (deployed)
++++ b/domainIntel.ts (phase1)
+@@ -2,6 +2,272 @@
+ // Enhanced: crt.sh + brute-force + CDN detection + cross-domain discovery + deep PTR
+ 
+ // @ts-nocheck
++
++// ══ NetWatch Phase 1 inline block (generated from security/phase1/nwhttp.mjs)
++// Do not edit here; edit the module and re-run apply_patch.py.
++// NetWatch — Phase 1 HTTP boundary hardening (pure logic, zero runtime dependencies).
++//
++// Canonical source for the inline block copied into each deployed function.
++// Base44 deploys single files, so the functions cannot import this module; the
++// patched function sources inline this file verbatim (minus `export`) and
++// tests/nwhttp.test.mjs asserts the inlined text still matches byte for byte.
++//
++// Scope of Phase 1 (authorized):
++//   - explicit, restrictive CORS (no wildcard, no origin reflection)
++//   - JSON content-type enforcement for body-carrying requests
++//   - strictly capped response reads (enforced while reading, reader cancelled)
++//   - a total wall-clock deadline with cancellation of outstanding work
++//   - a guarded GET whose redirects are re-validated per hop
++//
++// Out of scope for Phase 1 (explicitly excluded by the authorization):
++//   deep=true gating, token buckets, scan tokens, authentication, caching.
++
++// ── CORS ────────────────────────────────────────────────────────────────────
++// There is no browser client. Native Android and Windows callers send no
++// Origin header, and CORS never applies to them. The default allowlist is
++// therefore empty: no Access-Control-Allow-Origin is emitted at all.
++function nwAllowedOriginsFromEnv(getenv) {
++  try {
++    const raw = typeof getenv === 'function' ? getenv('NW_ALLOWED_ORIGINS') : '';
++    return new Set(
++      String(raw || '')
++        .split(',')
++        .map((s) => s.trim().replace(/\/+$/, ''))
++        .filter((s) => s.length > 0),
++    );
++  } catch (_) {
++    return new Set();
++  }
++}
++
++function nwOriginAllowed(origin, allowedOrigins) {
++  if (!origin || !allowedOrigins) return false;
++  const o = String(origin).trim().replace(/\/+$/, '');
++  if (!o) return false;
++  return allowedOrigins.has(o);
++}
++
++// Explicit headers on every response. `Vary: Origin` keeps intermediaries from
++// serving a cached response to the wrong origin once an allowlist is set.
++function nwCorsHeaders(origin, allowedOrigins, methods) {
++  const h = {
++    Vary: 'Origin',
++    'Access-Control-Allow-Methods': methods,
++    'Access-Control-Allow-Headers': 'Content-Type',
++    'Access-Control-Max-Age': '600',
++  };
++  if (nwOriginAllowed(origin, allowedOrigins)) {
++    h['Access-Control-Allow-Origin'] = String(origin).trim().replace(/\/+$/, '');
++  }
++  return h;
++}
++
++function nwPreflight(origin, allowedOrigins, methods) {
++  return {
++    status: 204,
++    headers: nwCorsHeaders(origin, allowedOrigins, methods),
++    body: null,
++  };
++}
++
++// ── Method and content-type gates ───────────────────────────────────────────
++// Body-carrying requests must declare application/json. Parameters such as
++// `; charset=utf-8` are accepted because .NET's StringContent sends them.
++// GET/HEAD/OPTIONS carry no body and are exempt so the existing
++// `GET /ipWhois?ip=...` path keeps working untouched.
++function nwIsJsonContentType(value) {
++  if (value === null || value === undefined) return false;
++  const base = String(value).split(';')[0].trim().toLowerCase();
++  return base === 'application/json';
++}
++
++function nwRequestCarriesBody(method) {
++  const m = String(method || '').toUpperCase();
++  return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS';
++}
++
++function nwContentTypeAccepted(method, contentType) {
++  if (!nwRequestCarriesBody(method)) return true;
++  return nwIsJsonContentType(contentType);
++}
++
++function nwMethodAllowed(method, methods) {
++  const m = String(method || '').toUpperCase();
++  return String(methods || '')
++    .split(',')
++    .map((s) => s.trim().toUpperCase())
++    .filter(Boolean)
++    .includes(m);
++}
++
++// ── Deadline ────────────────────────────────────────────────────────────────
++// One timer per invocation. Aborting the signal cancels every in-flight fetch
++// that was given it (DNS, crt.sh, page fetch). `close()` must run in `finally`
++// so a completed invocation never leaves a live timer behind.
++function nwDeadline(ms, now = () => Date.now()) {
++  const started = now();
++  const controller = new AbortController();
++  const budget = Math.max(1, Number(ms) || 1);
++  const timer = setTimeout(() => {
++    try {
++      controller.abort(new Error('deadline exceeded'));
++    } catch (_) {
++      controller.abort();
++    }
++  }, budget);
++  // Never keep a Deno/Node process alive just for the deadline timer.
++  if (timer && typeof timer.unref === 'function') timer.unref();
++  return {
++    signal: controller.signal,
++    expired: () => controller.signal.aborted,
++    remaining: () => Math.max(0, budget - (now() - started)),
++    elapsed: () => now() - started,
++    close: () => clearTimeout(timer),
++  };
++}
++
++// Combine the per-operation timeout with the invocation deadline.
++function nwMergeSignals(signals) {
++  const list = (signals || []).filter(Boolean);
++  if (list.length === 0) return undefined;
++  if (list.length === 1) return list[0];
++  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') {
++    return AbortSignal.any(list);
++  }
++  const controller = new AbortController();
++  for (const s of list) {
++    if (s.aborted) {
++      controller.abort(s.reason);
++      return controller.signal;
++    }
++    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
++  }
++  return controller.signal;
++}
++
++// ── Capped read ─────────────────────────────────────────────────────────────
++// Enforced while reading: once the cap is reached the stream is cancelled, so an
++// oversized or hostile response can never be buffered past `maxBytes`.
++async function nwReadCapped(res, maxBytes) {
++  const cap = Math.max(0, Number(maxBytes) || 0);
++  if (!res || !res.body || typeof res.body.getReader !== 'function') {
++    const t = await (res ? res.text() : Promise.resolve(''));
++    const s = String(t);
++    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  }
++  const reader = res.body.getReader();
++  const chunks = [];
++  let total = 0;
++  let truncated = false;
++  while (true) {
++    const { done, value } = await reader.read();
++    if (done) break;
++    const room = cap - total;
++    if (value.length > room) {
++      if (room > 0) chunks.push(value.slice(0, room));
++      total += Math.max(0, room);
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++    chunks.push(value);
++    total += value.length;
++    if (total >= cap) {
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++  }
++  const buf = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
++  let off = 0;
++  for (const c of chunks) { buf.set(c, off); off += c.length; }
++  return { text: new TextDecoder().decode(buf), truncated, bytes: total };
++}
++
++// ── Guarded GET ─────────────────────────────────────────────────────────────
++// Same contract as the function-local safeGet it replaces, plus an invocation
++// deadline signal. Validation is injected so this module stays dependency-free.
++//
++// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
++// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++async function nwSafeGet(url, opts) {
++  const fetchImpl = opts.fetchImpl;
++  const resolve = opts.resolve;
++  const validateHostname = opts.validateHostname;
++  const checkResolved = opts.checkResolved;
++  const readCapped = opts.readCapped || nwReadCapped;
++  const maxHops = opts.maxHops === undefined ? 3 : opts.maxHops;
++  const timeoutMs = opts.timeoutMs === undefined ? 9000 : opts.timeoutMs;
++  const maxBytes = opts.maxBytes === undefined ? 1500000 : opts.maxBytes;
++  const deadline = opts.signal;
++
++  const hops = [];
++  let current = url;
++
++  for (let hop = 0; hop <= maxHops; hop++) {
++    if (deadline && deadline.aborted) throw new Error('deadline exceeded');
++    let u;
++    try { u = new URL(current); } catch (_) { throw new Error('blocked_url: unparseable'); }
++    if (u.protocol !== 'https:') throw new Error('blocked_url: https required');
++    if (u.username || u.password) throw new Error('blocked_url: credentials rejected');
++    if (u.port && u.port !== '443') throw new Error('blocked_url: port rejected');
++    hops.push(current);
++
++    const hostCheck = validateHostname(u.hostname);
++    if (!hostCheck.ok) throw new Error('blocked_host: ' + hostCheck.error);
++
++    const ips = await resolve(u.hostname);
++    const ipCheck = checkResolved(ips);
++    if (!ipCheck.ok) throw new Error('blocked_resolution: ' + ipCheck.error);
++
++    const res = await fetchImpl(current, {
++      method: 'GET',
++      redirect: 'manual',
++      signal: nwMergeSignals([AbortSignal.timeout(timeoutMs), deadline]),
++      headers: {
++        'User-Agent':
++          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
++          '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
++        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
++      },
++    });
++
++    if (res.status >= 300 && res.status < 400) {
++      const loc = res.headers && res.headers.get ? res.headers.get('location') : null;
++      if (!loc) throw new Error('redirect_without_location');
++      current = new URL(loc, current).toString();
++      continue;
++    }
++
++    const { text, truncated } = await readCapped(res, maxBytes);
++    return { status: res.status, body: text, url: current, hops, truncated };
++  }
++
++  throw new Error('too_many_redirects');
++}
++
++// ── Phase 1 glue (generated) ────────────────────────────────────────────────
++const nwGetenv = (k) => { try { return Deno.env.get(k); } catch (_) { return undefined; } };
++const NW_METHODS = 'POST, OPTIONS';
++// Ops knob, clamped: 12 s default sits below the 20 s client read timeout.
++const nwDeadlineMs = () => Math.min(20000, Math.max(1000, Number(nwGetenv('NW_DEADLINE_MS')) || 12000));
++const NW_CRTSH_MAX_BYTES = 400000;         // strict cap, enforced while reading
++const NW_CRTSH_MAX_ROWS = 2000;
++
++// Configuration is read per request, not at import time, so module import order
++// or a mid-deployment env change can never alter behaviour unexpectedly.
++const nwOrigins = () => nwAllowedOriginsFromEnv(nwGetenv);
++const nwCors = (req) => nwCorsHeaders(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++const nwPreflightFor = (req) => {
++  const p = nwPreflight(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++  return new Response(p.body, { status: p.status, headers: p.headers });
++};
++const nwUnsupportedMediaType = (req) =>
++  Response.json({ error: 'Content-Type must be application/json' },
++    { status: 415, headers: { ...nwCors(req), 'Cache-Control': 'no-store' } });
++const nwMethodNotAllowed = (req) =>
++  Response.json({ error: 'Method not allowed' },
++    { status: 405, headers: { ...nwCors(req), Allow: NW_METHODS, 'Cache-Control': 'no-store' } });
+ // NetWatch inline security block — generated from security/netGuard.mjs and
+ // security/safeGet.mjs. Base44 deploys single files, so no imports.
+ // Covered by netGuard.test.mjs + safeGet.test.mjs (22 tests).
+@@ -192,89 +458,19 @@
+  * @returns {Promise<{status:number, body:string, url:string, hops:string[], truncated:boolean}>}
+  */
+ async function safeGet(url, opts) {
+-  const fetchImpl = opts.fetchImpl;
+-  const resolve = opts.resolve;
+-  const maxHops = opts.maxHops ?? 3;
+-  const timeoutMs = opts.timeoutMs ?? 9000;
+-  const maxBytes = opts.maxBytes ?? 1_500_000;
+-
+-  const hops = [];
+-  let current = url;
+-
+-  for (let hop = 0; hop <= maxHops; hop++) {
+-    // 1. structural validation of this hop
+-    let u;
+-    try { u = new URL(current); } catch { throw new Error('blocked_url: unparseable'); }
+-    if (u.protocol !== 'https:') throw new Error('blocked_url: https required');
+-    if (u.username || u.password) throw new Error('blocked_url: credentials rejected');
+-    if (u.port && u.port !== '443') throw new Error('blocked_url: port rejected');
+-    hops.push(current);
+-
+-    // 2. hostname rules (rejects IP literals, localhost, .local/.internal, metadata names)
+-    const hostCheck = validateHostname(u.hostname);
+-    if (!hostCheck.ok) throw new Error(`blocked_host: ${hostCheck.error}`);
+-
+-    // 3. resolve and require every address to be public
+-    const ips = await resolve(u.hostname);
+-    const ipCheck = checkResolved(ips);
+-    if (!ipCheck.ok) throw new Error(`blocked_resolution: ${ipCheck.error}`);
+-
+-    // 4. single request, redirects NOT followed by the platform
+-    const res = await fetchImpl(current, {
+-      method: 'GET',
+-      redirect: 'manual',
+-      signal: AbortSignal.timeout(timeoutMs),
+-      headers: {
+-        'User-Agent':
+-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+-          '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+-      },
+-    });
+-
+-    // 5. redirects are handled by this loop only
+-    if (res.status >= 300 && res.status < 400) {
+-      const loc = res.headers.get('location');
+-      if (!loc) throw new Error('redirect_without_location');
+-      current = new URL(loc, current).toString();
+-      continue;
+-    }
+-
+-    // 6. bounded body read
+-    const { text, truncated } = await readCapped(res, maxBytes);
+-    return { status: res.status, body: text, url: current, hops, truncated };
+-  }
+-
+-  throw new Error('too_many_redirects');
++  return nwSafeGet(url, {
++    ...opts,
++    fetchImpl: opts.fetchImpl,
++    resolve: opts.resolve,
++    validateHostname,
++    checkResolved,
++    readCapped,
++    signal: opts.signal,
++  });
+ }
+ 
+ async function readCapped(res, maxBytes) {
+-  if (!res.body || !res.body.getReader) {
+-    const t = await res.text();
+-    return { text: t.slice(0, maxBytes), truncated: t.length > maxBytes };
+-  }
+-  const reader = res.body.getReader();
+-  const chunks = [];
+-  let total = 0;
+-  let truncated = false;
+-  while (true) {
+-    const { done, value } = await reader.read();
+-    if (done) break;
+-    const room = maxBytes - total;
+-    if (value.length > room) {
+-      chunks.push(value.slice(0, room));
+-      truncated = true;
+-      try { await reader.cancel(); } catch (_) {}
+-      break;
+-    }
+-    chunks.push(value);
+-    total += value.length;
+-    if (total >= maxBytes) { truncated = true; try { await reader.cancel(); } catch (_) {} break; }
+-  }
+-  const buf = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+-  let off = 0;
+-  for (const c of chunks) { buf.set(c, off); off += c.length; }
+-  return { text: new TextDecoder().decode(buf), truncated };
++  return nwReadCapped(res, maxBytes);
+ }
+ 
+ /** Queuing semaphore: waits when full (unlike createLimiter, which rejects). */
+@@ -387,10 +583,19 @@
+ }
+ 
+ Deno.serve(async (req) => {
+-  if (req.method === 'OPTIONS') {
+-    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
+-  }
+-
++  // Phase 1: explicit CORS, JSON-only bodies, POST only, one hard deadline.
++  if (req.method === 'OPTIONS') return nwPreflightFor(req);
++  if (!nwMethodAllowed(req.method, NW_METHODS)) return nwMethodNotAllowed(req);
++  if (!nwContentTypeAccepted(req.method, req.headers.get('content-type')))
++    return nwUnsupportedMediaType(req);
++
++  const dl = nwDeadline(nwDeadlineMs());
++  let nwTruncated = false;
++  const nwGuard = () => {
++    if (!dl.expired()) return true;
++    nwTruncated = true;
++    return false;
++  };
+   try {
+     const body = await req.json().catch(() => ({}));
+     const { domain, deep } = body;
+@@ -419,6 +624,7 @@
+       domain: cleanDomain,
+       timestamp: new Date().toISOString(),
+       deep: isDeep,
++      truncated: false,
+       ipv4: [],
+       ipv6: [],
+       cname: null,
+@@ -440,7 +646,8 @@
+       if (++nwDnsCount > NW_DNS_BUDGET) throw new Error('dns query budget exceeded');
+       const r = await nwDnsGate(() => fetch(
+         `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,
+-        { headers: { Accept: 'application/dns-json' }, signal: AbortSignal.timeout(7000) }
++        { headers: { Accept: 'application/dns-json' },
++          signal: nwMergeSignals([AbortSignal.timeout(7000), dl.signal]) }
+       ));
+       const d = await r.json();
+       return (d.Answer || []) as any[];
+@@ -483,15 +690,25 @@
+     const certNameSet = new Set<string>();
+ 
+     try {
++      if (!nwGuard()) throw new Error('deadline');
+       const r = await fetch(
+         `https://crt.sh/?q=%25.${cleanDomain}&output=json`,
+-        { signal: AbortSignal.timeout(20000) }
++        { signal: nwMergeSignals([AbortSignal.timeout(20000), dl.signal]) }
+       );
+       if (r.ok) {
+-        const text = await r.text();
++        // Strict cap enforced while reading: an oversized CT response is cut
++        // off and the reader cancelled instead of being buffered in full.
++        const capped = await nwReadCapped(r, NW_CRTSH_MAX_BYTES);
++        if (capped.truncated) {
++          nwTruncated = true;
++          results.errors.push('crt.sh: response truncated at ' + NW_CRTSH_MAX_BYTES + ' bytes');
++        }
++        const text = capped.text;
+         if (text.trim().startsWith('[')) {
+-          const rows = JSON.parse(text);
+-          for (const row of rows) {
++          let rows = [];
++          try { rows = JSON.parse(text); } catch (_) { rows = []; }
++          if (!Array.isArray(rows)) rows = [];
++          for (const row of rows.slice(0, NW_CRTSH_MAX_ROWS)) {
+             const names = [
+               ...(row.name_value || '').split('\n'),
+               row.common_name || ''
+@@ -563,15 +780,17 @@
+       'ml', 'ai', 'model', 'inference', 'predict',
+     ];
+ 
+-    await Promise.allSettled(
+-      commonPrefixes.map(async (prefix) => {
+-        const fqdn = `${prefix}.${cleanDomain}`;
+-        try {
+-          const recs = await fetchDns(fqdn, 'A');
+-          if (recs.length > 0) subSet.add(fqdn);
+-        } catch (_) {}
+-      })
+-    );
++    if (nwGuard()) {
++      await Promise.allSettled(
++        commonPrefixes.map(async (prefix) => {
++          const fqdn = `${prefix}.${cleanDomain}`;
++          try {
++            const recs = await fetchDns(fqdn, 'A');
++            if (recs.length > 0) subSet.add(fqdn);
++          } catch (_) {}
++        })
++      );
++    }
+ 
+     // ── 4. Resolve all discovered subdomains in parallel (batched) ────────────
+     const allSubs = Array.from(subSet).sort();
+@@ -579,6 +798,7 @@
+     const subdomainResults: any[] = [];
+ 
+     for (let i = 0; i < Math.min(allSubs.length, 200); i += BATCH) {
++      if (dl.expired()) { nwTruncated = true; results.errors.push('deadline: subdomain scan stopped'); break; }
+       const batch = allSubs.slice(i, i + BATCH);
+       const resolved = await Promise.allSettled(
+         batch.map(async (sub) => {
+@@ -621,6 +841,7 @@
+     // This is the ONLY way to find domains like ttua.nu that share no DNS,
+     // certificate or name similarity with the primary domain.
+     try {
++      if (!nwGuard()) throw new Error('deadline');
+       const UAs = { 
+         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+@@ -639,12 +860,19 @@
+         return out;
+       };
+       const htmlPages = await Promise.allSettled([
+-        safeGet(`https://${cleanDomain}/`, { fetchImpl: fetch, resolve: nwResolve, timeoutMs: 9000, maxHops: 3 }),
+-        safeGet(`https://www.${cleanDomain}/`, { fetchImpl: fetch, resolve: nwResolve, timeoutMs: 9000, maxHops: 3 }),
++        safeGet(`https://${cleanDomain}/`, { fetchImpl: fetch, resolve: nwResolve, timeoutMs: 9000, maxHops: 3, signal: dl.signal }),
++        safeGet(`https://www.${cleanDomain}/`, { fetchImpl: fetch, resolve: nwResolve, timeoutMs: 9000, maxHops: 3, signal: dl.signal }),
+       ]);
+ 
+       let html = '';
++      if (dl.expired()) {
++        nwTruncated = true;
++        results.errors.push('deadline: page fetch aborted');
++      }
+       for (const p of htmlPages) {
++        if (p.status === 'rejected') {
++          results.errors.push('page fetch: ' + ((p.reason && p.reason.message) || 'failed'));
++        }
+         if (p.status === 'fulfilled' && p.value && p.value.status < 400) {
+           html += p.value.body || '';
+         }
+@@ -831,11 +1059,15 @@
+       }
+     }
+ 
++    results.truncated = results.truncated || nwTruncated;
+     return Response.json(results, {
+-      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
++      headers: { ...nwCors(req), 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+     });
+ 
+-  } catch (err: any) {
+-    return Response.json({ error: err.message }, { status: 500 });
++  } catch (err) {
++    return Response.json({ error: err.message },
++      { status: 500, headers: { ...nwCors(req), 'Cache-Control': 'no-store' } });
++  } finally {
++    dl.close();
+   }
+ });
+--- a/geoIp.ts (deployed)
++++ b/geoIp.ts (phase1)
+@@ -1,4 +1,266 @@
+ // @ts-nocheck
++
++// ══ NetWatch Phase 1 inline block (generated from security/phase1/nwhttp.mjs)
++// Do not edit here; edit the module and re-run apply_patch.py.
++// NetWatch — Phase 1 HTTP boundary hardening (pure logic, zero runtime dependencies).
++//
++// Canonical source for the inline block copied into each deployed function.
++// Base44 deploys single files, so the functions cannot import this module; the
++// patched function sources inline this file verbatim (minus `export`) and
++// tests/nwhttp.test.mjs asserts the inlined text still matches byte for byte.
++//
++// Scope of Phase 1 (authorized):
++//   - explicit, restrictive CORS (no wildcard, no origin reflection)
++//   - JSON content-type enforcement for body-carrying requests
++//   - strictly capped response reads (enforced while reading, reader cancelled)
++//   - a total wall-clock deadline with cancellation of outstanding work
++//   - a guarded GET whose redirects are re-validated per hop
++//
++// Out of scope for Phase 1 (explicitly excluded by the authorization):
++//   deep=true gating, token buckets, scan tokens, authentication, caching.
++
++// ── CORS ────────────────────────────────────────────────────────────────────
++// There is no browser client. Native Android and Windows callers send no
++// Origin header, and CORS never applies to them. The default allowlist is
++// therefore empty: no Access-Control-Allow-Origin is emitted at all.
++function nwAllowedOriginsFromEnv(getenv) {
++  try {
++    const raw = typeof getenv === 'function' ? getenv('NW_ALLOWED_ORIGINS') : '';
++    return new Set(
++      String(raw || '')
++        .split(',')
++        .map((s) => s.trim().replace(/\/+$/, ''))
++        .filter((s) => s.length > 0),
++    );
++  } catch (_) {
++    return new Set();
++  }
++}
++
++function nwOriginAllowed(origin, allowedOrigins) {
++  if (!origin || !allowedOrigins) return false;
++  const o = String(origin).trim().replace(/\/+$/, '');
++  if (!o) return false;
++  return allowedOrigins.has(o);
++}
++
++// Explicit headers on every response. `Vary: Origin` keeps intermediaries from
++// serving a cached response to the wrong origin once an allowlist is set.
++function nwCorsHeaders(origin, allowedOrigins, methods) {
++  const h = {
++    Vary: 'Origin',
++    'Access-Control-Allow-Methods': methods,
++    'Access-Control-Allow-Headers': 'Content-Type',
++    'Access-Control-Max-Age': '600',
++  };
++  if (nwOriginAllowed(origin, allowedOrigins)) {
++    h['Access-Control-Allow-Origin'] = String(origin).trim().replace(/\/+$/, '');
++  }
++  return h;
++}
++
++function nwPreflight(origin, allowedOrigins, methods) {
++  return {
++    status: 204,
++    headers: nwCorsHeaders(origin, allowedOrigins, methods),
++    body: null,
++  };
++}
++
++// ── Method and content-type gates ───────────────────────────────────────────
++// Body-carrying requests must declare application/json. Parameters such as
++// `; charset=utf-8` are accepted because .NET's StringContent sends them.
++// GET/HEAD/OPTIONS carry no body and are exempt so the existing
++// `GET /ipWhois?ip=...` path keeps working untouched.
++function nwIsJsonContentType(value) {
++  if (value === null || value === undefined) return false;
++  const base = String(value).split(';')[0].trim().toLowerCase();
++  return base === 'application/json';
++}
++
++function nwRequestCarriesBody(method) {
++  const m = String(method || '').toUpperCase();
++  return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS';
++}
++
++function nwContentTypeAccepted(method, contentType) {
++  if (!nwRequestCarriesBody(method)) return true;
++  return nwIsJsonContentType(contentType);
++}
++
++function nwMethodAllowed(method, methods) {
++  const m = String(method || '').toUpperCase();
++  return String(methods || '')
++    .split(',')
++    .map((s) => s.trim().toUpperCase())
++    .filter(Boolean)
++    .includes(m);
++}
++
++// ── Deadline ────────────────────────────────────────────────────────────────
++// One timer per invocation. Aborting the signal cancels every in-flight fetch
++// that was given it (DNS, crt.sh, page fetch). `close()` must run in `finally`
++// so a completed invocation never leaves a live timer behind.
++function nwDeadline(ms, now = () => Date.now()) {
++  const started = now();
++  const controller = new AbortController();
++  const budget = Math.max(1, Number(ms) || 1);
++  const timer = setTimeout(() => {
++    try {
++      controller.abort(new Error('deadline exceeded'));
++    } catch (_) {
++      controller.abort();
++    }
++  }, budget);
++  // Never keep a Deno/Node process alive just for the deadline timer.
++  if (timer && typeof timer.unref === 'function') timer.unref();
++  return {
++    signal: controller.signal,
++    expired: () => controller.signal.aborted,
++    remaining: () => Math.max(0, budget - (now() - started)),
++    elapsed: () => now() - started,
++    close: () => clearTimeout(timer),
++  };
++}
++
++// Combine the per-operation timeout with the invocation deadline.
++function nwMergeSignals(signals) {
++  const list = (signals || []).filter(Boolean);
++  if (list.length === 0) return undefined;
++  if (list.length === 1) return list[0];
++  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') {
++    return AbortSignal.any(list);
++  }
++  const controller = new AbortController();
++  for (const s of list) {
++    if (s.aborted) {
++      controller.abort(s.reason);
++      return controller.signal;
++    }
++    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
++  }
++  return controller.signal;
++}
++
++// ── Capped read ─────────────────────────────────────────────────────────────
++// Enforced while reading: once the cap is reached the stream is cancelled, so an
++// oversized or hostile response can never be buffered past `maxBytes`.
++async function nwReadCapped(res, maxBytes) {
++  const cap = Math.max(0, Number(maxBytes) || 0);
++  if (!res || !res.body || typeof res.body.getReader !== 'function') {
++    const t = await (res ? res.text() : Promise.resolve(''));
++    const s = String(t);
++    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  }
++  const reader = res.body.getReader();
++  const chunks = [];
++  let total = 0;
++  let truncated = false;
++  while (true) {
++    const { done, value } = await reader.read();
++    if (done) break;
++    const room = cap - total;
++    if (value.length > room) {
++      if (room > 0) chunks.push(value.slice(0, room));
++      total += Math.max(0, room);
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++    chunks.push(value);
++    total += value.length;
++    if (total >= cap) {
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++  }
++  const buf = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
++  let off = 0;
++  for (const c of chunks) { buf.set(c, off); off += c.length; }
++  return { text: new TextDecoder().decode(buf), truncated, bytes: total };
++}
++
++// ── Guarded GET ─────────────────────────────────────────────────────────────
++// Same contract as the function-local safeGet it replaces, plus an invocation
++// deadline signal. Validation is injected so this module stays dependency-free.
++//
++// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
++// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++async function nwSafeGet(url, opts) {
++  const fetchImpl = opts.fetchImpl;
++  const resolve = opts.resolve;
++  const validateHostname = opts.validateHostname;
++  const checkResolved = opts.checkResolved;
++  const readCapped = opts.readCapped || nwReadCapped;
++  const maxHops = opts.maxHops === undefined ? 3 : opts.maxHops;
++  const timeoutMs = opts.timeoutMs === undefined ? 9000 : opts.timeoutMs;
++  const maxBytes = opts.maxBytes === undefined ? 1500000 : opts.maxBytes;
++  const deadline = opts.signal;
++
++  const hops = [];
++  let current = url;
++
++  for (let hop = 0; hop <= maxHops; hop++) {
++    if (deadline && deadline.aborted) throw new Error('deadline exceeded');
++    let u;
++    try { u = new URL(current); } catch (_) { throw new Error('blocked_url: unparseable'); }
++    if (u.protocol !== 'https:') throw new Error('blocked_url: https required');
++    if (u.username || u.password) throw new Error('blocked_url: credentials rejected');
++    if (u.port && u.port !== '443') throw new Error('blocked_url: port rejected');
++    hops.push(current);
++
++    const hostCheck = validateHostname(u.hostname);
++    if (!hostCheck.ok) throw new Error('blocked_host: ' + hostCheck.error);
++
++    const ips = await resolve(u.hostname);
++    const ipCheck = checkResolved(ips);
++    if (!ipCheck.ok) throw new Error('blocked_resolution: ' + ipCheck.error);
++
++    const res = await fetchImpl(current, {
++      method: 'GET',
++      redirect: 'manual',
++      signal: nwMergeSignals([AbortSignal.timeout(timeoutMs), deadline]),
++      headers: {
++        'User-Agent':
++          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
++          '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
++        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
++      },
++    });
++
++    if (res.status >= 300 && res.status < 400) {
++      const loc = res.headers && res.headers.get ? res.headers.get('location') : null;
++      if (!loc) throw new Error('redirect_without_location');
++      current = new URL(loc, current).toString();
++      continue;
++    }
++
++    const { text, truncated } = await readCapped(res, maxBytes);
++    return { status: res.status, body: text, url: current, hops, truncated };
++  }
++
++  throw new Error('too_many_redirects');
++}
++
++// ── Phase 1 glue (generated) ────────────────────────────────────────────────
++const nwGetenv = (k) => { try { return Deno.env.get(k); } catch (_) { return undefined; } };
++const NW_METHODS = 'POST, OPTIONS';
++
++// Configuration is read per request, not at import time, so module import order
++// or a mid-deployment env change can never alter behaviour unexpectedly.
++const nwOrigins = () => nwAllowedOriginsFromEnv(nwGetenv);
++const nwCors = (req) => nwCorsHeaders(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++const nwPreflightFor = (req) => {
++  const p = nwPreflight(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++  return new Response(p.body, { status: p.status, headers: p.headers });
++};
++const nwUnsupportedMediaType = (req) =>
++  Response.json({ error: 'Content-Type must be application/json' },
++    { status: 415, headers: { ...nwCors(req), 'Cache-Control': 'no-store' } });
++const nwMethodNotAllowed = (req) =>
++  Response.json({ error: 'Method not allowed' },
++    { status: 405, headers: { ...nwCors(req), Allow: NW_METHODS, 'Cache-Control': 'no-store' } });
+ // D14 zero-cost core: Cymru IP-to-ASN over Cloudflare DoH, PTR, cache.
+ const V4_BLOCKED = [
+   ['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8],
+@@ -308,12 +570,12 @@
+ }
+ 
+ Deno.serve(async (req: Request) => {
+-  const cors = {
+-    'Access-Control-Allow-Origin': '*',
+-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+-    'Access-Control-Allow-Headers': 'Content-Type',
+-  };
+-  if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
++  // Phase 1: explicit CORS, JSON-only bodies (Android sends application/json).
++  const cors = nwCors(req);
++  if (req.method === 'OPTIONS') return nwPreflightFor(req);
++  if (!nwMethodAllowed(req.method, NW_METHODS)) return nwMethodNotAllowed(req);
++  if (!nwContentTypeAccepted(req.method, req.headers.get('content-type')))
++    return nwUnsupportedMediaType(req);
+ 
+   try {
+     const body = await req.json().catch(() => ({}));
+--- a/ipWhois.ts (deployed)
++++ b/ipWhois.ts (phase1)
+@@ -1,4 +1,266 @@
+ // @ts-nocheck
++
++// ══ NetWatch Phase 1 inline block (generated from security/phase1/nwhttp.mjs)
++// Do not edit here; edit the module and re-run apply_patch.py.
++// NetWatch — Phase 1 HTTP boundary hardening (pure logic, zero runtime dependencies).
++//
++// Canonical source for the inline block copied into each deployed function.
++// Base44 deploys single files, so the functions cannot import this module; the
++// patched function sources inline this file verbatim (minus `export`) and
++// tests/nwhttp.test.mjs asserts the inlined text still matches byte for byte.
++//
++// Scope of Phase 1 (authorized):
++//   - explicit, restrictive CORS (no wildcard, no origin reflection)
++//   - JSON content-type enforcement for body-carrying requests
++//   - strictly capped response reads (enforced while reading, reader cancelled)
++//   - a total wall-clock deadline with cancellation of outstanding work
++//   - a guarded GET whose redirects are re-validated per hop
++//
++// Out of scope for Phase 1 (explicitly excluded by the authorization):
++//   deep=true gating, token buckets, scan tokens, authentication, caching.
++
++// ── CORS ────────────────────────────────────────────────────────────────────
++// There is no browser client. Native Android and Windows callers send no
++// Origin header, and CORS never applies to them. The default allowlist is
++// therefore empty: no Access-Control-Allow-Origin is emitted at all.
++function nwAllowedOriginsFromEnv(getenv) {
++  try {
++    const raw = typeof getenv === 'function' ? getenv('NW_ALLOWED_ORIGINS') : '';
++    return new Set(
++      String(raw || '')
++        .split(',')
++        .map((s) => s.trim().replace(/\/+$/, ''))
++        .filter((s) => s.length > 0),
++    );
++  } catch (_) {
++    return new Set();
++  }
++}
++
++function nwOriginAllowed(origin, allowedOrigins) {
++  if (!origin || !allowedOrigins) return false;
++  const o = String(origin).trim().replace(/\/+$/, '');
++  if (!o) return false;
++  return allowedOrigins.has(o);
++}
++
++// Explicit headers on every response. `Vary: Origin` keeps intermediaries from
++// serving a cached response to the wrong origin once an allowlist is set.
++function nwCorsHeaders(origin, allowedOrigins, methods) {
++  const h = {
++    Vary: 'Origin',
++    'Access-Control-Allow-Methods': methods,
++    'Access-Control-Allow-Headers': 'Content-Type',
++    'Access-Control-Max-Age': '600',
++  };
++  if (nwOriginAllowed(origin, allowedOrigins)) {
++    h['Access-Control-Allow-Origin'] = String(origin).trim().replace(/\/+$/, '');
++  }
++  return h;
++}
++
++function nwPreflight(origin, allowedOrigins, methods) {
++  return {
++    status: 204,
++    headers: nwCorsHeaders(origin, allowedOrigins, methods),
++    body: null,
++  };
++}
++
++// ── Method and content-type gates ───────────────────────────────────────────
++// Body-carrying requests must declare application/json. Parameters such as
++// `; charset=utf-8` are accepted because .NET's StringContent sends them.
++// GET/HEAD/OPTIONS carry no body and are exempt so the existing
++// `GET /ipWhois?ip=...` path keeps working untouched.
++function nwIsJsonContentType(value) {
++  if (value === null || value === undefined) return false;
++  const base = String(value).split(';')[0].trim().toLowerCase();
++  return base === 'application/json';
++}
++
++function nwRequestCarriesBody(method) {
++  const m = String(method || '').toUpperCase();
++  return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS';
++}
++
++function nwContentTypeAccepted(method, contentType) {
++  if (!nwRequestCarriesBody(method)) return true;
++  return nwIsJsonContentType(contentType);
++}
++
++function nwMethodAllowed(method, methods) {
++  const m = String(method || '').toUpperCase();
++  return String(methods || '')
++    .split(',')
++    .map((s) => s.trim().toUpperCase())
++    .filter(Boolean)
++    .includes(m);
++}
++
++// ── Deadline ────────────────────────────────────────────────────────────────
++// One timer per invocation. Aborting the signal cancels every in-flight fetch
++// that was given it (DNS, crt.sh, page fetch). `close()` must run in `finally`
++// so a completed invocation never leaves a live timer behind.
++function nwDeadline(ms, now = () => Date.now()) {
++  const started = now();
++  const controller = new AbortController();
++  const budget = Math.max(1, Number(ms) || 1);
++  const timer = setTimeout(() => {
++    try {
++      controller.abort(new Error('deadline exceeded'));
++    } catch (_) {
++      controller.abort();
++    }
++  }, budget);
++  // Never keep a Deno/Node process alive just for the deadline timer.
++  if (timer && typeof timer.unref === 'function') timer.unref();
++  return {
++    signal: controller.signal,
++    expired: () => controller.signal.aborted,
++    remaining: () => Math.max(0, budget - (now() - started)),
++    elapsed: () => now() - started,
++    close: () => clearTimeout(timer),
++  };
++}
++
++// Combine the per-operation timeout with the invocation deadline.
++function nwMergeSignals(signals) {
++  const list = (signals || []).filter(Boolean);
++  if (list.length === 0) return undefined;
++  if (list.length === 1) return list[0];
++  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') {
++    return AbortSignal.any(list);
++  }
++  const controller = new AbortController();
++  for (const s of list) {
++    if (s.aborted) {
++      controller.abort(s.reason);
++      return controller.signal;
++    }
++    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
++  }
++  return controller.signal;
++}
++
++// ── Capped read ─────────────────────────────────────────────────────────────
++// Enforced while reading: once the cap is reached the stream is cancelled, so an
++// oversized or hostile response can never be buffered past `maxBytes`.
++async function nwReadCapped(res, maxBytes) {
++  const cap = Math.max(0, Number(maxBytes) || 0);
++  if (!res || !res.body || typeof res.body.getReader !== 'function') {
++    const t = await (res ? res.text() : Promise.resolve(''));
++    const s = String(t);
++    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  }
++  const reader = res.body.getReader();
++  const chunks = [];
++  let total = 0;
++  let truncated = false;
++  while (true) {
++    const { done, value } = await reader.read();
++    if (done) break;
++    const room = cap - total;
++    if (value.length > room) {
++      if (room > 0) chunks.push(value.slice(0, room));
++      total += Math.max(0, room);
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++    chunks.push(value);
++    total += value.length;
++    if (total >= cap) {
++      truncated = true;
++      try { await reader.cancel(); } catch (_) {}
++      break;
++    }
++  }
++  const buf = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
++  let off = 0;
++  for (const c of chunks) { buf.set(c, off); off += c.length; }
++  return { text: new TextDecoder().decode(buf), truncated, bytes: total };
++}
++
++// ── Guarded GET ─────────────────────────────────────────────────────────────
++// Same contract as the function-local safeGet it replaces, plus an invocation
++// deadline signal. Validation is injected so this module stays dependency-free.
++//
++// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
++// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++async function nwSafeGet(url, opts) {
++  const fetchImpl = opts.fetchImpl;
++  const resolve = opts.resolve;
++  const validateHostname = opts.validateHostname;
++  const checkResolved = opts.checkResolved;
++  const readCapped = opts.readCapped || nwReadCapped;
++  const maxHops = opts.maxHops === undefined ? 3 : opts.maxHops;
++  const timeoutMs = opts.timeoutMs === undefined ? 9000 : opts.timeoutMs;
++  const maxBytes = opts.maxBytes === undefined ? 1500000 : opts.maxBytes;
++  const deadline = opts.signal;
++
++  const hops = [];
++  let current = url;
++
++  for (let hop = 0; hop <= maxHops; hop++) {
++    if (deadline && deadline.aborted) throw new Error('deadline exceeded');
++    let u;
++    try { u = new URL(current); } catch (_) { throw new Error('blocked_url: unparseable'); }
++    if (u.protocol !== 'https:') throw new Error('blocked_url: https required');
++    if (u.username || u.password) throw new Error('blocked_url: credentials rejected');
++    if (u.port && u.port !== '443') throw new Error('blocked_url: port rejected');
++    hops.push(current);
++
++    const hostCheck = validateHostname(u.hostname);
++    if (!hostCheck.ok) throw new Error('blocked_host: ' + hostCheck.error);
++
++    const ips = await resolve(u.hostname);
++    const ipCheck = checkResolved(ips);
++    if (!ipCheck.ok) throw new Error('blocked_resolution: ' + ipCheck.error);
++
++    const res = await fetchImpl(current, {
++      method: 'GET',
++      redirect: 'manual',
++      signal: nwMergeSignals([AbortSignal.timeout(timeoutMs), deadline]),
++      headers: {
++        'User-Agent':
++          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
++          '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
++        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
++      },
++    });
++
++    if (res.status >= 300 && res.status < 400) {
++      const loc = res.headers && res.headers.get ? res.headers.get('location') : null;
++      if (!loc) throw new Error('redirect_without_location');
++      current = new URL(loc, current).toString();
++      continue;
++    }
++
++    const { text, truncated } = await readCapped(res, maxBytes);
++    return { status: res.status, body: text, url: current, hops, truncated };
++  }
++
++  throw new Error('too_many_redirects');
++}
++
++// ── Phase 1 glue (generated) ────────────────────────────────────────────────
++const nwGetenv = (k) => { try { return Deno.env.get(k); } catch (_) { return undefined; } };
++const NW_METHODS = 'GET, POST, OPTIONS';
++
++// Configuration is read per request, not at import time, so module import order
++// or a mid-deployment env change can never alter behaviour unexpectedly.
++const nwOrigins = () => nwAllowedOriginsFromEnv(nwGetenv);
++const nwCors = (req) => nwCorsHeaders(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++const nwPreflightFor = (req) => {
++  const p = nwPreflight(req.headers.get('origin'), nwOrigins(), NW_METHODS);
++  return new Response(p.body, { status: p.status, headers: p.headers });
++};
++const nwUnsupportedMediaType = (req) =>
++  Response.json({ error: 'Content-Type must be application/json' },
++    { status: 415, headers: { ...nwCors(req), 'Cache-Control': 'no-store' } });
++const nwMethodNotAllowed = (req) =>
++  Response.json({ error: 'Method not allowed' },
++    { status: 405, headers: { ...nwCors(req), Allow: NW_METHODS, 'Cache-Control': 'no-store' } });
+ // D14 zero-cost core: Cymru IP-to-ASN over Cloudflare DoH, PTR, cache.
+ const V4_BLOCKED = [
+   ['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8],
+@@ -339,12 +601,13 @@
+ }
+ 
+ Deno.serve(async (req: Request) => {
+-  const cors = {
+-    'Access-Control-Allow-Origin': '*',
+-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+-    'Access-Control-Allow-Headers': 'Content-Type',
+-  };
+-  if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
++  // Phase 1: explicit CORS. GET stays bodyless and exempt from the JSON gate,
++  // which is what the shipped Android client uses: GET /ipWhois?ip=...
++  const cors = nwCors(req);
++  if (req.method === 'OPTIONS') return nwPreflightFor(req);
++  if (!nwMethodAllowed(req.method, NW_METHODS)) return nwMethodNotAllowed(req);
++  if (!nwContentTypeAccepted(req.method, req.headers.get('content-type')))
++    return nwUnsupportedMediaType(req);
+ 
+   try {
+     let raw = '';
