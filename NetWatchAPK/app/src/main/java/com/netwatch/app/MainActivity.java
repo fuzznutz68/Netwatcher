@@ -168,6 +168,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private final Set<String> trustedDomains = Collections.synchronizedSet(new HashSet<>());
     // Root domain of the currently monitored app (e.g. "paypal.com")
     private String monitoredRootDomain = "";
+    private static final String PICK_TAG   = "NetWatchPick";
     private static final String PREFS_NAME = "netwatch_prefs";
     private static final String PREF_LANG   = "language";   // "en" or "ru"
     private boolean isRussian = false;
@@ -876,6 +877,12 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         executor.execute(() -> {
             PackageManager pm = getPackageManager();
             List<AppEntry> entries = new ArrayList<>();
+            // Exclusion accounting: identifies the exact gate that drops a package
+            // without logging hosts, traffic, or any user content.
+            int droppedNoLauncher = 0, droppedSystem = 0, droppedPrefix = 0, droppedError = 0;
+            int installedCount = 0;
+            java.util.List<String> noLauncherPkgs = new ArrayList<>();
+            java.util.List<String> systemPkgs = new ArrayList<>();
             try {
             List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
             if (apps == null || apps.isEmpty()) {
@@ -892,18 +899,27 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 }
             }
 
+            installedCount = apps.size();
             for (ApplicationInfo ai : apps) {
               try {
                 // Must have a launcher intent (visible in app drawer)
                 Intent launchIntent = pm.getLaunchIntentForPackage(ai.packageName);
-                if (launchIntent == null) continue;
+                if (launchIntent == null) {
+                    droppedNoLauncher++;
+                    if (noLauncherPkgs.size() < 50) noLauncherPkgs.add(ai.packageName);
+                    continue;
+                }
 
                 // Skip system apps — only show user-installed apps
                 // FLAG_SYSTEM = pre-installed on system partition
                 // If the app was updated by the user it has FLAG_UPDATED_SYSTEM_APP — include those
                 boolean isSystemApp = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 boolean isUpdatedSystemApp = (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-                if (isSystemApp && !isUpdatedSystemApp) continue;
+                if (isSystemApp && !isUpdatedSystemApp) {
+                    droppedSystem++;
+                    if (systemPkgs.size() < 50) systemPkgs.add(ai.packageName);
+                    continue;
+                }
 
                 // Extra guard: skip known Android framework / chipset packages
                 // NOTE: we do NOT block com.google.android.* broadly — that would hide
@@ -920,7 +936,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                     pkg.equals("com.google.android.providers.media.module") ||
                     pkg.startsWith("com.google.android.permissioncontroller") ||
                     pkg.startsWith("com.google.android.ext.") ||
-                    pkg.startsWith("com.google.android.trichromelibrary")) continue;
+                    pkg.startsWith("com.google.android.trichromelibrary")) {
+                    droppedPrefix++;
+                    continue;
+                }
 
                 String label;
                 try {
@@ -933,6 +952,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
               } catch (Throwable t) {
                 // Skip only this package; never let one bad entry abort the whole list
                 // (an uncaught throw here runs on a pool thread and kills the process).
+                droppedError++;
                 if (BuildConfig.DEBUG) android.util.Log.w("NetWatch", "app enum skip: " + ai.packageName, t);
               }
             }
@@ -941,6 +961,19 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 // Enumeration must never take the app down or leave the picker unusable.
                 if (BuildConfig.DEBUG) android.util.Log.e("NetWatch", "app enumeration failed", t);
             }
+
+            // One-line accounting so a device run names the failing gate. Package
+            // names only — no hosts, traffic, accounts or user content.
+            android.util.Log.i(PICK_TAG, "pick: installed=" + installedCount
+                    + " shown=" + entries.size()
+                    + " noLauncher=" + droppedNoLauncher
+                    + " systemApp=" + droppedSystem
+                    + " prefix=" + droppedPrefix
+                    + " error=" + droppedError);
+            if (!noLauncherPkgs.isEmpty())
+                android.util.Log.i(PICK_TAG, "noLauncher: " + noLauncherPkgs);
+            if (!systemPkgs.isEmpty())
+                android.util.Log.i(PICK_TAG, "systemApp: " + systemPkgs);
 
             // Sort alphabetically
             Collections.sort(entries, (a, b) -> a.label.compareToIgnoreCase(b.label));
