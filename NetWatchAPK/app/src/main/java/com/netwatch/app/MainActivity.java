@@ -4750,7 +4750,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 appLabel  = appLabel  != null ? appLabel  : "";
                 timestamp = timestamp != null ? timestamp : "";
 
-                String rawIp  = ipPort.contains(":") ? ipPort.split(":")[0] : ipPort;
+                String rawIp  = splitServiceIpPort(ipPort)[0];   // IPv4 and IPv6 alike
                 String display = (host != null && !host.isEmpty() && !host.equals(rawIp)) ? host : rawIp;
 
                 synchronized (deviceLog) {
