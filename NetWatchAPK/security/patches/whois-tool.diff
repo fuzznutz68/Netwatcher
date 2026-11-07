@@ -1,3 +1,18 @@
+diff --git a/NetWatchAPK/app/build.gradle b/NetWatchAPK/app/build.gradle
+index c710eed8..15ed9251 100644
+--- a/NetWatchAPK/app/build.gradle
++++ b/NetWatchAPK/app/build.gradle
+@@ -17,8 +17,8 @@ android {
+         applicationId "com.netwatch.net"
+         minSdk 30
+         targetSdk 36
+-        versionCode 84
+-        versionName "2.10.4-p0-diag"
++        versionCode 85
++        versionName "2.10.4-whois-test"
+         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+     }
+ 
 diff --git a/NetWatchAPK/app/src/main/java/com/netwatch/app/MainActivity.java b/NetWatchAPK/app/src/main/java/com/netwatch/app/MainActivity.java
 index 077e9de3..6ccf4554 100644
 --- a/NetWatchAPK/app/src/main/java/com/netwatch/app/MainActivity.java
@@ -427,7 +442,7 @@ index 077e9de3..6ccf4554 100644
          });
      }
 diff --git a/NetWatchAPK/app/src/main/res/layout/activity_main.xml b/NetWatchAPK/app/src/main/res/layout/activity_main.xml
-index 8277f67a..69c4f211 100644
+index 8277f67a..c29ef7de 100644
 --- a/NetWatchAPK/app/src/main/res/layout/activity_main.xml
 +++ b/NetWatchAPK/app/src/main/res/layout/activity_main.xml
 @@ -851,8 +851,16 @@
@@ -487,7 +502,7 @@ index 8277f67a..69c4f211 100644
                  android:text="PORT"
                  android:layout_weight="1"/>
              <Button
-@@ -884,18 +908,49 @@
+@@ -884,10 +908,37 @@
                  android:id="@+id/toolDnsBtn"
                  android:background="@drawable/input_background"
                  android:layout_width="0dp"
@@ -505,10 +520,10 @@ index 8277f67a..69c4f211 100644
 +                android:layout_marginRight="4dp"
                  android:text="DNS"
                  android:layout_weight="1"/>
-             <Button
-                 android:textSize="12sp"
-                 android:textStyle="bold"
-                 android:textColor="#e0e8f0"
++            <Button
++                android:textSize="12sp"
++                android:textStyle="bold"
++                android:textColor="#e0e8f0"
 +                android:id="@+id/toolWhoisBtn"
 +                android:background="@drawable/input_background"
 +                android:layout_width="0dp"
@@ -524,6 +539,10 @@ index 8277f67a..69c4f211 100644
 +                android:layout_marginRight="4dp"
 +                android:text="WHOIS"
 +                android:layout_weight="1"/>
+             <Button
+                 android:textSize="12sp"
+                 android:textStyle="bold"
+@@ -895,7 +946,15 @@
                  android:id="@+id/toolLanBtn"
                  android:background="@drawable/input_background"
                  android:layout_width="0dp"
