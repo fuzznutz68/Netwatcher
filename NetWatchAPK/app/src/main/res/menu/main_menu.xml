@@ -26,6 +26,9 @@
         android:id="@+id/menu_history"
         android:title="🕓 Connection History"/>
     <item
+        android:id="@+id/menu_picker_diag"
+        android:title="🧪 App Picker Diagnostics"/>
+    <item
         android:id="@+id/menu_language"
         android:title="🌍 Language / Язык"/>
     <item

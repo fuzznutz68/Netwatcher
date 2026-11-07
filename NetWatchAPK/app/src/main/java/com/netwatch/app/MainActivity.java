@@ -429,6 +429,10 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
+            if (id == R.id.menu_picker_diag) {
+                showPickerDiagnostics();
+                return true;
+            }
             if (id == R.id.menu_instructions_domain) {
                 if (isRussian) {
                     showInfoDialog("🔍 Domain Intel — Справка",
@@ -871,6 +875,135 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         String ts = new SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(new Date(s.startTime));
         String filename = "NetWatch_History_" + s.appLabel.replaceAll("[^a-zA-Z0-9]", "_") + "_" + ts + ".csv";
         shareCsv(filename, sb.toString());
+    }
+
+
+    /**
+     * Read-only picker diagnostics. Recomputes the SAME predicates loadAppList uses
+     * and reports, per package, which gate included or excluded it. Changes no
+     * filtering behaviour and is reachable from the overflow menu, so a standalone
+     * tablet can report without ADB. Package names only; no hosts or traffic.
+     */
+    private void showPickerDiagnostics() {
+        showToast(isRussian ? "Сбор диагностики…" : "Collecting diagnostics…");
+        executor.execute(() -> {
+            StringBuilder sb = new StringBuilder();
+            int nIncluded = 0, nNoLauncher = 0, nSystem = 0, nPrefix = 0, nNotDiscovered = 0, nError = 0;
+
+            String build = "?";
+            try {
+                android.content.pm.PackageInfo pi = getPackageManager()
+                        .getPackageInfo(getPackageName(), 0);
+                build = pi.versionName + " (" + pi.versionCode + ")";
+            } catch (Throwable ignored) { }
+
+            PackageManager pm = getPackageManager();
+            java.util.Map<String, String> state = new java.util.TreeMap<>();
+            java.util.Map<String, String> detail = new java.util.TreeMap<>();
+
+            java.util.Set<String> launcherPkgs = new java.util.HashSet<>();
+            try {
+                Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+                for (android.content.pm.ResolveInfo ri : pm.queryIntentActivities(main, 0)) {
+                    if (ri.activityInfo != null) launcherPkgs.add(ri.activityInfo.packageName);
+                }
+            } catch (Throwable ignored) { }
+
+            java.util.List<ApplicationInfo> apps = null;
+            try {
+                apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            } catch (Throwable t) {
+                nError++;
+                sb.append("ENUMERATION_ERROR: ").append(t.getClass().getSimpleName())
+                  .append(" ").append(String.valueOf(t.getMessage())).append('\n');
+            }
+
+            if (apps != null) {
+                for (ApplicationInfo ai : apps) {
+                    String pkg = ai.packageName;
+                    boolean isSystem = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    boolean isUpdated = (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+                    boolean blocked = pkg.startsWith("com.android.") || pkg.startsWith("android.")
+                            || pkg.equals("android") || pkg.startsWith("com.qualcomm.")
+                            || pkg.startsWith("com.mediatek.") || pkg.startsWith("com.sec.android.")
+                            || pkg.equals("com.google.android.gms") || pkg.equals("com.google.android.gsf")
+                            || pkg.equals("com.google.android.providers.media.module")
+                            || pkg.startsWith("com.google.android.permissioncontroller")
+                            || pkg.startsWith("com.google.android.ext.")
+                            || pkg.startsWith("com.google.android.trichromelibrary");
+
+                    Intent li = null;
+                    try { li = pm.getLaunchIntentForPackage(pkg); } catch (Throwable ignored) { }
+
+                    String st;
+                    if (li == null)                 { st = "NO_LAUNCHER";        nNoLauncher++; }
+                    else if (isSystem && !isUpdated){ st = "SYSTEM_APP_FILTER";  nSystem++;     }
+                    else if (blocked)               { st = "PREFIX_FILTER";      nPrefix++;     }
+                    else                            { st = "INCLUDED";           nIncluded++;   }
+
+                    state.put(pkg, st);
+                    detail.put(pkg, "flags=" + (isSystem ? "SYSTEM " : "")
+                            + (isUpdated ? "UPDATED_SYSTEM " : "")
+                            + (ai.enabled ? "enabled" : "DISABLED")
+                            + (launcherPkgs.contains(pkg) ? " launcher=yes" : " launcher=no"));
+                }
+                for (String lp : launcherPkgs) {
+                    if (!state.containsKey(lp)) {
+                        state.put(lp, "NOT_DISCOVERED");
+                        detail.put(lp, "has launcher activity but absent from getInstalledApplications");
+                        nNotDiscovered++;
+                    }
+                }
+            }
+
+            sb.append("NetWatch picker diagnostics\n");
+            sb.append("build: ").append(build).append('\n');
+            sb.append("android: ").append(android.os.Build.VERSION.RELEASE)
+              .append(" (SDK ").append(android.os.Build.VERSION.SDK_INT).append(")\n");
+            sb.append("device: ").append(android.os.Build.MANUFACTURER).append(' ')
+              .append(android.os.Build.MODEL).append('\n');
+            sb.append("installed=").append(apps == null ? 0 : apps.size())
+              .append(" launcherPkgs=").append(launcherPkgs.size()).append('\n');
+            sb.append("INCLUDED=").append(nIncluded)
+              .append(" NO_LAUNCHER=").append(nNoLauncher)
+              .append(" SYSTEM_APP_FILTER=").append(nSystem)
+              .append(" PREFIX_FILTER=").append(nPrefix)
+              .append(" NOT_DISCOVERED=").append(nNotDiscovered)
+              .append(" ENUMERATION_ERROR=").append(nError).append("\n\n");
+            sb.append("state | package | details\n");
+            for (java.util.Map.Entry<String, String> e : state.entrySet()) {
+                sb.append(e.getValue()).append(" | ").append(e.getKey())
+                  .append(" | ").append(detail.get(e.getKey())).append('\n');
+            }
+            final String report = sb.toString();
+
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                android.util.Log.i("NetWatchPick", report);
+            }
+            mainHandler.post(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                android.widget.TextView tv = new android.widget.TextView(this);
+                tv.setText(report);
+                tv.setTextSize(10f);
+                tv.setTypeface(android.graphics.Typeface.MONOSPACE);
+                tv.setTextIsSelectable(true);
+                tv.setPadding(24, 24, 24, 24);
+                android.widget.ScrollView sv = new android.widget.ScrollView(this);
+                sv.addView(tv);
+                new AlertDialog.Builder(this)
+                        .setTitle("🧪 App Picker Diagnostics")
+                        .setView(sv)
+                        .setPositiveButton(isRussian ? "Поделиться" : "Share", (d, w) -> {
+                            Intent send = new Intent(Intent.ACTION_SEND);
+                            send.setType("text/plain");
+                            send.putExtra(Intent.EXTRA_SUBJECT, "NetWatch picker diagnostics");
+                            send.putExtra(Intent.EXTRA_TEXT, report);
+                            startActivity(Intent.createChooser(send, "Share diagnostics"));
+                        })
+                        .setNegativeButton(isRussian ? "Закрыть" : "Close", null)
+                        .show();
+            });
+        });
     }
 
     private void loadAppList() {
