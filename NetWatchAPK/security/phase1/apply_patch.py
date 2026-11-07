@@ -70,7 +70,10 @@ di = insert_after(di, "// @ts-nocheck\n", header_block(
     "const nwDeadlineMs = () => Math.min(20000, Math.max(1000, "
     "Number(nwGetenv('NW_DEADLINE_MS')) || 12000));\n"
     "const NW_CRTSH_MAX_BYTES = 400000;         // strict cap, enforced while reading\n"
-    "const NW_CRTSH_MAX_ROWS = 2000;\n"), "domainIntel: block")
+    "const NW_CRTSH_MAX_ROWS = 2000;\n"
+    "// crt.sh gets its own sub-budget: a hung CT query must never eat the whole\n"
+    "// invocation deadline and starve the rest of the scan.\n"
+    "const NW_CRTSH_MAX_MS = 6000;\n"), "domainIntel: block")
 
 # one implementation of the capped reader and the guarded GET
 di = sub_regex(di, r"async function readCapped\(res, maxBytes\) \{.*?\n\}\n",
@@ -113,6 +116,15 @@ di = sub_once(di, """Deno.serve(async (req) => {
 
 di = sub_once(di, "      deep: isDeep,\n", "      deep: isDeep,\n      truncated: false,\n", "domainIntel: results.truncated")
 
+di = sub_once(di, """      const d = await r.json();
+      return (d.Answer || []) as any[];""",
+"""      // The DoH body is capped like every other network read: a hostile or
+      // broken resolver cannot make us buffer an unbounded JSON document.
+      const jr = await nwReadJson(r, 262144);
+      if (!jr.ok) throw new Error('dns-json: ' + jr.reason);
+      const d: any = jr.value;
+      return (d.Answer || []) as any[];""", "domainIntel: capped DoH JSON")
+
 di = sub_once(di, "{ headers: { Accept: 'application/dns-json' }, signal: AbortSignal.timeout(7000) }",
               "{ headers: { Accept: 'application/dns-json' },\n"
               "          signal: nwMergeSignals([AbortSignal.timeout(7000), dl.signal]) }", "domainIntel: fetchDns signal")
@@ -128,7 +140,7 @@ di = sub_once(di, """      const r = await fetch(
 """      if (!nwGuard()) throw new Error('deadline');
       const r = await fetch(
         `https://crt.sh/?q=%25.${cleanDomain}&output=json`,
-        { signal: nwMergeSignals([AbortSignal.timeout(20000), dl.signal]) }
+        { signal: nwMergeSignals([AbortSignal.timeout(NW_CRTSH_MAX_MS), dl.signal]) }
       );
       if (r.ok) {
         // Strict cap enforced while reading: an oversized CT response is cut
@@ -226,6 +238,12 @@ g = sub_once(g, """Deno.serve(async (req: Request) => {
   if (!nwMethodAllowed(req.method, NW_METHODS)) return nwMethodNotAllowed(req);
   if (!nwContentTypeAccepted(req.method, req.headers.get('content-type')))
     return nwUnsupportedMediaType(req);""", "geoIp: handler head")
+g = sub_once(g, """  let d;
+  try { d = await r.json(); } catch { return { ok: false, reason: 'bad-json' }; }""",
+"""  // DoH bodies go through the capped reader; a truncated body is a failure.
+  const jr = await nwReadJson(r, 262144);
+  if (!jr.ok) return { ok: false, reason: jr.reason };
+  const d: any = jr.value;""", "geoIp: capped DoH JSON")
 (PATCHED / "geoIp.ts").write_text(g, encoding="utf-8")
 print(f"geoIp.ts        {orig_len} → {len(g)} bytes")
 
@@ -247,6 +265,20 @@ w = sub_once(w, """Deno.serve(async (req: Request) => {
   if (!nwMethodAllowed(req.method, NW_METHODS)) return nwMethodNotAllowed(req);
   if (!nwContentTypeAccepted(req.method, req.headers.get('content-type')))
     return nwUnsupportedMediaType(req);""", "ipWhois: handler head")
+w = sub_once(w, """  let d;
+  try { d = await r.json(); } catch { return { ok: false, reason: 'bad-json' }; }""",
+"""  // DoH bodies go through the capped reader; a truncated body is a failure.
+  const jr = await nwReadJson(r, 262144);
+  if (!jr.ok) return { ok: false, reason: jr.reason };
+  const d: any = jr.value;""", "ipWhois: capped DoH JSON")
+
+w = sub_once(w, "    const text = (await r.text()).slice(0, 200000);",
+"""    // RDAP was previously read in full and sliced afterwards, which buffered the
+    // whole body first. It is now capped while streaming.
+    const rdapBody = await nwReadCapped(r, 200000);
+    if (rdapBody.unreadable || rdapBody.truncated)
+      return { error: 'rdap: response too large' };
+    const text = rdapBody.text;""", "ipWhois: capped RDAP read")
 (PATCHED / "ipWhois.ts").write_text(w, encoding="utf-8")
 print(f"ipWhois.ts      {orig_len} → {len(w)} bytes")
 print("patch generated OK")

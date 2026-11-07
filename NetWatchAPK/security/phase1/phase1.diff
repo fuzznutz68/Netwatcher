@@ -1,6 +1,6 @@
---- a/domainIntel.ts (deployed)
+--- a/domainIntel.ts (deployed baseline)
 +++ b/domainIntel.ts (phase1)
-@@ -2,6 +2,272 @@
+@@ -2,6 +2,289 @@
  // Enhanced: crt.sh + brute-force + CDN detection + cross-domain discovery + deep PTR
  
  // @ts-nocheck
@@ -150,12 +150,16 @@
 +// ── Capped read ─────────────────────────────────────────────────────────────
 +// Enforced while reading: once the cap is reached the stream is cancelled, so an
 +// oversized or hostile response can never be buffered past `maxBytes`.
++// Fallback rule: if the body cannot be read as a stream, the response is
++// discarded unread. A non-streaming read (res.text()/res.arrayBuffer()) buffers
++// the entire body, and a declared Content-Length is a claim by the remote server,
++// not a guarantee, so no such path is acceptable here.
 +async function nwReadCapped(res, maxBytes) {
 +  const cap = Math.max(0, Number(maxBytes) || 0);
-+  if (!res || !res.body || typeof res.body.getReader !== 'function') {
-+    const t = await (res ? res.text() : Promise.resolve(''));
-+    const s = String(t);
-+    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  if (!res || !res.body) return { text: '', truncated: false, bytes: 0 };
++  if (!res.body || typeof res.body.getReader !== 'function') {
++    try { if (res.body && typeof res.body.cancel === 'function') await res.body.cancel(); } catch (_) {}
++    return { text: '', truncated: true, bytes: 0, unreadable: true };
 +  }
 +  const reader = res.body.getReader();
 +  const chunks = [];
@@ -192,6 +196,16 @@
 +//
 +// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
 +// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++// JSON read through the same cap: parsing never sees more than `maxBytes`, and a
++// truncated body is a failure rather than a partial parse.
++async function nwReadJson(res, maxBytes) {
++  const r = await nwReadCapped(res, maxBytes);
++  if (r.unreadable) return { ok: false, reason: 'unreadable', truncated: true, bytes: 0 };
++  if (r.truncated) return { ok: false, reason: 'too-large', truncated: true, bytes: r.bytes };
++  try { return { ok: true, value: JSON.parse(r.text), bytes: r.bytes }; }
++  catch (_) { return { ok: false, reason: 'bad-json', bytes: r.bytes }; }
++}
++
 +async function nwSafeGet(url, opts) {
 +  const fetchImpl = opts.fetchImpl;
 +  const resolve = opts.resolve;
@@ -255,6 +269,9 @@
 +const nwDeadlineMs = () => Math.min(20000, Math.max(1000, Number(nwGetenv('NW_DEADLINE_MS')) || 12000));
 +const NW_CRTSH_MAX_BYTES = 400000;         // strict cap, enforced while reading
 +const NW_CRTSH_MAX_ROWS = 2000;
++// crt.sh gets its own sub-budget: a hung CT query must never eat the whole
++// invocation deadline and starve the rest of the scan.
++const NW_CRTSH_MAX_MS = 6000;
 +
 +// Configuration is read per request, not at import time, so module import order
 +// or a mid-deployment env change can never alter behaviour unexpectedly.
@@ -273,7 +290,7 @@
  // NetWatch inline security block — generated from security/netGuard.mjs and
  // security/safeGet.mjs. Base44 deploys single files, so no imports.
  // Covered by netGuard.test.mjs + safeGet.test.mjs (22 tests).
-@@ -192,89 +458,19 @@
+@@ -192,89 +475,19 @@
   * @returns {Promise<{status:number, body:string, url:string, hops:string[], truncated:boolean}>}
   */
  async function safeGet(url, opts) {
@@ -373,7 +390,7 @@
  }
  
  /** Queuing semaphore: waits when full (unlike createLimiter, which rejects). */
-@@ -387,10 +583,19 @@
+@@ -387,10 +600,19 @@
  }
  
  Deno.serve(async (req) => {
@@ -397,7 +414,7 @@
    try {
      const body = await req.json().catch(() => ({}));
      const { domain, deep } = body;
-@@ -419,6 +624,7 @@
+@@ -419,6 +641,7 @@
        domain: cleanDomain,
        timestamp: new Date().toISOString(),
        deep: isDeep,
@@ -405,7 +422,7 @@
        ipv4: [],
        ipv6: [],
        cname: null,
-@@ -440,7 +646,8 @@
+@@ -440,9 +663,14 @@
        if (++nwDnsCount > NW_DNS_BUDGET) throw new Error('dns query budget exceeded');
        const r = await nwDnsGate(() => fetch(
          `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,
@@ -413,9 +430,16 @@
 +        { headers: { Accept: 'application/dns-json' },
 +          signal: nwMergeSignals([AbortSignal.timeout(7000), dl.signal]) }
        ));
-       const d = await r.json();
+-      const d = await r.json();
++      // The DoH body is capped like every other network read: a hostile or
++      // broken resolver cannot make us buffer an unbounded JSON document.
++      const jr = await nwReadJson(r, 262144);
++      if (!jr.ok) throw new Error('dns-json: ' + jr.reason);
++      const d: any = jr.value;
        return (d.Answer || []) as any[];
-@@ -483,15 +690,25 @@
+     };
+ 
+@@ -483,15 +711,25 @@
      const certNameSet = new Set<string>();
  
      try {
@@ -423,7 +447,7 @@
        const r = await fetch(
          `https://crt.sh/?q=%25.${cleanDomain}&output=json`,
 -        { signal: AbortSignal.timeout(20000) }
-+        { signal: nwMergeSignals([AbortSignal.timeout(20000), dl.signal]) }
++        { signal: nwMergeSignals([AbortSignal.timeout(NW_CRTSH_MAX_MS), dl.signal]) }
        );
        if (r.ok) {
 -        const text = await r.text();
@@ -445,7 +469,7 @@
              const names = [
                ...(row.name_value || '').split('\n'),
                row.common_name || ''
-@@ -563,15 +780,17 @@
+@@ -563,15 +801,17 @@
        'ml', 'ai', 'model', 'inference', 'predict',
      ];
  
@@ -472,7 +496,7 @@
  
      // ── 4. Resolve all discovered subdomains in parallel (batched) ────────────
      const allSubs = Array.from(subSet).sort();
-@@ -579,6 +798,7 @@
+@@ -579,6 +819,7 @@
      const subdomainResults: any[] = [];
  
      for (let i = 0; i < Math.min(allSubs.length, 200); i += BATCH) {
@@ -480,7 +504,7 @@
        const batch = allSubs.slice(i, i + BATCH);
        const resolved = await Promise.allSettled(
          batch.map(async (sub) => {
-@@ -621,6 +841,7 @@
+@@ -621,6 +862,7 @@
      // This is the ONLY way to find domains like ttua.nu that share no DNS,
      // certificate or name similarity with the primary domain.
      try {
@@ -488,7 +512,7 @@
        const UAs = { 
          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-@@ -639,12 +860,19 @@
+@@ -639,12 +881,19 @@
          return out;
        };
        const htmlPages = await Promise.allSettled([
@@ -510,7 +534,7 @@
          if (p.status === 'fulfilled' && p.value && p.value.status < 400) {
            html += p.value.body || '';
          }
-@@ -831,11 +1059,15 @@
+@@ -831,11 +1080,15 @@
        }
      }
  
@@ -529,9 +553,9 @@
 +    dl.close();
    }
  });
---- a/geoIp.ts (deployed)
+--- a/geoIp.ts (deployed baseline)
 +++ b/geoIp.ts (phase1)
-@@ -1,4 +1,266 @@
+@@ -1,4 +1,280 @@
  // @ts-nocheck
 +
 +// ══ NetWatch Phase 1 inline block (generated from security/phase1/nwhttp.mjs)
@@ -679,12 +703,16 @@
 +// ── Capped read ─────────────────────────────────────────────────────────────
 +// Enforced while reading: once the cap is reached the stream is cancelled, so an
 +// oversized or hostile response can never be buffered past `maxBytes`.
++// Fallback rule: if the body cannot be read as a stream, the response is
++// discarded unread. A non-streaming read (res.text()/res.arrayBuffer()) buffers
++// the entire body, and a declared Content-Length is a claim by the remote server,
++// not a guarantee, so no such path is acceptable here.
 +async function nwReadCapped(res, maxBytes) {
 +  const cap = Math.max(0, Number(maxBytes) || 0);
-+  if (!res || !res.body || typeof res.body.getReader !== 'function') {
-+    const t = await (res ? res.text() : Promise.resolve(''));
-+    const s = String(t);
-+    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  if (!res || !res.body) return { text: '', truncated: false, bytes: 0 };
++  if (!res.body || typeof res.body.getReader !== 'function') {
++    try { if (res.body && typeof res.body.cancel === 'function') await res.body.cancel(); } catch (_) {}
++    return { text: '', truncated: true, bytes: 0, unreadable: true };
 +  }
 +  const reader = res.body.getReader();
 +  const chunks = [];
@@ -721,6 +749,16 @@
 +//
 +// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
 +// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++// JSON read through the same cap: parsing never sees more than `maxBytes`, and a
++// truncated body is a failure rather than a partial parse.
++async function nwReadJson(res, maxBytes) {
++  const r = await nwReadCapped(res, maxBytes);
++  if (r.unreadable) return { ok: false, reason: 'unreadable', truncated: true, bytes: 0 };
++  if (r.truncated) return { ok: false, reason: 'too-large', truncated: true, bytes: r.bytes };
++  try { return { ok: true, value: JSON.parse(r.text), bytes: r.bytes }; }
++  catch (_) { return { ok: false, reason: 'bad-json', bytes: r.bytes }; }
++}
++
 +async function nwSafeGet(url, opts) {
 +  const fetchImpl = opts.fetchImpl;
 +  const resolve = opts.resolve;
@@ -798,7 +836,20 @@
  // D14 zero-cost core: Cymru IP-to-ASN over Cloudflare DoH, PTR, cache.
  const V4_BLOCKED = [
    ['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8],
-@@ -308,12 +570,12 @@
+@@ -201,8 +477,10 @@
+     return { ok: false, reason: 'network', error: String((e && e.message) || e) };
+   }
+   if (!r.ok) return { ok: false, reason: 'http', status: r.status };
+-  let d;
+-  try { d = await r.json(); } catch { return { ok: false, reason: 'bad-json' }; }
++  // DoH bodies go through the capped reader; a truncated body is a failure.
++  const jr = await nwReadJson(r, 262144);
++  if (!jr.ok) return { ok: false, reason: jr.reason };
++  const d: any = jr.value;
+   if (d.Status === 3) return { ok: false, reason: 'nxdomain' };
+   if (d.Status !== 0) return { ok: false, reason: 'rcode', status: d.Status };
+   const TYPE_NUM = { A: 1, NS: 2, CNAME: 5, SOA: 6, PTR: 12, MX: 15, TXT: 16, AAAA: 28 };
+@@ -308,12 +586,12 @@
  }
  
  Deno.serve(async (req: Request) => {
@@ -817,9 +868,9 @@
  
    try {
      const body = await req.json().catch(() => ({}));
---- a/ipWhois.ts (deployed)
+--- a/ipWhois.ts (deployed baseline)
 +++ b/ipWhois.ts (phase1)
-@@ -1,4 +1,266 @@
+@@ -1,4 +1,280 @@
  // @ts-nocheck
 +
 +// ══ NetWatch Phase 1 inline block (generated from security/phase1/nwhttp.mjs)
@@ -967,12 +1018,16 @@
 +// ── Capped read ─────────────────────────────────────────────────────────────
 +// Enforced while reading: once the cap is reached the stream is cancelled, so an
 +// oversized or hostile response can never be buffered past `maxBytes`.
++// Fallback rule: if the body cannot be read as a stream, the response is
++// discarded unread. A non-streaming read (res.text()/res.arrayBuffer()) buffers
++// the entire body, and a declared Content-Length is a claim by the remote server,
++// not a guarantee, so no such path is acceptable here.
 +async function nwReadCapped(res, maxBytes) {
 +  const cap = Math.max(0, Number(maxBytes) || 0);
-+  if (!res || !res.body || typeof res.body.getReader !== 'function') {
-+    const t = await (res ? res.text() : Promise.resolve(''));
-+    const s = String(t);
-+    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
++  if (!res || !res.body) return { text: '', truncated: false, bytes: 0 };
++  if (!res.body || typeof res.body.getReader !== 'function') {
++    try { if (res.body && typeof res.body.cancel === 'function') await res.body.cancel(); } catch (_) {}
++    return { text: '', truncated: true, bytes: 0, unreadable: true };
 +  }
 +  const reader = res.body.getReader();
 +  const chunks = [];
@@ -1009,6 +1064,16 @@
 +//
 +// LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
 +// runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
++// JSON read through the same cap: parsing never sees more than `maxBytes`, and a
++// truncated body is a failure rather than a partial parse.
++async function nwReadJson(res, maxBytes) {
++  const r = await nwReadCapped(res, maxBytes);
++  if (r.unreadable) return { ok: false, reason: 'unreadable', truncated: true, bytes: 0 };
++  if (r.truncated) return { ok: false, reason: 'too-large', truncated: true, bytes: r.bytes };
++  try { return { ok: true, value: JSON.parse(r.text), bytes: r.bytes }; }
++  catch (_) { return { ok: false, reason: 'bad-json', bytes: r.bytes }; }
++}
++
 +async function nwSafeGet(url, opts) {
 +  const fetchImpl = opts.fetchImpl;
 +  const resolve = opts.resolve;
@@ -1086,7 +1151,34 @@
  // D14 zero-cost core: Cymru IP-to-ASN over Cloudflare DoH, PTR, cache.
  const V4_BLOCKED = [
    ['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8],
-@@ -339,12 +601,13 @@
+@@ -201,8 +477,10 @@
+     return { ok: false, reason: 'network', error: String((e && e.message) || e) };
+   }
+   if (!r.ok) return { ok: false, reason: 'http', status: r.status };
+-  let d;
+-  try { d = await r.json(); } catch { return { ok: false, reason: 'bad-json' }; }
++  // DoH bodies go through the capped reader; a truncated body is a failure.
++  const jr = await nwReadJson(r, 262144);
++  if (!jr.ok) return { ok: false, reason: jr.reason };
++  const d: any = jr.value;
+   if (d.Status === 3) return { ok: false, reason: 'nxdomain' };
+   if (d.Status !== 0) return { ok: false, reason: 'rcode', status: d.Status };
+   const TYPE_NUM = { A: 1, NS: 2, CNAME: 5, SOA: 6, PTR: 12, MX: 15, TXT: 16, AAAA: 28 };
+@@ -315,7 +593,12 @@
+       signal: AbortSignal.timeout(6000),
+     });
+     if (!r.ok) return { error: 'rdap: http ' + r.status };
+-    const text = (await r.text()).slice(0, 200000);
++    // RDAP was previously read in full and sliced afterwards, which buffered the
++    // whole body first. It is now capped while streaming.
++    const rdapBody = await nwReadCapped(r, 200000);
++    if (rdapBody.unreadable || rdapBody.truncated)
++      return { error: 'rdap: response too large' };
++    const text = rdapBody.text;
+     let d: any;
+     try { d = JSON.parse(text); } catch { return { error: 'rdap: bad json' }; }
+ 
+@@ -339,12 +622,13 @@
  }
  
  Deno.serve(async (req: Request) => {

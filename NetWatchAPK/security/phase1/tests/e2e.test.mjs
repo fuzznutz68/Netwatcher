@@ -195,6 +195,44 @@ test('timeout: a rejecting page fetch is recorded, request still succeeds', asyn
   assert.deepEqual(d.ipv4, ['93.184.216.34'], 'DNS results survive a page fetch failure');
 });
 
+// ── capped reads inside the subrequests ─────────────────────────────────────
+test('domainIntel: an oversized DoH body is rejected, the scan still completes', async () => {
+  installDenoStub();
+  const huge = () => json(Array.from({ length: 40_000 }, (_, i) => ({ data: `1.2.3.${i % 255}` })));
+  installFetch([
+    { match: (u) => u.startsWith('https://cloudflare-dns.com/dns-query') && u.includes('name=example.com'), respond: huge },
+    anyDns(() => dnsEmpty()),
+    crtRoute(() => json([])),
+    pageRoute('example.com', () => new Response('', { status: 200 })),
+    pageRoute('www.example.com', () => new Response('', { status: 200 })),
+  ]);
+  const handler = await loadHandler('domainIntel');
+  const res = await call(handler, '/domainIntel', {
+    headers: { 'content-type': 'application/json' }, body: JSON.stringify({ domain: 'example.com' }),
+  });
+  assert.equal(res.status, 200, 'a hostile resolver must not fail the request');
+  const d = await res.json();
+  assert.ok(d.errors.some((e) => e.includes('dns-json: too-large')), JSON.stringify(d.errors.slice(0, 4)));
+});
+
+test('ipWhois: an oversized RDAP body is refused by the cap, lookup degrades cleanly', async () => {
+  installDenoStub();
+  installFetch([
+    dnsRoute('8.8.8.8.origin.asn.cymru.com', 'TXT', () => dnsOk([txtRecord('15169 | 8.8.8.0/24 | US | arin | 1992-12-01')])),
+    dnsRoute('15169.asn.cymru.com', 'TXT', () => dnsOk([txtRecord('15169 | US | arin | 2000-03-30 | GOOGLE - Google LLC, US')])),
+    anyDns(() => dnsEmpty()),
+    { match: (u) => u.startsWith('https://rdap.arin.net/'),
+      respond: () => json({ name: 'GOGL', pad: 'x'.repeat(400_000), entities: [] }) },
+  ]);
+  const handler = await loadHandler('ipWhois');
+  const res = await call(handler, '/ipWhois?ip=8.8.8.8', { method: 'GET' });
+  assert.equal(res.status, 200);
+  const d = await res.json();
+  assert.equal(d.ip, '8.8.8.8');
+  assert.ok(!/GOGL/.test(JSON.stringify(d)), 'oversized RDAP must not be parsed');
+  assert.match(JSON.stringify(d.errors || d), /rdap: response too large/);
+});
+
 // ── geoIp ───────────────────────────────────────────────────────────────────
 test('geoIp: Android POST works, non-JSON and wrong methods are refused', async () => {
   installDenoStub();

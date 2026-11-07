@@ -145,12 +145,16 @@ function nwMergeSignals(signals) {
 // ── Capped read ─────────────────────────────────────────────────────────────
 // Enforced while reading: once the cap is reached the stream is cancelled, so an
 // oversized or hostile response can never be buffered past `maxBytes`.
+// Fallback rule: if the body cannot be read as a stream, the response is
+// discarded unread. A non-streaming read (res.text()/res.arrayBuffer()) buffers
+// the entire body, and a declared Content-Length is a claim by the remote server,
+// not a guarantee, so no such path is acceptable here.
 async function nwReadCapped(res, maxBytes) {
   const cap = Math.max(0, Number(maxBytes) || 0);
-  if (!res || !res.body || typeof res.body.getReader !== 'function') {
-    const t = await (res ? res.text() : Promise.resolve(''));
-    const s = String(t);
-    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
+  if (!res || !res.body) return { text: '', truncated: false, bytes: 0 };
+  if (!res.body || typeof res.body.getReader !== 'function') {
+    try { if (res.body && typeof res.body.cancel === 'function') await res.body.cancel(); } catch (_) {}
+    return { text: '', truncated: true, bytes: 0, unreadable: true };
   }
   const reader = res.body.getReader();
   const chunks = [];
@@ -187,6 +191,16 @@ async function nwReadCapped(res, maxBytes) {
 //
 // LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
 // runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
+// JSON read through the same cap: parsing never sees more than `maxBytes`, and a
+// truncated body is a failure rather than a partial parse.
+async function nwReadJson(res, maxBytes) {
+  const r = await nwReadCapped(res, maxBytes);
+  if (r.unreadable) return { ok: false, reason: 'unreadable', truncated: true, bytes: 0 };
+  if (r.truncated) return { ok: false, reason: 'too-large', truncated: true, bytes: r.bytes };
+  try { return { ok: true, value: JSON.parse(r.text), bytes: r.bytes }; }
+  catch (_) { return { ok: false, reason: 'bad-json', bytes: r.bytes }; }
+}
+
 async function nwSafeGet(url, opts) {
   const fetchImpl = opts.fetchImpl;
   const resolve = opts.resolve;
@@ -463,8 +477,10 @@ async function dohQuery(name, type = 'TXT', { timeoutMs = 4000 } = {}) {
     return { ok: false, reason: 'network', error: String((e && e.message) || e) };
   }
   if (!r.ok) return { ok: false, reason: 'http', status: r.status };
-  let d;
-  try { d = await r.json(); } catch { return { ok: false, reason: 'bad-json' }; }
+  // DoH bodies go through the capped reader; a truncated body is a failure.
+  const jr = await nwReadJson(r, 262144);
+  if (!jr.ok) return { ok: false, reason: jr.reason };
+  const d: any = jr.value;
   if (d.Status === 3) return { ok: false, reason: 'nxdomain' };
   if (d.Status !== 0) return { ok: false, reason: 'rcode', status: d.Status };
   const TYPE_NUM = { A: 1, NS: 2, CNAME: 5, SOA: 6, PTR: 12, MX: 15, TXT: 16, AAAA: 28 };

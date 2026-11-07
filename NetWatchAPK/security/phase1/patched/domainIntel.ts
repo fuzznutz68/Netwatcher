@@ -148,12 +148,16 @@ function nwMergeSignals(signals) {
 // ── Capped read ─────────────────────────────────────────────────────────────
 // Enforced while reading: once the cap is reached the stream is cancelled, so an
 // oversized or hostile response can never be buffered past `maxBytes`.
+// Fallback rule: if the body cannot be read as a stream, the response is
+// discarded unread. A non-streaming read (res.text()/res.arrayBuffer()) buffers
+// the entire body, and a declared Content-Length is a claim by the remote server,
+// not a guarantee, so no such path is acceptable here.
 async function nwReadCapped(res, maxBytes) {
   const cap = Math.max(0, Number(maxBytes) || 0);
-  if (!res || !res.body || typeof res.body.getReader !== 'function') {
-    const t = await (res ? res.text() : Promise.resolve(''));
-    const s = String(t);
-    return { text: s.slice(0, cap), truncated: s.length > cap, bytes: Math.min(s.length, cap) };
+  if (!res || !res.body) return { text: '', truncated: false, bytes: 0 };
+  if (!res.body || typeof res.body.getReader !== 'function') {
+    try { if (res.body && typeof res.body.cancel === 'function') await res.body.cancel(); } catch (_) {}
+    return { text: '', truncated: true, bytes: 0, unreadable: true };
   }
   const reader = res.body.getReader();
   const chunks = [];
@@ -190,6 +194,16 @@ async function nwReadCapped(res, maxBytes) {
 //
 // LIMITATION (unchanged by Phase 1): the request is issued by hostname, so the
 // runtime resolves the name again at connect time. See PINNING_INVESTIGATION.md.
+// JSON read through the same cap: parsing never sees more than `maxBytes`, and a
+// truncated body is a failure rather than a partial parse.
+async function nwReadJson(res, maxBytes) {
+  const r = await nwReadCapped(res, maxBytes);
+  if (r.unreadable) return { ok: false, reason: 'unreadable', truncated: true, bytes: 0 };
+  if (r.truncated) return { ok: false, reason: 'too-large', truncated: true, bytes: r.bytes };
+  try { return { ok: true, value: JSON.parse(r.text), bytes: r.bytes }; }
+  catch (_) { return { ok: false, reason: 'bad-json', bytes: r.bytes }; }
+}
+
 async function nwSafeGet(url, opts) {
   const fetchImpl = opts.fetchImpl;
   const resolve = opts.resolve;
@@ -253,6 +267,9 @@ const NW_METHODS = 'POST, OPTIONS';
 const nwDeadlineMs = () => Math.min(20000, Math.max(1000, Number(nwGetenv('NW_DEADLINE_MS')) || 12000));
 const NW_CRTSH_MAX_BYTES = 400000;         // strict cap, enforced while reading
 const NW_CRTSH_MAX_ROWS = 2000;
+// crt.sh gets its own sub-budget: a hung CT query must never eat the whole
+// invocation deadline and starve the rest of the scan.
+const NW_CRTSH_MAX_MS = 6000;
 
 // Configuration is read per request, not at import time, so module import order
 // or a mid-deployment env change can never alter behaviour unexpectedly.
@@ -649,7 +666,11 @@ Deno.serve(async (req) => {
         { headers: { Accept: 'application/dns-json' },
           signal: nwMergeSignals([AbortSignal.timeout(7000), dl.signal]) }
       ));
-      const d = await r.json();
+      // The DoH body is capped like every other network read: a hostile or
+      // broken resolver cannot make us buffer an unbounded JSON document.
+      const jr = await nwReadJson(r, 262144);
+      if (!jr.ok) throw new Error('dns-json: ' + jr.reason);
+      const d: any = jr.value;
       return (d.Answer || []) as any[];
     };
 
@@ -693,7 +714,7 @@ Deno.serve(async (req) => {
       if (!nwGuard()) throw new Error('deadline');
       const r = await fetch(
         `https://crt.sh/?q=%25.${cleanDomain}&output=json`,
-        { signal: nwMergeSignals([AbortSignal.timeout(20000), dl.signal]) }
+        { signal: nwMergeSignals([AbortSignal.timeout(NW_CRTSH_MAX_MS), dl.signal]) }
       );
       if (r.ok) {
         // Strict cap enforced while reading: an oversized CT response is cut

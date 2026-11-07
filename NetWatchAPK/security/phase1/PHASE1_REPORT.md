@@ -1,3 +1,7 @@
+> **Superseded in part.** This is the review-stage report. Four defects were found and
+> corrected during real-Deno validation; the current state, measurements and verdict
+> are in `D14_PHASE1_VALIDATION.md`. The 50-test figure here became 56.
+
 # D14 Phase 1 — CORS, JSON, crt.sh cap, wall-clock deadline
 
 Branch `d14/phase1-cors-json-deadline`, cut from tag `v2.10.6` (`59a60517`).

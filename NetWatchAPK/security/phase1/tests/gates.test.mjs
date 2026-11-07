@@ -45,6 +45,30 @@ test('gate order: OPTIONS, then method, then content type, then parsing', () => 
   }
 });
 
+test('crt.sh has its own sub-budget below the invocation deadline', () => {
+  const src = patched.domainIntel;
+  assert.match(src, /const NW_CRTSH_MAX_MS = (\d+);/);
+  const ms = Number(/const NW_CRTSH_MAX_MS = (\d+);/.exec(src)[1]);
+  assert.ok(ms <= 6000, `crt.sh budget ${ms} ms is too large to protect the scan`);
+  assert.match(src, /AbortSignal\.timeout\(NW_CRTSH_MAX_MS\)/,
+    'crt.sh must use its own budget, not a 20 s timeout');
+  assert.ok(!/AbortSignal\.timeout\(20000\)/.test(src),
+    'the 20 s crt.sh timeout would let one hung query consume the deadline');
+});
+
+test('no whole-body read exists in any shipped path', () => {
+  const moduleSrc = read('nwhttp.mjs');
+  for (const [name, src] of [...Object.entries(patched), ['nwhttp.mjs', moduleSrc]]) {
+    const code = src.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+    assert.ok(!/\.text\(\)/.test(code), `${name} reads a whole body with .text()`);
+    assert.ok(!/\.arrayBuffer\(\)/.test(code), `${name} reads a whole body with .arrayBuffer()`);
+    assert.ok(!/await\s+r\.json\(\)/.test(code), `${name} reads a whole body with .json()`);
+  }
+  // the only legitimate whole-body read is decoding a JSON payload we already
+  // capped through nwReadCapped, which is done with JSON.parse on the capped text
+  assert.ok(/JSON\.parse/.test(patched.ipWhois) || /JSON\.parse/.test(patched.geoIp));
+});
+
 test('ipWhois keeps GET as an allowed, bodyless method', () => {
   const src = patched.ipWhois;
   assert.match(src, /const NW_METHODS = 'GET, POST, OPTIONS'/);
@@ -61,7 +85,7 @@ test('domainIntel: deadline, crt.sh cap and finally-close are all wired', () => 
   assert.match(src, /nwReadCapped\(r, NW_CRTSH_MAX_BYTES\)/, 'crt.sh must read through the cap');
   assert.ok(!/const text = await r\.text\(\)/.test(src), 'uncapped crt.sh read is still present');
   assert.match(src, /finally \{\s*dl\.close\(\);/, 'deadline timer must be closed');
-  assert.match(src, /signal: nwMergeSignals\(\[AbortSignal\.timeout\(20000\), dl\.signal\]\)/, 'crt.sh honours the deadline');
+  assert.match(src, /signal: nwMergeSignals\(\[AbortSignal\.timeout\(NW_CRTSH_MAX_MS\), dl\.signal\]\)/, 'crt.sh honours the deadline and its own budget');
   assert.match(src, /signal: nwMergeSignals\(\[AbortSignal\.timeout\(7000\), dl\.signal\]\)/, 'DNS honours the deadline');
 });
 
