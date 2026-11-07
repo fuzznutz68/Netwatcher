@@ -1,105 +1,117 @@
-# WHOIS Network Tools patch - implemented and tested (not built, not merged)
+# WHOIS Network Tools patch - corrections applied, retested
 
-Date: 2026-11-07. Branch `feat/whois-network-tool`, commit `55cd3d13`, isolated
-in worktree `/app/wt-whois` created from baseline `de993d08`.
-Artifact for review: `security/patches/whois-tool.diff` (390 lines,
-+199 / -30, two files).
+Branch `feat/whois-network-tool`, worktree `/app/wt-whois` from baseline
+`de993d08`. Two files, +302 / -31. No build, no merge, no deploy.
 
-## What changed
+## Correction 1 - IP-only input validation
 
-| File | Change |
-|---|---|
-| `app/src/main/res/layout/activity_main.xml` | `toolWhoisBtn` inserted between DNS and LAN; six buttons now `48dp` tall, equal weight, `marginRight 4dp`, `minWidth/minHeight 0dp`, 2dp side padding, `autoSizeTextType=uniform` 8-12sp |
-| `MainActivity.java` | `TOOL_WHOIS = 5` (LAN unchanged at 4); field declaration; `findViewById`; click → `setToolMode(TOOL_WHOIS)`; style line; dispatch branch; `showIpWhois` rewrite; `splitIpPort` helper; help texts |
+`isIPv4Literal`, `isIPv6Literal`, `isHex` and `isIpLiteral` validate shape only;
+nothing resolves names (`InetAddress.getByName` is never called on user input).
 
-Nothing else. `git diff --stat de993d08` for `NetWatchAPK/app` reports exactly
-those two files.
+`showIpWhois` now rejects before any network activity:
 
-## Requirement traceability
+- empty -> "Enter an IP address." dialog
+- not a literal -> "WHOIS works with IP addresses only. Enter an IPv4 or IPv6
+  address, for example 1.1.1.1 or 2606:4700:4700::1111." dialog
+- only then the single-flight gate and the request
 
-1. `TOOL_WHOIS = 5`, `TOOL_LAN` stays 4, ids 0-4 untouched.
-2. Six equal-weight buttons at 48dp; autosizing text (8-12sp) keeps labels
-   legible at 360dp and at increased font scales without clipping.
-3. WHOIS returns from `runNetworkTool()` **before** `toolsRunning = true`, so
-   RUN stays enabled and STOP never appears. `whoisInFlight` (volatile) blocks a
-   second request until the first finishes, in `finally`.
-4. Same `ipWhois` URL, same `showInfoDialog`; no backend change.
-5. Device Monitor long-press untouched and still calls the same method
-   (line 4902), so it inherits the corrected field mapping.
-6. `asn_name` / `rdap_name` / `abuse_contact` first, with `asnName` / `netName`
-   / `abuse` fallbacks; `optString` everywhere, so a rolled-back backend cannot
-   throw. Empty values are skipped rather than printed blank.
-7. `splitIpPort()` handles IPv4, bracketed IPv6, unbracketed IPv6 as emitted by
-   the VPN service, and a bare address with no port. An address is never
-   truncated just because it contains colons.
-8. Domain Intel help now says "TLS certificate info" / "Сведения о
-   TLS-сертификате" instead of claiming WHOIS.
-9. Tested below; RDAP-unavailable renders a short note instead of empty lines.
-10. Manual tablet checklist below; PING/TRACE/PORT/DNS/LAN code paths untouched.
+`google.com`, `example`, `1.1.1.1:443`, `256.1.1.1`, `1:2:3:4:5:6:7` are all
+refused locally, so the backend is never called with a domain. No DNS lookup was
+added. The tools tab hint also changes per mode to "IP address (e.g. 1.1.1.1)".
+
+## Correction 2 - parser for the known Device Monitor format
+
+`splitIpPort` is gone; `splitServiceIpPort` replaces it and is called from
+exactly one place, `buildDeviceRow`. It no longer applies `lastIndexOf(':')` to
+arbitrary strings.
+
+The format is now pinned to what the service actually emits. `NetWatchVpnService.ipv6()`
+formats sixteen bytes as eight uncompressed lowercase groups, then `emit()` sends
+`ip + ":" + port`. So the wire shapes are exactly:
+
+- IPv4: `a.b.c.d:port` (one colon)
+- IPv6: eight groups + port (eight colons)
+- bracketed is accepted defensively
+
+Anything with a different colon count is returned whole with an empty port. The
+split is trusted only when the port is 1-5 digits <= 65535 and the prefix is a
+valid literal. A bare or compressed IPv6 therefore keeps every character, and
+the address handed to WHOIS is never truncated.
+
+## Correction 3 - encoding
+
+Byte-level audit of both changed files: valid UTF-8, zero U+FFFD replacement
+characters, no double-encoded sequences (`Ð`, `Ñ`, `â€`), and every new Russian
+string re-read successfully from disk:
+
+    Введите IP-адрес.
+    WHOIS работает только с IP-адресами.
+    WHOIS уже выполняется
+    WHOIS: превышено время ожидания
+    RDAP недоступен для этого адреса
+    WHOIS работает только с публичными IP-адресами (не с доменами).
+
+The mojibake you saw does not exist in the source tree; it is introduced by the
+viewer/console decoding a UTF-8 file as a single-byte code page. The generated
+diff is UTF-8 with Cyrillic context lines intact.
+
+## Single dialog, single request
+
+`whoisInFlight` is now an `AtomicBoolean` claimed with `compareAndSet` through
+`acquireWhoisSlot`, released in `finally`. `showWhoisDialog` tracks one
+`AlertDialog` and dismisses any visible predecessor before showing a new result,
+so results replace rather than stack. Both entry points (tools tab, Device
+Monitor long-press) share that dialog.
 
 ## Test results
 
-**JVM harness against the real patched source** (methods extracted verbatim by
-script, so the test cannot drift from the implementation): `org.json`
-20240303.jar, JDK 17.
+JVM harness built by extracting the methods verbatim from the patched file
+(`org.json` 20240303, JDK 17):
 
 ```
-passed 47, failed 0
+passed 72, failed 0
 ```
 
-- 16 host/port cases, each asserting both halves: `1.2.3.4:443`, `1.2.3.4`,
-  `1.2.3.4:abc`, `[2606:4700:4700::1111]:443`, `[2606:...]`, `2606:...:443`
-  (unbracketed, service format), `2606:...` bare, `2606:4700::1111`, `::1`,
-  `::1:443`, `:443`, empty, unclosed `[2606::1`, `2001:db8::/32`,
-  `1.1.1.1:65536`, `1.1.1.1:8080`.
-- 15 normalization and mapping assertions: bracket stripping, whitespace, null;
-  new-backend payload (`APNIC-LABS`, `helpdesk@apnic.net`, `AU (registry)`);
-  legacy payload (`asnName`, `netName`, `abuse`, null cidr); RDAP-failure
-  payload (Net/Abuse empty, cidr kept from Cymru).
+- **Service format, 17 cases** (both halves asserted): `1.2.3.4:443`,
+  `1.1.1.1:8080`, `2606:4700:4700:0:0:0:0:1111:443`, `2001:db8:0:0:0:0:0:1:22`,
+  `[2606:4700:4700::1111]:443`, `[2606::1]`, bare `2606:4700:4700::1111`,
+  bare `2606:4700:4700:0:0:0:0:1111`, `1.2.3.4`, `::1`, `1.2.3.4:abc`,
+  `1.2.3.4:65536`, `999.1.1.1:443`, `2001:db8::/32`, unclosed `[2606::1`,
+  empty, `:443`.
+- **Literal validation, 20 cases**: valid and invalid dotted quads, leading
+  zeros, 7 vs 8 vs 9 group IPv6, `::`, `::ffff:192.168.0.1`, zone id
+  `fe80::1%wlan0`, `google.com`, `example`, `1.1.1.1:443`, empty.
+- **Normalization, 4 cases**: brackets stripped, whitespace trimmed, null, full
+  eight-group address passes through unchanged.
+- **Single-flight gate, 4 cases**: first caller wins, second blocked, released
+  flag works, null flag refused.
+- **Response mapping, 11 cases**: new keys (`asn_name`, `rdap_name`,
+  `abuse_contact`, `AU (registry)`), legacy fallbacks (`asnName`, `netName`,
+  `abuse`, null cidr), RDAP-failure payload.
 
-**Static checks:** `activity_main.xml` parses as well-formed XML; `javac`
-parse-only pass over `MainActivity.java` reports zero syntax errors (the full
-compile needs the Android SDK and was deliberately not run). Button geometry
-verified programmatically: all six 48dp, weight 1, autosize on, WHOIS between
-DNS and LAN.
+**Static checks:** layout is well-formed XML with six equal-weight 48dp buttons
+and autosizing labels (8-12sp, all six present); `javac` parse-only pass on
+`MainActivity.java` reports zero syntax errors. Full compile needs the Android
+SDK and was not run.
 
-**Not verified here:** anything that needs a device - real rendering at 360dp and
-at 1.3x/1.5x font scale, dialog appearance, live lookups. Those are in the
-manual checklist.
-
-## Manual checklist for the tablet build (after separate build approval)
+## Manual checklist for the tablet build (needs separate build approval)
 
 | Area | Check |
 |---|---|
-| Network Tools | six buttons visible in order PING TRACE PORT DNS WHOIS LAN, all readable at your font scale |
-| WHOIS | `1.1.1.1` → AS13335 (Cloudflare, Inc.), Net APNIC-LABS, Abuse helpdesk@apnic.net, Country AU (registry) |
-| WHOIS | `193.0.14.129` → AS25152, RIPE-NCC-K-ROOT, abuse@ripe.net |
-| WHOIS | `2606:4700:4700::1111` → AS13335, US (registry) |
-| WHOIS | `8.8.8.8` → cidr 8.8.8.0/24 plus "(RDAP unavailable for this address)" |
-| WHOIS | `192.168.1.1`, `127.0.0.1`, `foo` → "Not a public IP address" dialog |
-| WHOIS | tap RUN twice quickly → second press says a lookup is already running |
-| RUN/STOP | after a WHOIS lookup RUN is still enabled, STOP never shown |
-| Device Monitor | long-press menu unchanged; WHOIS on IPv4 row now shows ASN name, Net, Abuse |
-| Device Monitor | WHOIS on an IPv6 row resolves the full address |
-| Tools | DNS, PORT, PING, TRACE, LAN still behave; LAN still hides the host field |
+| Network Tools | six buttons PING TRACE PORT DNS WHOIS LAN at normal and enlarged font scale |
+| WHOIS | `google.com` -> IP-only dialog, no request sent |
+| WHOIS | `1.1.1.1` -> AS13335 (Cloudflare, Inc.), Net APNIC-LABS, AU (registry) |
+| WHOIS | `2606:4700:4700::1111` -> full address queried, AS13335, US (registry) |
+| WHOIS | `8.8.8.8` -> cidr kept plus "(RDAP unavailable for this address)" |
+| WHOIS | `192.168.1.1`, `127.0.0.1` -> "Not a public IP address" |
+| WHOIS | RUN tapped twice -> second says a lookup is already running |
+| WHOIS | two lookups in sequence -> second dialog replaces the first, never stacks |
+| Device Monitor | long-press menu intact; IPv4 and IPv6 rows both resolve fully |
+| Tools | PING, TRACE, PORT, DNS, LAN unchanged; LAN still hides the host field |
 | Traffic Trace | rows and app list identical to baseline |
-| Language | EN/RU help and toasts correct |
-
-## Risk notes carried into review
-
-- Autosizing labels rely on API 26+ (minSdk is 30), so no fallback path is
-  exercised in practice.
-- `splitIpPort` treats a trailing 1-5 digit group as a port only when the
-  remainder still looks like an address; a bare IPv6 whose final group is
-  numeric and preceded by a non-`::` prefix could be read as host+port. That
-  path is not used by any caller (the tools field passes raw text to WHOIS, and
-  Device Monitor always appends a real port).
-- Adding a sixth button reduces each label's width by ~10dp; if your font scale
-  clips `WHOIS`, the fallback is wrapping the row in a HorizontalScrollView with
-  `minWidth 64dp` per button.
+| Language | EN/RU dialogs and toasts |
 
 ## State
 
-- Baseline tag `de993d08` untouched; main tree app sources identical to it.
-- Live `geoIp` / `ipWhois` / `domainIntel` / `trafficProbe` untouched.
-- No APK built, nothing merged, nothing published, private worktree only.
+Baseline `de993d08` untouched, main tree sources identical to it, live backend
+functions unchanged, no APK built or published. D14 remains PARTIALLY MITIGATED.

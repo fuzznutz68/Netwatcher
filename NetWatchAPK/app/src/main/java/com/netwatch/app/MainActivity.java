@@ -603,7 +603,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Для чистого результата остановите мониторинг (VPN).\n\n" +
                         "Введите хост или IP, выберите инструмент и нажмите ПУСК.\n" +
                         "Для PORT укажите порт (или введите host:port).\n" +
-                        "Кнопка СТОП прерывает выполнение.\nWHOIS работает только для публичных IP.");
+                        "Кнопка СТОП прерывает выполнение.\nWHOIS работает только с публичными IP-адресами (не с доменами).");
                 } else {
                     showInfoDialog("🛠 Network Tools — Help",
                         "Basic network utilities right inside NetWatch.\n\n" +
@@ -621,7 +621,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                         "Stop monitoring (VPN) first for a clean scan.\n\n" +
                         "Enter a host or IP, pick a tool, tap RUN.\n" +
                         "For PORT, enter the port (or use host:port syntax).\n" +
-                        "Tap STOP to interrupt a running tool.\nWHOIS works on public IPs only.");
+                        "Tap STOP to interrupt a running tool.\nWHOIS works on public IP addresses only, not domain names.");
                 }
                 return true;
             } else if (id == R.id.menu_history) {
@@ -2786,7 +2786,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         // Port field only relevant for the PORT tool; host input hidden for LAN scans
         toolsPortInput.setVisibility(m == TOOL_PORT ? View.VISIBLE : View.GONE);
         toolsHostInput.setVisibility(m == TOOL_LAN ? View.INVISIBLE : View.VISIBLE);
-        toolsHostInput.setHint(isRussian ? "хост или IP (напр. google.com)" : "host or IP (e.g. google.com)");
+        toolsHostInput.setHint(isRussian
+            ? (m == TOOL_WHOIS ? "IP-адрес (напр. 1.1.1.1)" : "хост или IP (напр. google.com)")
+            : (m == TOOL_WHOIS ? "IP address (e.g. 1.1.1.1)" : "host or IP (e.g. google.com)"));
         toolsPortInput.setHint(isRussian ? "порт" : "port");
         toolsTitleText.setText(isRussian ? "🛠 Сетевые инструменты" : "🛠 Network Tools");
         toolsRunBtn.setText(isRussian ? "▶  ПУСК" : "▶  RUN");
@@ -4850,7 +4852,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         header.setTypeface(android.graphics.Typeface.MONOSPACE);
 
         // Line 2: resolved hostname or IP:port (cyan = resolved, white = raw IP)
-        String rawIp = splitIpPort(ipPort)[0];
+        String rawIp = splitServiceIpPort(ipPort)[0];
         boolean resolved = !display.equals(rawIp);
         android.widget.TextView hostView = new android.widget.TextView(this);
         hostView.setText(resolved ? display : ipPort);
@@ -4911,7 +4913,15 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return row;
     }
 
-    private volatile boolean whoisInFlight = false;
+    private final java.util.concurrent.atomic.AtomicBoolean whoisInFlight =
+        new java.util.concurrent.atomic.AtomicBoolean(false);
+    private android.app.AlertDialog whoisDialog;
+
+    /** Single-flight gate shared by every WHOIS entry point (tools tab and the
+     *  Device Monitor long-press). True only for the caller that claimed it. */
+    private static boolean acquireWhoisSlot(java.util.concurrent.atomic.AtomicBoolean flag) {
+        return flag != null && flag.compareAndSet(false, true);
+    }
 
     private static String firstNonEmpty(String a, String b) {
         if (a != null && !a.trim().isEmpty()) return a.trim();
@@ -4922,6 +4932,71 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         if (s == null || s.isEmpty()) return false;
         for (int i = 0; i < s.length(); i++) if (!Character.isDigit(s.charAt(i))) return false;
         return true;
+    }
+
+    private static boolean isHex(String s) {
+        if (s == null || s.isEmpty()) return false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            boolean ok = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+            if (!ok) return false;
+        }
+        return true;
+    }
+
+    /** Dotted quad, 0-255 per octet, no leading zeros. No name resolution. */
+    private static boolean isIPv4Literal(String s) {
+        if (s == null || s.isEmpty()) return false;
+        String[] parts = s.split("\\.", -1);
+        if (parts.length != 4) return false;
+        for (String o : parts) {
+            if (o.isEmpty() || o.length() > 3 || !isDigits(o)) return false;
+            if (o.length() > 1 && o.charAt(0) == '0') return false;
+            if (Integer.parseInt(o) > 255) return false;
+        }
+        return true;
+    }
+
+    /** IPv6 literal by shape only: hex groups, at most one "::", optional
+     *  embedded IPv4 tail, optional zone id. Never resolves anything. */
+    private static boolean isIPv6Literal(String s) {
+        if (s == null || s.isEmpty() || s.indexOf(':') < 0) return false;
+        String t = s;
+        int zone = t.indexOf('%');
+        if (zone >= 0) t = t.substring(0, zone);
+        if (t.isEmpty()) return false;
+        int dbl = t.indexOf("::");
+        if (dbl >= 0 && dbl != t.lastIndexOf("::")) return false;
+        String head = dbl >= 0 ? t.substring(0, dbl) : t;
+        String tail = dbl >= 0 ? t.substring(dbl + 2) : "";
+        int groups = 0;
+        if (!head.isEmpty()) {
+            for (String g : head.split(":", -1)) {
+                if (g.isEmpty() || g.length() > 4 || !isHex(g)) return false;
+                groups++;
+            }
+        }
+        if (!tail.isEmpty()) {
+            String[] tg = tail.split(":", -1);
+            for (int i = 0; i < tg.length; i++) {
+                String g = tg[i];
+                if (g.isEmpty()) return false;
+                if (g.indexOf('.') >= 0) {
+                    if (i != tg.length - 1 || !isIPv4Literal(g)) return false;
+                    groups += 2;
+                } else {
+                    if (g.length() > 4 || !isHex(g)) return false;
+                    groups++;
+                }
+            }
+        }
+        if (dbl >= 0) return groups < 8;      // "::" must stand for at least one group
+        return groups == 8;
+    }
+
+    /** True only for a public IP literal the backend can answer for. */
+    private static boolean isIpLiteral(String s) {
+        return isIPv4Literal(s) || isIPv6Literal(s);
     }
 
     /** Accepts a bare address or a bracketed one; strips brackets and spaces. */
@@ -4936,11 +5011,14 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         return s;
     }
 
-    /** Splits an "ip:port" string as emitted by the VPN service - IPv4,
-     *  bracketed IPv6 or unbracketed IPv6 - and tolerates a bare address that
-     *  carries no port. Returns {ip, port}; port is "" when absent or not
-     *  numeric. An address is never truncated just because it contains colons. */
-    private static String[] splitIpPort(String s) {
+    /** Parser for Device Monitor's known wire format only: NetWatchVpnService
+     *  emits  ip + ":" + port  where ip is a dotted quad or the uncompressed
+     *  8-group IPv6 form produced by ipv6(). That gives a fixed colon count
+     *  (1 for IPv4, 8 for IPv6 + port), which is what makes this unambiguous.
+     *  Anything else - a bare address, a compressed IPv6, junk - is returned
+     *  whole with an empty port, so an address is never truncated.
+     *  Not used for text the user types. */
+    private static String[] splitServiceIpPort(String s) {
         if (s == null) return new String[]{"", ""};
         String t = s.trim();
         if (t.isEmpty()) return new String[]{"", ""};
@@ -4950,21 +5028,36 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             String ip = t.substring(1, close).trim();
             String rest = t.substring(close + 1).trim();
             String port = rest.startsWith(":") ? rest.substring(1).trim() : "";
-            return new String[]{ip, isDigits(port) ? port : ""};
+            if (isDigits(port) && port.length() <= 5 && !ip.isEmpty() && isIpLiteral(ip)) {
+                return new String[]{ip, port};
+            }
+            return new String[]{ip, ""};
         }
         int colons = 0;
         for (int i = 0; i < t.length(); i++) if (t.charAt(i) == ':') colons++;
-        if (colons == 0) return new String[]{t, ""};              // bare address
+        if (colons != 1 && colons != 8) return new String[]{t, ""};   // not the service shape
         int cut = t.lastIndexOf(':');
-        if (cut <= 0) return new String[]{t, ""};                 // ":443" or empty host
+        if (cut <= 0) return new String[]{t, ""};
         String ip = t.substring(0, cut);
         String port = t.substring(cut + 1);
-        if (ip.endsWith(":")) return new String[]{t, ""};         // "::" tail is not a port
         if (!isDigits(port) || port.length() > 5) return new String[]{t, ""};
         try { if (Integer.parseInt(port) > 65535) return new String[]{t, ""}; }
         catch (NumberFormatException nfe) { return new String[]{t, ""}; }
-        if (colons > 1 && ip.endsWith("::")) return new String[]{t, ""};
+        if (!isIpLiteral(ip)) return new String[]{t, ""};
         return new String[]{ip, port};
+    }
+
+    /** One WHOIS dialog at a time: a new result replaces the previous one
+     *  instead of stacking on top of it. */
+    private void showWhoisDialog(String title, String message) {
+        if (whoisDialog != null && whoisDialog.isShowing()) whoisDialog.dismiss();
+        whoisDialog = new android.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(isRussian ? "Понятно" : "Got it", null)
+            .create();
+        whoisDialog.setOnDismissListener(d -> whoisDialog = null);
+        whoisDialog.show();
     }
 
     private void showIpWhois(String rawIpIn, String hostname) {
@@ -4972,14 +5065,23 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         final String title = hostname != null && !hostname.isEmpty() && !hostname.equals(ip)
             ? "WHOIS: " + hostname : "WHOIS: " + ip;
         if (ip.isEmpty()) {
-            showInfoDialog(title, isRussian ? "Введите IP-адрес." : "Enter an IP address.");
+            showWhoisDialog(title, isRussian
+                ? "Введите IP-адрес."
+                : "Enter an IP address.");
             return;
         }
-        if (whoisInFlight) {                                   // no overlapping lookups
+        if (!isIpLiteral(ip)) {                       // domains never reach the backend
+            showWhoisDialog(title, isRussian
+                ? "WHOIS работает только с IP-адресами.\n\nВведите IPv4 или IPv6,\n"
+                  + "например 1.1.1.1\nили 2606:4700:4700::1111."
+                : "WHOIS works with IP addresses only.\n\nEnter an IPv4 or IPv6 address,"
+                  + "\nfor example 1.1.1.1\nor 2606:4700:4700::1111.");
+            return;
+        }
+        if (!acquireWhoisSlot(whoisInFlight)) {       // no overlapping requests
             showToast(isRussian ? "WHOIS уже выполняется" : "WHOIS lookup already running");
             return;
         }
-        whoisInFlight = true;
         android.widget.Toast.makeText(this, "Looking up " + ip + "...",
             android.widget.Toast.LENGTH_SHORT).show();
         executor.execute(() -> {
@@ -4991,7 +5093,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 conn.setReadTimeout(8000);
                 int code = conn.getResponseCode();
                 if (code == 400) {
-                    runOnUiThread(() -> showInfoDialog(title, isRussian
+                    runOnUiThread(() -> showWhoisDialog(title, isRussian
                         ? "Не публичный IP-адрес.\n\nЧастные, служебные и\nнекорректные адреса\nне запрашиваются."
                         : "Not a public IP address.\n\nPrivate, reserved and malformed\naddresses are not queried."));
                     return;
@@ -5022,7 +5124,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                     }
                 }
                 StringBuilder msg = new StringBuilder();
-                if (!org.isEmpty())   msg.append("Org:      ").append(org).append("\n");
+                if (!org.isEmpty())     msg.append("Org:      ").append(org).append("\n");
                 if (!asn.isEmpty()) {
                     msg.append("ASN:      ").append(asn);
                     if (!asnName.isEmpty()) msg.append(" (").append(asnName).append(")");
@@ -5031,14 +5133,14 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 if (!cidr.isEmpty())    msg.append("CIDR:     ").append(cidr).append("\n");
                 if (!country.isEmpty()) msg.append("Country:  ").append(country).append("\n");
                 if (!netName.isEmpty()) msg.append("Net:      ").append(netName).append("\n");
-                if (!registr.isEmpty()) msg.append("Registrar:").append(" ").append(registr).append("\n");
+                if (!registr.isEmpty()) msg.append("Registrar: ").append(registr).append("\n");
                 if (!abuse.isEmpty())   msg.append("Abuse:    ").append(abuse).append("\n");
                 if (!host.isEmpty())    msg.append("Hostname: ").append(host).append("\n");
                 if (msg.length() == 0) msg.append(isRussian ? "Данных нет." : "No data returned.");
                 else if (rdapDown) msg.append("\n(").append(isRussian
                         ? "RDAP недоступен для этого адреса" : "RDAP unavailable for this address").append(")");
                 final String result = msg.toString().trim();
-                runOnUiThread(() -> showInfoDialog(title, result));
+                runOnUiThread(() -> showWhoisDialog(title, result));
             } catch (java.net.SocketTimeoutException te) {
                 runOnUiThread(() -> android.widget.Toast.makeText(this,
                     isRussian ? "WHOIS: превышено время ожидания" : "WHOIS timed out",
@@ -5047,7 +5149,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 runOnUiThread(() -> android.widget.Toast.makeText(this,
                     "WHOIS failed: " + ex.getMessage(), android.widget.Toast.LENGTH_LONG).show());
             } finally {
-                whoisInFlight = false;
+                whoisInFlight.set(false);
             }
         });
     }
