@@ -69,6 +69,11 @@ the lookup now use the same port-aware splitter, so the address is shown in full
 "Copy Hostname" is not offered for an unresolved address, and the dialog is titled
 `WHOIS: 2a03:2880:f382:90:face:b00c:0:8e`.
 
+![Device Monitor showing five connections, including a full IPv6 address in the DOMAIN / IP column](images/device-monitor-ipv6.png)
+
+*Device Monitor on Android 14, build 87: row 2 is an IPv6 connection displayed in full
+(`2a03:2880:f382:90:face:b00c:0:8e:443`). Before build 87 this row read `2a03`.*
+
 ### CSV export
 
 Tap **EXPORT** in Device Monitor to write the visible connection log to CSV and share it.
@@ -89,6 +94,12 @@ except the DNS resolver you choose and the WHOIS backend described below.
 | DNS | host name | A/AAAA/CNAME plus resolver choice |
 | LAN | none | ARP cache plus ping sweep, vendor identification |
 | WHOIS | **IP address only** | Registry lookup, see below |
+
+![Network Tools panel with PING, TRACE, PORT, DNS, WHOIS and LAN](images/tools-whois.png)
+
+*Network Tools on build 87. The small footer line is a static label left over from an
+earlier build — it still reads `netwatch tools v2.10.1`. The version actually installed is
+shown in Menu → About, which reads it from the package.*
 
 ### WHOIS
 

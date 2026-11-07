@@ -63,9 +63,15 @@ lives on `main`, source for each release lives on its tag.
 
 ## Screenshots
 
-`DeviceMonitor.jpg` and the images attached to older releases were captured on earlier
-builds. They still show the tab layout correctly but predate the Network Tools WHOIS tool;
-fresh captures will replace them after the next device session.
+| Capture | Shows |
+| --- | --- |
+| ![Network Tools panel](docs/images/tools-whois.png) | Build 87 Network Tools: PING, TRACE, PORT, DNS, **WHOIS**, LAN |
+| ![Device Monitor with a full IPv6 row](docs/images/device-monitor-ipv6.png) | Build 87 Device Monitor: complete IPv6 address, per-connection rows |
+
+Both were captured on Android 14 tablet hardware running build 87. `DeviceMonitor.jpg` at
+the repository root is from an older build and is kept for history only; the live captures
+above supersede it. Note that the footer line inside the Tools tab is a static label that
+still reads `netwatch tools v2.10.1` — the installed version comes from Menu → About.
 
 ## Limitations
 
