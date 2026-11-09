@@ -86,3 +86,22 @@ Deployment evidence, captured 2026-11-07 around 17:40 MSK:
 
 Steps 1 to 4 are cryptographic. Step 5 is behavioural. No step closes the gap
 between 4 and 5, because the platform cannot echo its stored copy.
+
+## domainIntel (preserved, NOT deployed by this audit)
+
+- Function name: `domainIntel` — `POST` with JSON `{"domain": "..."}`
+- Source file: `domainIntel.production-current-616da0e0.ts`
+- SHA-256: `616da0e0ede59d5d50fc9bb74bd5967818dd1782a7577e3f0f220f320a28065e`
+- Size: 35,001 bytes, 841 lines
+- Status: **current production source, deployed before D14 Phase 1** (Phase 2
+  hardening). The validated Phase 1 patch for this function exists and was never
+  deployed; see `NetWatchAPK/security/phase1/patched/domainIntel.ts` at
+  `0553d54d` (46,757 B, `55f9f48a…`).
+- Why it is here: GitHub's `main` carries a 5,911-byte `functions/domainIntel.ts`
+  that predates the Cymru/Phase 2 work, so the live source was not recoverable
+  from the remote repository. Without this snapshot the only copies were the
+  workspace file and the archived rollback.
+- Deployment evidence: behaviour, not read-back. `POST` with `text/plain` returns
+  400 (the Phase 1 patch would return 415), the response has 14 keys with no
+  `truncated` field, and a scan of `example.com` still runs the 10 to 13 second
+  path. Re-checked 2026-11-09.

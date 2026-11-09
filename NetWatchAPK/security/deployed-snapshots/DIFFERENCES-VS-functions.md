@@ -1,30 +1,35 @@
 # Drift between the tracked `functions/` files and what production runs
 
-The repository tracks `functions/*.ts`, but those files are a *workspace staging
-area*, not a mirror of the platform. For two of the three functions they describe
-code that production no longer executes.
+`functions/*.ts` is a workspace staging area, not a mirror of the platform. Two
+distinct problems show up in this audit: stale tracked files, and a divergence
+between GitHub's `main` and the workspace.
 
-| Function | Tracked `functions/` file | Deployed artifact | Verdict |
-|---|---|---|---|
-| `ipWhois` | `ipWhois.ts` — 5,550 B, `ac14db18…` | 27,812 B, `aacf114f…` | **STALE** — the tracked file is the retired ipwho.is implementation, 22,262 B smaller than what runs |
-| `geoIp` | `geoIp.ts` — 3,411 B, `01831e4f…` | 25,616 B, `6c2e7098…` | **STALE** — the tracked file predates the Cymru rewrite |
-| `geoIp` (staging copy) | `geoIp.deploy.ts` — 13,256 B, `c3794215…` | 25,616 B, `6c2e7098…` | **STALE** — this is the pre-deploy Cymru build, i.e. the rollback source, not what runs |
-| `domainIntel` | `domainIntel.ts` — 35,001 B, `616da0e0…` | `616da0e0…` (Phase 2, unchanged) | **CURRENT** — matches the production baseline and the rollback copy |
+## Three-way comparison, 2026-11-09
 
-Consequences:
+| Function | GitHub `main` `functions/` | Workspace `functions/` (local `main`) | Deployed / production | Verdict |
+|---|---|---|---|---|
+| `ipWhois` | 5,550 B `ac14db18…` | 5,550 B `ac14db18…` | 27,812 B `aacf114f…` | tracked file is the retired ipwho.is build; 22,262 B behind production |
+| `geoIp` | 3,411 B `01831e4f…` | 3,411 B `01831e4f…` | 25,616 B `6c2e7098…` | tracked file predates Cymru; `geoIp.deploy.ts` (13,256 B) is the rollback build, also superseded |
+| `domainIntel` | 5,911 B `0c773a6d…` | 35,001 B `616da0e0…` | 35,001 B `616da0e0…` | GitHub is badly stale; the workspace copy matches production |
 
-- Anyone reading `functions/ipWhois.ts` or `functions/geoIp.ts` would conclude the
-  backend is far simpler than it is, and would not see any Phase 1 hardening.
-- A future deploy of either tracked file would silently regress production to a
-  pre-Cymru implementation.
-- `functions/domainIntel.ts` is correct today, but it is also the rollback source.
-  Overwriting it during a deployment attempt destroys that copy unless the
-  snapshot in `NetWatchAPK/security/phase1/baseline/` is used instead.
+## What this means
 
-Recommended follow-up, not performed here because these snapshots are the
-authoritative record and `functions/` was out of scope: point the tracked
-`functions/` files at the deployed artifacts (or replace them with a one-line
-pointer plus the checksum), so the repository stops advertising retired code.
+1. **No tracked `functions/` file describes production for any of the three.**
+   `ipWhois` and `geoIp` are stale everywhere; `domainIntel` is correct only in
+   the workspace, not on GitHub.
+2. **Deploying a tracked file would regress production.** `functions/ipWhois.ts`,
+   `functions/geoIp.ts` and GitHub's `functions/domainIntel.ts` all describe
+   implementations that are no longer live.
+3. **The workspace `functions/domainIntel.ts` is also the rollback source.**
+   Overwriting it during a deployment attempt destroys the convenient copy, which
+   is why `NetWatchAPK/security/phase1/baseline/` and
+   `deployed-snapshots/domainIntel.production-current-616da0e0.ts` now both hold
+   it.
+4. **GitHub `main` and workspace `main` have diverged.** `main` on GitHub is
+   `89855bc7`; the workspace `main` is `a4bb227b`, a separate lineage that GitHub
+   rejects on push (large binaries, `GH001`). This audit branch is therefore based
+   on GitHub's `main`, and its `functions/` files are GitHub's stale copies.
 
-Verification date: 2026-11-09. `functions/` files were read only; none were
-modified.
+Recommended follow-up, not performed here: replace the tracked `functions/`
+files with pointers to the snapshots in this directory, so the repository stops
+advertising retired code. That is a separate, reviewable change.
